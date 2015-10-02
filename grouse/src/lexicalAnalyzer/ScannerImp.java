@@ -3,9 +3,11 @@ package lexicalAnalyzer;
 import inputHandler.PushbackCharStream;
 import tokens.NullToken;
 import tokens.Token;
+import utilities.Debug;
 
 public abstract class ScannerImp implements Scanner {
 	private Token nextToken;
+	private Debug debug = new Debug();
 	protected final PushbackCharStream input;
 	
 	protected abstract Token findNextToken();
@@ -14,6 +16,7 @@ public abstract class ScannerImp implements Scanner {
 		super();
 		this.input = input;
 		nextToken = findNextToken();
+		debug.out(nextToken.fullString()); // TODO: test this next
 	}
 
 	// Iterator<Token> implementation
