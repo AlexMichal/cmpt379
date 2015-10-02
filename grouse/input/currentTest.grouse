@@ -1,20 +1,10 @@
 main {
-    imm quarters := 5;
+    imm quarters := 5; //
     imm dimes := 3;
     imm nickels := 7;
     imm pennies := 17;
-    imm value := quarters * 25 +
-    			 dimes * 10 +
-    			 nickels * 5 +
-    			 pennies;
+
+    imm value := quarters * 25 + 21;
+
     print value nl;
-
-    imm moredimes := dimes > nickels;
-    print moredimes,;
-
-    imm boot := true;
-    imm boof := false;
-    
-    print boot, boof nl;
-    print boot boof nl;
 }

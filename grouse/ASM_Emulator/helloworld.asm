@@ -1,17 +1,17 @@
-DLabel	Hello
-DataC 	72			// H
-DataC	101			// e
-DataC	108			// l
-DataC	108			// l
-DataC	111			// o
-DataC	32			// <space>
-DataC	119			// w
-DataC	111			// o
-DataC	114			// r
-DataC	108			// l
-DataC	100			// d
-DataC	33			// !
-DataC	0
-PushD   Hello
+DLabel       $hello       
+DataC       72
+DataC       101
+DataC       108
+DataC       108
+DataC       111
+DataC       32
+DataC       119
+DataC       111
+DataC       114
+DataC       108
+DataC       100
+DataC       33
+DataC       0
+PushD       $hello
 Printf
 Halt

@@ -13,10 +13,13 @@ import tokens.LextantToken;
 import tokens.NullToken;
 import tokens.NumberToken;
 import tokens.Token;
+import utilities.Debug;
 
 import static lexicalAnalyzer.PunctuatorScanningAids.*;
 
 public class LexicalAnalyzer extends ScannerImp implements Scanner {
+	private static Debug debug = new Debug();
+	
 	public static LexicalAnalyzer make(String filename) {
 		InputHandler handler = InputHandler.fromFilename(filename);
 		PushbackCharStream charStream = PushbackCharStream.make(handler);
@@ -24,6 +27,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	}
 
 	public LexicalAnalyzer(PushbackCharStream input) {
+
 		super(input);
 	}
 
@@ -34,6 +38,9 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	@Override
 	protected Token findNextToken() {
 		LocatedChar ch = nextNonWhitespaceChar();
+		
+		// beginning of each token (?)
+		debug.out(ch.toString());
 		
 		if(ch.isDigit()) {
 			return scanNumber(ch);
