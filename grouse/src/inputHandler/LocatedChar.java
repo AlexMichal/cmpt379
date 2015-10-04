@@ -2,7 +2,6 @@ package inputHandler;
 
 /** Value object for holding a character and its location in the input text.
  *  Contains delegates to select character operations.
- *
  */
 public class LocatedChar {
 	Character character;
@@ -13,7 +12,6 @@ public class LocatedChar {
 		this.character = character;
 		this.location = location;
 	}
-
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// getters
@@ -21,14 +19,14 @@ public class LocatedChar {
 	public Character getCharacter() {
 		return character;
 	}
+	
 	public TextLocation getLocation() {
 		return location;
 	}
+	
 	public boolean isChar(char c) {
 		return character == c;
 	}
-	
-	
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// toString
@@ -36,6 +34,7 @@ public class LocatedChar {
 	public String toString() {
 		return "(" + charString() + ", " + location + ")";
 	}
+	
 	private String charString() {
 		if(Character.isWhitespace(character)) {
 			int i = character;
@@ -46,16 +45,17 @@ public class LocatedChar {
 		}
 	}
 
-	
 	//////////////////////////////////////////////////////////////////////////////
 	// delegates
 	
 	public boolean isLowerCase() {
 		return Character.isLowerCase(character);
 	}
+	
 	public boolean isDigit() {
 		return Character.isDigit(character);
 	}
+	
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);
 	}
