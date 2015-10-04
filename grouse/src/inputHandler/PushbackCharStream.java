@@ -24,20 +24,19 @@ public class PushbackCharStream extends LocatedCharStream {
 
 	@Override
 	public LocatedChar next() {
-		//debug.out("NEXT");
-		
-		if(pushedBack.empty()) {
+		debug.out("EMPTY???????????????????" + pushedBack.empty());
+		if (pushedBack.empty()) {
 			return super.next();
 		}
 		else {
-			//debug.out("POP: " + pushedBack.get(pushedBack.ind));
+			debug.out("POP: " + pushedBack.peek());
 			return pushedBack.pop(); // Pop non-Punctuators
 		}
 	}
 	
 	public LocatedChar peek() {
 		LocatedChar result = next(); // Pop off the result
-		debug.out("PEEK");
+
 		pushback(result); // Push back the result
 		
 		return result; // Return the result

@@ -41,23 +41,23 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 	private LocatedChar nextCharInLine() {
 		if (endOfInput()) return FLAG_END_OF_INPUT;
 		
-		debug.out("ASSSSS: " + lineNumberOfRestOfLineToDelete);
-		
 		TextLocation location = new TextLocation(input.fileName(), input.lineNumber(), index);
 		
 		// Get next character in input stream
 		char character = line.charAt(index);
 		
+		// Return a null character if it's a character after "//" 
 		if (lineNumberOfRestOfLineToDelete == input.lineNumber()) {
 			index++;
 			
 			return new LocatedChar(' ', location);
 		}
 	
+		// Check if the current character is a '/'
 		if (character == '/') {
 			// Check if the next character in the input is also a '/'
 			// If so, we have found the beginning of a comment
-			// And we need to remove everything until we find a '/n'
+			// And we need to remove everything TODO: until we find a '/n'
 			if (line.charAt(index + 1) == '/') {
 				lineNumberOfRestOfLineToDelete = input.lineNumber();
 				

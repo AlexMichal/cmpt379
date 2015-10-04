@@ -37,8 +37,10 @@ public class LocatedCharString {
 	
 	public LocatedChar chopTail() {
 		LocatedChar result = locatedChars.remove(locatedChars.size()-1);
+		
 		string = string.substring(0, string.length()-1);
 		string = string.intern();
+		
 		return result;
 	}
 	
