@@ -37,6 +37,7 @@ public class PunctuatorScanningAids {
 	//////////////////////////////////////////////////////////////////////////////
 	// creation of startingCharacters
 
+	// Go to Punctuator class and find the list of Punctuators and return a collection of them
 	static private void makeStartingCharacters() {
 		for(Punctuator p: Punctuator.values()) {
 			String lexeme = p.getLexeme();
