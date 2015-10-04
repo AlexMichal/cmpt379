@@ -11,8 +11,7 @@ import java.util.Iterator;
 
 /** Simple line-based file reader.
  *  The lines returned DO NOT include the line terminator.
- * @author shermer
- *
+ * @author Shermer
  */
 public class LineBasedReader implements Iterator<String>  {
 	private BufferedReader reader;
@@ -66,6 +65,7 @@ public class LineBasedReader implements Iterator<String>  {
 	private void preloadNextLine() {
 		nextLine  = readOneLine();
 	}
+	
 	private String readOneLine() {
 		try {
 			return reader.readLine();

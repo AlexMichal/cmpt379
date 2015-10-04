@@ -14,8 +14,8 @@ public class PunctuatorScanningAids {
 	private static Map<String, Set<Punctuator>> punctuatorsHavingPrefix = new HashMap<String, Set<Punctuator>>();
 	private static final Set<Punctuator> emptyPunctuatorSet = Collections.unmodifiableSet(EnumSet.noneOf(Punctuator.class));
 	static {
-		makeStartingCharacters();
-		makePunctuatorsHavingPrefix();
+		makeStartingCharacters(); // create a collection of Punctuators
+		makePunctuatorsHavingPrefix(); // not sure
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -81,7 +81,6 @@ public class PunctuatorScanningAids {
 		}
 	}
 
-	
 	private static void makeAllMapEntriesconstutable() {
 		for(Entry<String, Set<Punctuator>> entry: punctuatorsHavingPrefix.entrySet()) {
 			replaceValueWithconstutableValue(entry);
@@ -92,7 +91,6 @@ public class PunctuatorScanningAids {
 		Set<Punctuator> unmodifiableSet = Collections.unmodifiableSet(value);
 		entry.setValue(unmodifiableSet);
 	}
-	
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// string utility

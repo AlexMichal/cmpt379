@@ -11,7 +11,6 @@ public class PartiallyScannedPunctuator extends LocatedCharString {
 	public PartiallyScannedPunctuator(LocatedChar c) {
 		super(c);
 	}
-
 	
 	// queries
 	public Boolean isPunctuator() {
@@ -22,10 +21,13 @@ public class PartiallyScannedPunctuator extends LocatedCharString {
 	public Punctuator asPunctuator() {
 		return Punctuator.forLexeme(asString());
 	}
+	
+	// This is where we create a Punctuator token
 	public Token asToken() {
 		if(isEmpty()) {
 			return NullToken.make(startingLocation);
 		}
+		
 		assert(isPunctuator());
 		return LextantToken.make(startingLocation, asString(), asPunctuator());
 	}

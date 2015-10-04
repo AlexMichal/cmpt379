@@ -3,7 +3,6 @@ package lexicalAnalyzer;
 import tokens.LextantToken;
 import tokens.Token;
 
-
 public enum Punctuator implements Lextant {
 	ADD("+"),
 	MULTIPLY("*"),
@@ -14,6 +13,7 @@ public enum Punctuator implements Lextant {
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
 	NULL_PUNCTUATOR("");
+	//FORWARD_SLASH("/");
 
 	private String lexeme;
 	private Token prototype;
@@ -28,7 +28,6 @@ public enum Punctuator implements Lextant {
 	public Token prototype() {
 		return prototype;
 	}
-	
 	
 	public static Punctuator forLexeme(String lexeme) {
 		for(Punctuator punctuator: values()) {

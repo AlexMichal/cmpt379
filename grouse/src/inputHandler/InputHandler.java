@@ -30,7 +30,6 @@ public class InputHandler implements Iterable<String> {
 	private InputHandler(String filename) {
 		this(filename, DEFAULT_TERMINATOR);
 	}
-
 	
 	/** Get the file name.
 	 * @return the filename that was passed to the constructor.
@@ -48,13 +47,13 @@ public class InputHandler implements Iterable<String> {
 		return lineNumber;
 	}
 
-
 	@Override
 	public Iterator<String> iterator() {
 		ensureSingleIterator();
 		
 		return new HandlerIterator(filename);
 	}
+	
 	private void ensureSingleIterator() {
 		if(iteratorIssued) {
 			throw new IllegalStateException("Cannot get two iterators on same InputHandler.");
@@ -62,7 +61,6 @@ public class InputHandler implements Iterable<String> {
 		iteratorIssued = true;
 	}
 	
-
 	protected class HandlerIterator extends LineBasedReader {
 		public HandlerIterator(String filename) {
 			super(filename);
@@ -75,9 +73,8 @@ public class InputHandler implements Iterable<String> {
 		}
 	}
 
-
-//////////////////////////////////////////////////////////////////////////////
-// factories
+	//////////////////////////////////////////////////////////////////////////////
+	// factories
 	
 	public static InputHandler fromFilename(String filename, String terminator) {
 		return new InputHandler(filename, terminator);

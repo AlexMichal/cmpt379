@@ -2,11 +2,18 @@ package inputHandler;
 
 import java.util.Stack;
 
+import utilities.Debug;
+
 public class PushbackCharStream extends LocatedCharStream {
 	private Stack<LocatedChar> pushedBack;
+	private static Debug debug = new Debug();
 	
+	// Constructor
+	// Gets called only once
 	public PushbackCharStream(InputHandler handler) {
 		super(handler);
+		
+		// Create an empty PushedBack stack
 		this.pushedBack = new Stack<LocatedChar>();
 	}
 
@@ -17,17 +24,23 @@ public class PushbackCharStream extends LocatedCharStream {
 
 	@Override
 	public LocatedChar next() {
+		//debug.out("NEXT");
+		
 		if(pushedBack.empty()) {
 			return super.next();
 		}
 		else {
-			return pushedBack.pop();
+			//debug.out("POP: " + pushedBack.get(pushedBack.ind));
+			return pushedBack.pop(); // Pop non-Punctuators
 		}
 	}
+	
 	public LocatedChar peek() {
-		LocatedChar result = next();
-		pushback(result);
-		return result;
+		LocatedChar result = next(); // Pop off the result
+		debug.out("PEEK");
+		pushback(result); // Push back the result
+		
+		return result; // Return the result
 	}
 
 	public void pushback(LocatedChar locatedChar) {
@@ -45,5 +58,4 @@ public class PushbackCharStream extends LocatedCharStream {
 	public static PushbackCharStream make(InputHandler handler) {
 		return new PushbackCharStream(handler);
 	}
-
 }

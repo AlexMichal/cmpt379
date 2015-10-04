@@ -7,6 +7,7 @@ import inputHandler.PushbackCharStream;
 import java.util.Set;
 
 import tokens.Token;
+import utilities.Debug;
 
 /** Algorithm object to scan to find a punctuator.  Invoke only on a character that can start a punctuator lexeme.
  * <p>
@@ -22,6 +23,8 @@ import tokens.Token;
  *  Part of derived information is in PunctuatorScanningAids.java, part is in Punctuator itself.
  */
 public class PunctuatorScanner {
+	private static Debug debug = new Debug();
+	
 	private PushbackCharStream input;
 	private PartiallyScannedPunctuator scanned;
 	
@@ -39,16 +42,19 @@ public class PunctuatorScanner {
 	private Token scanPunctuator() {
 		Set<Punctuator> punctuators = punctuatorSetForPrefix(scanned.asString());
 		
+		debug.out("SCAN PUNCTUATOR: " + scanned.asString());
+		
 		if(punctuators.size() == 1 && scanned.isPunctuator()) {
-			return scanned.asToken();
+			return scanned.asToken(); // create a Punctuator token
 		}
 		
 		if(punctuators.isEmpty() || !input.hasNext()) {
 			backupToLastPunctuatorPrefix();
-			return scanned.asToken();
+			return scanned.asToken(); // create a Punctuator token
 		}
 		
 		scanned.add(input.next());
+		
 		return scanPunctuator();
 	}
 
