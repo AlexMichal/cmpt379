@@ -14,9 +14,12 @@ public abstract class ScannerImp implements Scanner {
 
 	public ScannerImp(PushbackCharStream input) {
 		super();
+		
 		this.input = input;
+		
 		nextToken = findNextToken();
-		debug.out(nextToken.fullString()); // TODO: test this next
+		
+		debug.out(nextToken.fullString());
 	}
 
 	// Iterator<Token> implementation
@@ -33,7 +36,7 @@ public abstract class ScannerImp implements Scanner {
 		
 		nextToken = findNextToken();
 		
-		//debug.out("NEXT TOKEN: " + nextToken);
+		//debug.out("NEXT TOKEN: " + nextToken);`
 		
 		return result;
 	}

@@ -76,7 +76,9 @@ public class PunctuatorScanningAids {
 		}
 		else {
 			EnumSet<Punctuator> emptySet = EnumSet.noneOf(Punctuator.class);
+			
 			punctuatorsHavingPrefix.put(prefix, emptySet);
+			
 			return emptySet;
 		}
 	}
