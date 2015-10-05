@@ -9,6 +9,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
@@ -16,21 +17,27 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import tokens.*;
+import utilities.Debug;
 import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import lexicalAnalyzer.Scanner;
 
-
 public class Parser {
+	private static Debug debug = new Debug();
+	
 	private Scanner scanner;
 	private Token nowReading;
 	private Token previouslyRead;
 	
+	// Constructor
+	// Called once by GrouseCompiler
 	public static ParseNode parse(Scanner scanner) {
 		Parser parser = new Parser(scanner);
+		
 		return parser.parse();
 	}
+	
 	public Parser(Scanner scanner) {
 		super();
 		this.scanner = scanner;
@@ -44,71 +51,67 @@ public class Parser {
 	////////////////////////////////////////////////////////////
 	// "program" is the start symbol S
 	// S -> MAIN mainBlock
-	
 	private ParseNode parseProgram() {
-		if(!startsProgram(nowReading)) {
-			return syntaxErrorNode("program");
-		}
-		ParseNode program = new ProgramNode(nowReading);
+		if(!startsProgram(nowReading)) return syntaxErrorNode("program");
 		
+		ParseNode program = new ProgramNode(nowReading);
 		expect(Keyword.MAIN);
+		
+		// Parsing the main block of code
 		ParseNode mainBlock = parseMainBlock();
 		program.appendChild(mainBlock);
 		
-		if(!(nowReading instanceof NullToken)) {
-			return syntaxErrorNode("end of program");
-		}
+		if(!(nowReading instanceof NullToken)) return syntaxErrorNode("end of program");
 		
 		return program;
 	}
+	
 	private boolean startsProgram(Token token) {
 		return token.isLextant(Keyword.MAIN);
 	}
-	
 	
 	///////////////////////////////////////////////////////////
 	// mainBlock
 	
 	// mainBlock -> { statement* }
 	private ParseNode parseMainBlock() {
-		if(!startsMainBlock(nowReading)) {
-			return syntaxErrorNode("mainBlock");
-		}
+		if(!startsMainBlock(nowReading)) return syntaxErrorNode("mainBlock");
+		
 		ParseNode mainBlock = new MainBlockNode(nowReading);
 		expect(Punctuator.OPEN_BRACE);
 		
+		// Parse each statement in between the opening and closing braces
 		while(startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
 			mainBlock.appendChild(statement);
 		}
+		
 		expect(Punctuator.CLOSE_BRACE);
 		return mainBlock;
 	}
+	
 	private boolean startsMainBlock(Token token) {
 		return token.isLextant(Punctuator.OPEN_BRACE);
 	}
-	
 	
 	///////////////////////////////////////////////////////////
 	// statements
 	
 	// statement-> declaration | printStmt
+	// Parses each statement of the main
 	private ParseNode parseStatement() {
-		if(!startsStatement(nowReading)) {
-			return syntaxErrorNode("statement");
-		}
-		if(startsDeclaration(nowReading)) {
-			return parseDeclaration();
-		}
-		if(startsPrintStatement(nowReading)) {
-			return parsePrintStatement();
-		}
+		if(!startsStatement(nowReading)) return syntaxErrorNode("statement");
+		
+		if(startsDeclaration(nowReading)) return parseDeclaration();
+		
+		if(startsPrintStatement(nowReading)) return parsePrintStatement();
+		
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
+	
 	private boolean startsStatement(Token token) {
-		return startsPrintStatement(token) ||
-			   startsDeclaration(token);
+		return startsPrintStatement(token) || startsDeclaration(token); // TODO: add let statement here
 	}
 	
 	// printStmt -> PRINT printExpressionList ;
@@ -124,6 +127,7 @@ public class Parser {
 		expect(Punctuator.TERMINATOR);
 		return result;
 	}
+	
 	private boolean startsPrintStatement(Token token) {
 		return token.isLextant(Keyword.PRINT);
 	}	
@@ -138,10 +142,8 @@ public class Parser {
 		return parent;
 	}
 	
-
 	// This adds the printExpression it parses to the children of the given parent
 	// printExpression -> expr? ,? nl? 
-	
 	private void parsePrintExpression(PrintStatementNode parent) {
 		if(startsExpression(nowReading)) {
 			ParseNode child = parseExpression();
@@ -158,6 +160,7 @@ public class Parser {
 			parent.appendChild(child);
 		}
 	}
+	
 	private boolean startsPrintExpression(Token token) {
 		return startsExpression(token) || token.isLextant(Punctuator.SEPARATOR, Keyword.NEWLINE) ;
 	}
@@ -177,11 +180,10 @@ public class Parser {
 		
 		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
 	}
+	
 	private boolean startsDeclaration(Token token) {
 		return token.isLextant(Keyword.IMMUTABLE);
 	}
-
-
 	
 	///////////////////////////////////////////////////////////
 	// expressions
@@ -199,6 +201,7 @@ public class Parser {
 		}
 		return parseExpression1();
 	}
+	
 	private boolean startsExpression(Token token) {
 		return startsExpression1(token);
 	}
@@ -220,6 +223,7 @@ public class Parser {
 		return left;
 
 	}
+	
 	private boolean startsExpression1(Token token) {
 		return startsExpression2(token);
 	}
@@ -240,6 +244,7 @@ public class Parser {
 		}
 		return left;
 	}
+	
 	private boolean startsExpression2(Token token) {
 		return startsLiteral(token);
 	}	
@@ -260,6 +265,7 @@ public class Parser {
 		}
 		return left;
 	}
+	
 	private boolean startsExpression3(Token token) {
 		return startsExpression4(token);
 	}
@@ -271,30 +277,37 @@ public class Parser {
 		}
 		return parseLiteral();
 	}
+	
 	private boolean startsExpression4(Token token) {
 		return startsLiteral(token);
 	}
 	
 	// literal -> number | identifier | booleanConstant
 	private ParseNode parseLiteral() {
-		if(!startsLiteral(nowReading)) {
-			return syntaxErrorNode("literal");
-		}
+		if(!startsLiteral(nowReading)) return syntaxErrorNode("literal");
 		
 		if(startsIntNumber(nowReading)) {
 			return parseIntNumber();
 		}
+		
+		if(startsFloatNumber(nowReading)) {
+			return parseFloatNumber();
+		}
+		
 		if(startsIdentifier(nowReading)) {
 			return parseIdentifier();
 		}
+		
 		if(startsBooleanConstant(nowReading)) {
 			return parseBooleanConstant();
 		}
+		
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
 	}
+	
 	private boolean startsLiteral(Token token) {
-		return startsIntNumber(token) || startsIdentifier(token) || startsBooleanConstant(token);
+		return startsIntNumber(token) || startsFloatNumber(token) || startsIdentifier(token) || startsBooleanConstant(token);
 	}
 
 	// number (terminal)
@@ -305,8 +318,21 @@ public class Parser {
 		readToken();
 		return new IntegerConstantNode(previouslyRead);
 	}
+	
+	private ParseNode parseFloatNumber() {
+		if(!startsFloatNumber(nowReading)) {
+			return syntaxErrorNode("float constant");
+		}
+		readToken();
+		return new FloatConstantNode(previouslyRead);
+	}
+	
 	private boolean startsIntNumber(Token token) {
-		return token instanceof NumberToken;
+		return token instanceof IntegerToken;
+	}
+	
+	private boolean startsFloatNumber(Token token) {
+		return token instanceof FloatToken;
 	}
 
 	// identifier (terminal)
@@ -329,33 +355,38 @@ public class Parser {
 		readToken();
 		return new BooleanConstantNode(previouslyRead);
 	}
+	
 	private boolean startsBooleanConstant(Token token) {
 		return token.isLextant(Keyword.TRUE, Keyword.FALSE);
 	}
 
 	private void readToken() {
 		previouslyRead = nowReading;
+		
 		nowReading = scanner.next();
 	}	
 	
 	// if the current token is one of the given lextants, read the next token.
 	// otherwise, give a syntax error and read next token (to avoid endless looping).
-	private void expect(Lextant ...lextants ) {
+	private void expect(Lextant ...lextants ) { // ... means we can pass in 0 or more Lextants
 		if(!nowReading.isLextant(lextants)) {
 			syntaxError(nowReading, "expecting " + Arrays.toString(lextants));
 		}
 		readToken();
 	}	
+	
 	private ErrorNode syntaxErrorNode(String expectedSymbol) {
 		syntaxError(nowReading, "expecting " + expectedSymbol);
 		ErrorNode errorNode = new ErrorNode(nowReading);
 		readToken();
 		return errorNode;
 	}
+	
 	private void syntaxError(Token token, String errorDescription) {
 		String message = "" + token.getLocation() + " " + errorDescription;
 		error(message);
 	}
+	
 	private void error(String message) {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.Parser");
 		log.severe("syntax error: " + message);
