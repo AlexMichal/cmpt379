@@ -35,11 +35,10 @@ public class TextLocation {
 			   ", character " + position;
 	}
 	
-	
-	
 	public static TextLocation nullInstance() {
 		return NullTextLocation.getInstance();
 	}
+	
 	static private class NullTextLocation extends TextLocation {
 		private static NullTextLocation instance = new NullTextLocation("null", -1, -1);
 		

@@ -4,6 +4,8 @@ import java.util.Stack;
 
 import utilities.Debug;
 
+// I'm guessing it's for things that aren't numbers, keywords, or punctuators? 
+// Always seems to be the ";" at the end of a statement
 public class PushbackCharStream extends LocatedCharStream {
 	private Stack<LocatedChar> pushedBack;
 	private static Debug debug = new Debug();
@@ -24,12 +26,12 @@ public class PushbackCharStream extends LocatedCharStream {
 
 	@Override
 	public LocatedChar next() {
-		debug.out("EMPTY???????????????????" + pushedBack.empty());
 		if (pushedBack.empty()) {
 			return super.next();
 		}
 		else {
-			debug.out("POP: " + pushedBack.peek());
+			//debug.out("POP: " + pushedBack.peek());
+			
 			return pushedBack.pop(); // Pop non-Punctuators
 		}
 	}

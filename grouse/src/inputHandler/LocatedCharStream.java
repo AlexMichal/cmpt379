@@ -26,7 +26,6 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 		this.index = 0;
 		this.line = "";
 		preloadChar();
-		
 	}
 	
 	private void preloadChar() {
