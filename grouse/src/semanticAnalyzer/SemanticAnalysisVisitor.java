@@ -38,27 +38,31 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	public void visitEnter(ProgramNode node) {
 		enterProgramScope(node);
 	}
+	
 	public void visitLeave(ProgramNode node) {
 		leaveScope(node);
 	}
+	
 	public void visitEnter(MainBlockNode node) {
 	}
+	
 	public void visitLeave(MainBlockNode node) {
 	}
-	
 	
 	///////////////////////////////////////////////////////////////////////////
 	// helper methods for scoping.
 	private void enterProgramScope(ParseNode node) {
 		Scope scope = Scope.createProgramScope();
 		node.setScope(scope);
-	}	
+	}
+	
 	@SuppressWarnings("unused")
 	private void enterSubscope(ParseNode node) {
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
 		node.setScope(scope);
-	}		
+	}
+	
 	private void leaveScope(ParseNode node) {
 		node.getScope().leave();
 	}
@@ -68,6 +72,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(PrintStatementNode node) {
 	}
+	
 	@Override
 	public void visitLeave(DeclarationNode node) {
 		IdentifierNode identifier = (IdentifierNode) node.child(0);
@@ -94,14 +99,15 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		if(signature.accepts(childTypes)) {
 			node.setType(signature.resultType());
-		}
-		else {
+		} else {
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
 	}
+	
 	private Lextant operatorFor(BinaryOperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
+		
 		return token.getLextant();
 	}
 

@@ -798,7 +798,8 @@ public class MemoryManager {
 		code.add(DataS, format);
 		code.add(PushD, stringLabel);
 		code.add(Printf);
-	}	
+	}
+	
 	// does not disturb stack.  Takes a format string - no %'s!
 	public static void pstring(ASMCodeFragment code, String format) {
 		String stringLabel = labeller.newLabel("mm-pstring-", "");
@@ -807,5 +808,4 @@ public class MemoryManager {
 		code.add(PushD, stringLabel);
 		code.add(Printf);
 	}
-
 }

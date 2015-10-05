@@ -1,6 +1,5 @@
 package applications;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -13,8 +12,11 @@ import parseTree.ParseNode;
 import parser.Parser;
 import semanticAnalyzer.SemanticAnalyzer;
 import tokens.Tokens;
+import utilities.Debug;
 
 public class GrouseCompiler extends GrouseApplication {
+	private static Debug debug = new Debug();
+	
 	/** Compiles a Grouse file.
 	 * @param args
 	 * @throws FileNotFoundException 
@@ -33,8 +35,11 @@ public class GrouseCompiler extends GrouseApplication {
 	public static void compile(String filename) throws FileNotFoundException {
 		Scanner scanner         = LexicalAnalyzer.make(filename);
 		ParseNode syntaxTree    = Parser.parse(scanner);
+		
+		debug.out("Semantic Analyzer starting: ");
 		ParseNode decoratedTree = SemanticAnalyzer.analyze(syntaxTree);
 
+		debug.out("Generate code starting: ");
 		generateCodeIfNoErrors(filename, decoratedTree);
 	}
 

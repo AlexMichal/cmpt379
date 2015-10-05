@@ -27,6 +27,7 @@ public class ParseNode {
 		this.parent = NO_PARENT;
 		initChildren();
 	}
+	
 	// "detached" copy constructor.  Copies all info except tree info (parent and children)
 	public ParseNode(ParseNode node) {
 		this.token = node.token;
@@ -37,29 +38,29 @@ public class ParseNode {
 		return token;
 	}
 	
-	
-////////////////////////////////////////////////////////////////////////////////////
-// attributes
-	
+	////////////////////////////////////////////////////////////////////////////////////
+	// attributes
 	public void setType(Type type) {
 		this.type = type;
 	}
 	public Type getType() {
 		return type;
 	}
-
 	
-////////////////////////////////////////////////////////////////////////////////////
-// scopes and bindings 
+	////////////////////////////////////////////////////////////////////////////////////
+	// scopes and bindings 
 	public Scope getScope() {
 		return scope;
 	}
+	
 	public void setScope(Scope scope) {
 		this.scope = scope;
 	}
+	
 	public boolean hasScope() {
 		return scope != null;
 	}
+	
 	public Scope getLocalScope() {
 		for(ParseNode current : pathToRoot()) {
 			if(current.hasScope()) {
@@ -68,6 +69,7 @@ public class ParseNode {
 		}
 		return Scope.nullInstance();
 	}
+	
 	public boolean containsBindingOf(String identifier) {
 		if(!hasScope()) {
 			return false;
@@ -75,6 +77,7 @@ public class ParseNode {
 		SymbolTable symbolTable = scope.getSymbolTable();
 		return symbolTable.containsKey(identifier);
 	}
+	
 	public Binding bindingOf(String identifier) {
 		if(!hasScope()) {
 			return Binding.nullInstance();

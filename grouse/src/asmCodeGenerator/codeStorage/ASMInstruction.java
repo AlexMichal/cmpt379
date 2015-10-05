@@ -7,51 +7,55 @@ public class ASMInstruction {
 	private String comment;
 	
 	
-/////////////////////////////////////////////////////////////////////
-// constructors
-	
+	/////////////////////////////////////////////////////////////////////
+	// constructors
 	public ASMInstruction(ASMOpcode opcode, int argument) {
 		this(opcode, argument, "");
 	}
+	
 	public ASMInstruction(ASMOpcode opcode, int argument, String comment) {
 		assert opcode.takesInteger() : opcode.toString();
 		this.opcode = opcode;
 		this.argument = argument;
 		this.comment = comment;
 	}
+	
 	public ASMInstruction(ASMOpcode opcode, double argument) {
 		this(opcode, argument, "");
 	}
+	
 	public ASMInstruction(ASMOpcode opcode, double argument, String comment) {
 		assert opcode.takesFloat() : opcode.toString();
 		this.opcode = opcode;
 		this.argument = argument;
 		this.comment = comment;
 	}
+	
 	public ASMInstruction(ASMOpcode opcode, String argument) {
 		this(opcode, argument, "");
 	}
+	
 	public ASMInstruction(ASMOpcode opcode, String argument, String comment) {
 		assert nullOrEmpty(argument) || opcode.takesString() : opcode.toString();
 		this.opcode = opcode;
 		this.argument = argument;
 		this.comment = comment;
 	}
+	
 	private boolean nullOrEmpty(String argument) {
 		return argument == null || argument.length()==0;
 	}
+	
 	// no commented version...use new ASMInstruction(opcode, "", comment) instead.
 	public ASMInstruction(ASMOpcode opcode) {
 		this.opcode = opcode;
 		this.argument = null;
 		this.comment = "";
 	}
-
 	
-/////////////////////////////////////////////////////////////////////////
-// toString ... particular attention paid to the DataS instruction, which
-//              the emulator doesn't handle.
-	
+	/////////////////////////////////////////////////////////////////////////
+	// toString ... particular attention paid to the DataS instruction, which
+	//              the emulator doesn't handle.
 	static private String indentation = "        ";
 	public String toString() {
 		if(opcode == ASMOpcode.DataS) {

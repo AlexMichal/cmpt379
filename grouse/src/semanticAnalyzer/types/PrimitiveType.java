@@ -14,13 +14,16 @@ public enum PrimitiveType implements Type {
 		this.sizeInBytes = size;
 		this.infoString = toString();
 	}
+	
 	private PrimitiveType(int size, String infoString) {
 		this.sizeInBytes = size;
 		this.infoString = infoString;
 	}
+	
 	public int getSize() {
 		return sizeInBytes;
 	}
+	
 	public String infoString() {
 		return infoString;
 	}

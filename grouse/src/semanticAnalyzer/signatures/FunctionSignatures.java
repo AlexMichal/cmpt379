@@ -37,6 +37,7 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		}
 		return FunctionSignature.nullInstance();
 	}
+	
 	public boolean accepts(List<Type> types) {
 		return !acceptingSignature(types).isNull();
 	}

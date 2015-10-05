@@ -4,12 +4,14 @@ import java.util.List;
 
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
+import utilities.Debug;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 
 //immutable
 public class FunctionSignature {
 	private static final boolean ALL_TYPES_ACCEPT_ERROR_TYPES = true;
+	private static Debug debug = new Debug();
 	private Type resultType;
 	private Type[] paramTypes;
 	Object whichVariant;
@@ -17,54 +19,58 @@ public class FunctionSignature {
 	
 	///////////////////////////////////////////////////////////////
 	// construction
-	
 	public FunctionSignature(Object whichVariant, Type ...types) {
 		assert(types.length >= 1);
+		debug.out("PARAM TYPES: " + types);
+		
 		storeParamTypes(types);
 		resultType = types[types.length-1];
 		this.whichVariant = whichVariant;
 	}
+	
 	private void storeParamTypes(Type[] types) {
 		paramTypes = new Type[types.length-1];
+		
 		for(int i=0; i<types.length-1; i++) {
 			paramTypes[i] = types[i];
 		}
 	}
 	
-	
 	///////////////////////////////////////////////////////////////
 	// accessors
-	
 	public Object getVariant() {
 		return whichVariant;
 	}
+	
 	public Type resultType() {
 		return resultType;
 	}
+	
 	public boolean isNull() {
 		return false;
 	}
 	
-	
 	///////////////////////////////////////////////////////////////
 	// main query
-
 	public boolean accepts(List<Type> types) {
 		if(types.size() != paramTypes.length) {
 			return false;
 		}
 		
-		for(int i=0; i<paramTypes.length; i++) {
+		for(int i = 0; i < paramTypes.length; i++) {
 			if(!assignableTo(paramTypes[i], types.get(i))) {
 				return false;
 			}
-		}		
+		}
+		
 		return true;
 	}
+	
 	private boolean assignableTo(Type variableType, Type valueType) {
 		if(valueType == PrimitiveType.ERROR && ALL_TYPES_ACCEPT_ERROR_TYPES) {
 			return true;
-		}	
+		}
+		
 		return variableType.equals(valueType);
 	}
 	
@@ -73,10 +79,12 @@ public class FunctionSignature {
 		public boolean accepts(List<Type> types) {
 			return false;
 		}
+		
 		public boolean isNull() {
 			return true;
 		}
 	};
+	
 	public static FunctionSignature nullInstance() {
 		return neverMatchedSignature;
 	}
@@ -85,7 +93,10 @@ public class FunctionSignature {
 	// Signatures for grouse-0 operators
 	// this section will probably disappear in grouse-1 (in favor of FunctionSignatures)
 	
-	private static FunctionSignature addSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
+	private static FunctionSignature addSignature = new FunctionSignature(
+			1, 
+			PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
+			//PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT);
 	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
 	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
 
@@ -95,13 +106,14 @@ public class FunctionSignature {
 		assert(lextant instanceof Punctuator);	
 		Punctuator punctuator = (Punctuator)lextant;
 		
+		debug.out("FunctionSignature: " + punctuator);
 		switch(punctuator) {
-		case ADD:		return addSignature;
-		case MULTIPLY:	return multiplySignature;
-		case GREATER:	return greaterSignature;
-
-		default:
-			return neverMatchedSignature;
+			case ADD:		return addSignature;
+			case MULTIPLY:	return multiplySignature;
+			case GREATER:	return greaterSignature;
+	
+			default:
+				return neverMatchedSignature;
 		}
 	}
 
