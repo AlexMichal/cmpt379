@@ -1,9 +1,12 @@
 package inputHandler;
 
+import utilities.Debug;
+
 /** Value object for holding a character and its location in the input text.
  *  Contains delegates to select character operations.
  */
 public class LocatedChar {
+	private static Debug debug = new Debug();
 	Character character;
 	TextLocation location;
 	
@@ -47,6 +50,9 @@ public class LocatedChar {
 
 	//////////////////////////////////////////////////////////////////////////////
 	// delegates
+	public boolean isCharacter() {
+		return isAsciiCharactersInRange(character, 32, 126);
+	}
 	
 	public boolean isLowerCase() {
 		return Character.isLowerCase(character);
@@ -58,5 +64,16 @@ public class LocatedChar {
 	
 	public boolean isWhitespace() {
 		return Character.isWhitespace(character);
+	}
+	
+	// Helper functions
+	private boolean isAsciiCharactersInRange(char character, int startOfRange, int endOfRange) {
+		if (startOfRange > endOfRange) return false;
+		
+		for (int i = startOfRange; i <= endOfRange; i++) {
+			if (character == (char)i) return true;
+		}
+		
+		return false;
 	}
 }

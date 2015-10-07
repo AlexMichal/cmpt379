@@ -6,6 +6,7 @@ import inputHandler.LocatedChar;
 import inputHandler.LocatedCharStream;
 import inputHandler.PushbackCharStream;
 import inputHandler.TextLocation;
+import tokens.CharacterToken;
 import tokens.FloatToken;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
@@ -44,19 +45,22 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		LocatedChar ch = nextNonWhitespaceChar();
 		
 		// beginning of each potential token
-		//debug.out("Potential Token spot: " + ch.toString());
+		debug.out("Potential Token spot: " + ch.toString());
 		
-		if(ch.isDigit()) {
+		if (ch.isDigit()) {
 			// if we find a digit, keep parsing input until we find a blank space or a period 
 			return scanNumber(ch);
 		}
-		else if(ch.isLowerCase()) {
+		else if (ch.isLowerCase()) {
 			return scanIdentifier(ch);
-		}
-		else if(isPunctuatorStart(ch)) {
+		} 
+		else if (isCharacterStart(ch)) {
+			return scanCharacter(ch);
+		} 
+		else if (isPunctuatorStart(ch)) {
 			return PunctuatorScanner.scan(ch, input);
 		}
-		else if(isEndOfInput(ch)) {
+		else if (isEndOfInput(ch)) {
 			return NullToken.make(ch.getLocation());
 		}
 		else {
@@ -67,8 +71,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 
 	private LocatedChar nextNonWhitespaceChar() {
 		LocatedChar ch = input.next();
-		
-		//debug.out("HERE: " + ch.getCharacter());
 		
 		while(ch.isWhitespace()) {
 			ch = input.next();
@@ -130,6 +132,24 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
+	// Character lexical analysis
+	private Token scanCharacter(LocatedChar lc) {
+		LocatedChar c = input.next();
+
+		// Search input until we find a non-digit (ideally a '.' or a ';'
+//		while(c.isDigit()) {
+//			buffer.append(c.getCharacter());
+//			c = input.next();
+//		}
+		
+		if (true) {
+		return CharacterToken.make(lc.getLocation(), lc.toString());
+		} else {
+			throw new IllegalArgumentException("found : number is not an Integer or a Float");
+		}
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////
 	// Identifier (variable names) and keyword (ex. imm, print) lexical analysis	
 	private Token scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
@@ -138,8 +158,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		appendSubsequentLowercase(buffer);
 
 		String lexeme = buffer.toString();
-		
-		//debug.out("IDENTIFIER AND KEYWORD Token: " + lexeme);
 		
 		if(Keyword.isAKeyword(lexeme)) {
 			return LextantToken.make(firstChar.getLocation(), lexeme, Keyword.forLexeme(lexeme));
@@ -174,6 +192,15 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		return lc == LocatedCharStream.FLAG_END_OF_INPUT;
 	}
 	
+	private boolean isCharacterStart(LocatedChar lc) {
+		char c = lc.getCharacter();
+		
+		if (c == '\'') {
+			return lc.isCharacter();
+		} else {
+			return false;
+		}
+	}	
 	// unused
 //	private boolean isBackSlash(LocatedChar lc) {
 //		char c = lc.getCharacter();
