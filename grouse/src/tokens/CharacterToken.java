@@ -20,9 +20,9 @@ public class CharacterToken extends TokenImp {
 	public static CharacterToken make(TextLocation location, String lexeme) {
 		CharacterToken result = new CharacterToken(location, lexeme);
 		
-		debug.out("Character token: " + lexeme.charAt(1));
+		//debug.out("Character token: " + lexeme.charAt(0));
 		
-		result.setValue(lexeme.charAt(0)); // TODO: CHECK HERE
+		result.setValue(lexeme.charAt(0)); // TODO: character related HERE
 		
 		return result;
 	}
