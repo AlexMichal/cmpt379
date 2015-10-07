@@ -10,13 +10,13 @@ public class IntegerConstantNode extends ParseNode {
 		super(token);
 		assert(token instanceof IntegerToken);
 	}
+	
 	public IntegerConstantNode(ParseNode node) {
 		super(node);
 	}
 
-////////////////////////////////////////////////////////////
-// attributes
-	
+	////////////////////////////////////////////////////////////
+	// attributes
 	public int getValue() {
 		return numberToken().getValue();
 	}
@@ -25,9 +25,8 @@ public class IntegerConstantNode extends ParseNode {
 		return (IntegerToken)token;
 	}	
 
-///////////////////////////////////////////////////////////
-// accept a visitor
-	
+	///////////////////////////////////////////////////////////
+	// accept a visitor
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visit(this);
 	}
