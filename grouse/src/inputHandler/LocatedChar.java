@@ -17,7 +17,7 @@ public class LocatedChar {
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
-	// getters
+	// Getters
 	
 	public Character getCharacter() {
 		return character;
@@ -49,7 +49,7 @@ public class LocatedChar {
 	}
 
 	//////////////////////////////////////////////////////////////////////////////
-	// delegates
+	// Delegates
 	public boolean isCharacter() {
 		return isAsciiCharactersInRange(character, 32, 126);
 	}

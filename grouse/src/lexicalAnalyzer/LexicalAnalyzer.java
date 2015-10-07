@@ -135,17 +135,13 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	// Character lexical analysis
 	private Token scanCharacter(LocatedChar lc) {
 		LocatedChar c = input.next();
-
-		// Search input until we find a non-digit (ideally a '.' or a ';'
-//		while(c.isDigit()) {
-//			buffer.append(c.getCharacter());
-//			c = input.next();
-//		}
 		
-		if (true) {
-		return CharacterToken.make(lc.getLocation(), lc.toString());
+		//debug.out("SCAN CHARACTER: " + c.getCharacter().toString());
+		
+		if (c.isCharacter()) {
+			return CharacterToken.make(lc.getLocation(), c.getCharacter().toString());
 		} else {
-			throw new IllegalArgumentException("found : number is not an Integer or a Float");
+			throw new IllegalArgumentException("found : character is not a Character");
 		}
 	}
 	
