@@ -42,7 +42,6 @@ public class BinaryOperatorNode extends ParseNode {
 	
 	///////////////////////////////////////////////////////////
 	// boilerplate for visitors
-			
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);

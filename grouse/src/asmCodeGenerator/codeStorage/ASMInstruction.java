@@ -1,11 +1,9 @@
 package asmCodeGenerator.codeStorage;
 
-
 public class ASMInstruction {
 	private ASMOpcode opcode;
 	private Object argument;
 	private String comment;
-	
 	
 	/////////////////////////////////////////////////////////////////////
 	// constructors
@@ -90,9 +88,11 @@ public class ASMInstruction {
 		result += dataCString(0, "");	// no terminator
 		return result;
 	}
+	
 	private String DataSComment() {
 		return "%% \"" + printable((String)argument) + "\"";
 	}
+	
 	private String printable(String string) {
 		StringBuilder sb = new StringBuilder();
 		
@@ -103,6 +103,7 @@ public class ASMInstruction {
 		
 		return sb.toString();
 	}
+	
 	private String printable(char c) {
 		switch(c) {
 		case '\n': return "\\n";

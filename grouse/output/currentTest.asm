@@ -5,6 +5,10 @@
         DataC        37                        %% "%d"
         DataC        100                       
         DataC        0                         
+        DLabel       $print-format-float       
+        DataC        37                        %% "%g"
+        DataC        103                       
+        DataC        0                         
         DLabel       $print-format-boolean     
         DataC        37                        %% "%s"
         DataC        115                       
@@ -81,203 +85,45 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        27                        
+        DataZ        32                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% quarters
-        PushI        5                         
-        StoreI                                 
+        PushF        50.200000                 
+        StoreF                                 
         PushD        $global-memory-block      
-        PushI        4                         
+        PushI        8                         
         Add                                    %% dimes
         PushI        3                         
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        PushI        7                         
-        StoreI                                 
-        PushD        $global-memory-block      
         PushI        12                        
+        Add                                    %% nickels
+        PushF        44.450000                 
+        StoreF                                 
+        PushD        $global-memory-block      
+        PushI        20                        
         Add                                    %% pennies
         PushI        17                        
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        16                        
+        PushI        24                        
         Add                                    %% value
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% quarters
-        LoadI                                  
-        PushI        25                        
-        Multiply                               
+        LoadF                                  
+        PushF        25.100000                 
+        FAdd                                   
+        PushF        21.100000                 
+        FAdd                                   
+        StoreF                                 
         PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% dimes
-        LoadI                                  
-        PushI        10                        
-        Multiply                               
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        PushI        5                         
-        Multiply                               
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% pennies
-        LoadI                                  
-        Add                                    
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        16                        
+        PushI        24                        
         Add                                    %% value
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% ncoins
-        PushD        $global-memory-block      
-        PushI        0                         
-        Add                                    %% quarters
-        LoadI                                  
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% dimes
-        LoadI                                  
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% pennies
-        LoadI                                  
-        Add                                    
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% ncoins
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        24                        
-        Add                                    %% moredimes
-        Label        -compare-arg1-1           
-        PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% dimes
-        LoadI                                  
-        Label        -compare-arg2-1           
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        Label        -compare-sub-1            
-        Subtract                               
-        JumpPos      -compare-true-1           
-        Jump         -compare-false-1          
-        Label        -compare-true-1           
-        PushI        1                         
-        Jump         -compare-join-1           
-        Label        -compare-false-1          
-        PushI        0                         
-        Jump         -compare-join-1           
-        Label        -compare-join-1           
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        24                        
-        Add                                    %% moredimes
-        LoadC                                  
-        JumpTrue     -print-boolean-true2      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join2      
-        Label        -print-boolean-true2      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join2      
-        PushD        $print-format-boolean     
-        Printf                                 
-        PushD        $print-format-separator   
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        25                        
-        Add                                    %% boot
-        PushI        1                         
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        26                        
-        Add                                    %% boof
-        PushI        0                         
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        25                        
-        Add                                    %% boot
-        LoadC                                  
-        JumpTrue     -print-boolean-true3      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join3      
-        Label        -print-boolean-true3      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join3      
-        PushD        $print-format-boolean     
-        Printf                                 
-        PushD        $print-format-separator   
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        26                        
-        Add                                    %% boof
-        LoadC                                  
-        JumpTrue     -print-boolean-true4      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join4      
-        Label        -print-boolean-true4      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join4      
-        PushD        $print-format-boolean     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        PushD        $print-format-separator   
-        Printf                                 
-        PushI        14                        
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        25                        
-        Add                                    %% boot
-        LoadC                                  
-        JumpTrue     -print-boolean-true5      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join5      
-        Label        -print-boolean-true5      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join5      
-        PushD        $print-format-boolean     
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        26                        
-        Add                                    %% boof
-        LoadC                                  
-        JumpTrue     -print-boolean-true6      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join6      
-        Label        -print-boolean-true6      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join6      
-        PushD        $print-format-boolean     
+        LoadF                                  
+        PushD        $print-format-float       
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 

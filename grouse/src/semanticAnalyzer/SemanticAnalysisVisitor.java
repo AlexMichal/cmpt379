@@ -12,6 +12,7 @@ import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
+import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.NewlineNode;
@@ -19,14 +20,18 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import semanticAnalyzer.signatures.FunctionSignature;
+import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import tokens.LextantToken;
 import tokens.Token;
+import utilities.Debug;
 
 class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
+	private static Debug debug = new Debug();
+	
 	@Override
 	public void visitLeave(ParseNode node) {
 		throw new RuntimeException("Node class unimplemented in SemanticAnalysisVisitor: " + node.getClass());
@@ -78,6 +83,8 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		IdentifierNode identifier = (IdentifierNode) node.child(0);
 		ParseNode initializer = node.child(1);
 		
+		//debug.out("VISIT LEAVE GET TYPE: " + initializer.getType());
+		
 		Type declarationType = initializer.getType();
 		node.setType(declarationType);
 		
@@ -90,16 +97,23 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visitLeave(BinaryOperatorNode node) {
 		assert node.nChildren() == 2;
+		
 		ParseNode left  = node.child(0);
 		ParseNode right = node.child(1);
 		List<Type> childTypes = Arrays.asList(left.getType(), right.getType());
 		
 		Lextant operator = operatorFor(node);
-		FunctionSignature signature = FunctionSignature.signatureOf(operator);
 		
-		if(signature.accepts(childTypes)) {
-			node.setType(signature.resultType());
-		} else {
+		FunctionSignatures signature = FunctionSignatures.signaturesOf(operator);
+		
+		Type typeOfChildrenNodes = FunctionSignatures.signature(signature.getKey(), childTypes).resultType();
+
+		debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childTypes).resultType());
+		debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildrenNodes);
+		
+		if (signature.accepts(childTypes)) {
+			node.setType(typeOfChildrenNodes);
+		} else { 
 			typeCheckError(node, childTypes);
 			node.setType(PrimitiveType.ERROR);
 		}
@@ -111,25 +125,33 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		return token.getLextant();
 	}
 
-
 	///////////////////////////////////////////////////////////////////////////
 	// simple leaf nodes
 	@Override
 	public void visit(BooleanConstantNode node) {
 		node.setType(PrimitiveType.BOOLEAN);
 	}
+	
 	@Override
 	public void visit(ErrorNode node) {
 		node.setType(PrimitiveType.ERROR);
 	}
+	
 	@Override
 	public void visit(IntegerConstantNode node) {
 		node.setType(PrimitiveType.INTEGER);
 	}
+	
+	@Override
+	public void visit(FloatConstantNode node) {
+		node.setType(PrimitiveType.FLOAT);
+	}
+	
 	@Override
 	public void visit(NewlineNode node) {
 //		node.setType(PrimitiveType.INTEGER);
 	}
+	
 	@Override
 	public void visit(SeparatorNode node) {
 //		node.setType(PrimitiveType.INTEGER);

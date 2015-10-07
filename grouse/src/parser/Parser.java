@@ -167,14 +167,14 @@ public class Parser {
 	
 	// declaration -> IMMUTABLE identifier := expression ;
 	private ParseNode parseDeclaration() {
-		if(!startsDeclaration(nowReading)) {
-			return syntaxErrorNode("declaration");
-		}
+		if(!startsDeclaration(nowReading)) return syntaxErrorNode("declaration");
+		
 		Token declarationToken = nowReading;
 		readToken();
 		
 		ParseNode identifier = parseIdentifier();
 		expect(Punctuator.ASSIGN);
+		
 		ParseNode initializer = parseExpression();
 		expect(Punctuator.TERMINATOR);
 		
@@ -192,7 +192,7 @@ public class Parser {
 	// expr2 -> expr3 [+ expr3]*  (left-assoc)
 	// expr3 -> expr4 [MULT expr4]*  (left-assoc)
 	// expr4 -> literal
-	// literal -> intNumber | identifier | booleanConstant
+	// literal -> intNumber | floatNumber | identifier | booleanConstant
 
 	// expr  -> expr1
 	private ParseNode parseExpression() {		
@@ -337,12 +337,12 @@ public class Parser {
 
 	// identifier (terminal)
 	private ParseNode parseIdentifier() {
-		if(!startsIdentifier(nowReading)) {
-			return syntaxErrorNode("identifier");
-		}
+		if(!startsIdentifier(nowReading)) return syntaxErrorNode("identifier");
+		
 		readToken();
 		return new IdentifierNode(previouslyRead);
 	}
+	
 	private boolean startsIdentifier(Token token) {
 		return token instanceof IdentifierToken;
 	}

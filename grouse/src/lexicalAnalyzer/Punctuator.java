@@ -22,18 +22,18 @@ public enum Punctuator implements Lextant {
 		this.lexeme = lexeme;
 		this.prototype = LextantToken.make(null, lexeme, this);
 	}
+	
 	public String getLexeme() {
 		return lexeme;
 	}
+	
 	public Token prototype() {
 		return prototype;
 	}
 	
 	public static Punctuator forLexeme(String lexeme) {
 		for(Punctuator punctuator: values()) {
-			if(punctuator.lexeme.equals(lexeme)) {
-				return punctuator;
-			}
+			if(punctuator.lexeme.equals(lexeme)) return punctuator;
 		}
 		return NULL_PUNCTUATOR;
 	}
@@ -45,7 +45,4 @@ public enum Punctuator implements Lextant {
 		   return lexemeToPunctuator.forLexeme(lexeme);
 	}
 */
-	
 }
-
-

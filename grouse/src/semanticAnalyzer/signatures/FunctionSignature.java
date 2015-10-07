@@ -8,20 +8,21 @@ import utilities.Debug;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 
-//immutable
+// immutable
 public class FunctionSignature {
 	private static final boolean ALL_TYPES_ACCEPT_ERROR_TYPES = true;
 	private static Debug debug = new Debug();
+	
 	private Type resultType;
 	private Type[] paramTypes;
 	Object whichVariant;
-	
 	
 	///////////////////////////////////////////////////////////////
 	// construction
 	public FunctionSignature(Object whichVariant, Type ...types) {
 		assert(types.length >= 1);
-		debug.out("PARAM TYPES: " + types);
+		
+		//debug.out("PARAM TYPES: " + types);
 		
 		storeParamTypes(types);
 		resultType = types[types.length-1];
@@ -93,28 +94,25 @@ public class FunctionSignature {
 	// Signatures for grouse-0 operators
 	// this section will probably disappear in grouse-1 (in favor of FunctionSignatures)
 	
-	private static FunctionSignature addSignature = new FunctionSignature(
-			1, 
-			PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
-			//PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT);
-	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
-	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
-
-	
-	// the switch here is ugly compared to polymorphism.  This should perhaps be a method on Lextant.
-	public static FunctionSignature signatureOf(Lextant lextant) {
-		assert(lextant instanceof Punctuator);	
-		Punctuator punctuator = (Punctuator)lextant;
-		
-		debug.out("FunctionSignature: " + punctuator);
-		switch(punctuator) {
-			case ADD:		return addSignature;
-			case MULTIPLY:	return multiplySignature;
-			case GREATER:	return greaterSignature;
-	
-			default:
-				return neverMatchedSignature;
-		}
-	}
-
+//	private static FunctionSignature addSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
+//	private static FunctionSignature addFSignature = new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT);
+//	private static FunctionSignature multiplySignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER);
+//	private static FunctionSignature greaterSignature = new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN);
+//
+//	
+//	// the switch here is ugly compared to polymorphism.  This should perhaps be a method on Lextant.
+//	public static FunctionSignature signatureOf(Lextant lextant) {
+//		assert(lextant instanceof Punctuator);	
+//		Punctuator punctuator = (Punctuator)lextant;
+//		
+//		debug.out("FunctionSignature: " + lextant);
+//		switch(punctuator) {
+//			case ADD:		return addSignature;// + addFSignature;
+//			case MULTIPLY:	return multiplySignature;
+//			case GREATER:	return greaterSignature;
+//	
+//			default:
+//				return neverMatchedSignature;
+//		}
+//	}
 }
