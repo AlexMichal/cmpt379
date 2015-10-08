@@ -53,6 +53,9 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		}
 		else if (isCharacterStart(ch)) {
 			return scanCharacter(ch);
+		}
+		else if (isStringStart(ch)) {
+			return scanString(ch);
 		} 
 		else if (ch.isLowerCase()) {
 			return scanIdentifier(ch);
@@ -147,6 +150,31 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
+	// String lexical analysis
+	private Token scanString(LocatedChar lc) {
+		LocatedChar c = input.next();
+		
+		debug.out("SCAN STRING: " + c.getCharacter().toString());
+		
+		if (c.isCharacter()) {
+			return CharacterToken.make(lc.getLocation(), c.getCharacter().toString());
+		} else {
+			throw new IllegalArgumentException("found : character is not a Character");
+		}
+	}
+	
+	private void appendSubsequentStringCharacters(StringBuffer buffer) {
+		LocatedChar c = input.next();
+		
+		while(c.isLowerCase()) {
+			buffer.append(c.getCharacter());
+			c = input.next();
+		}
+		
+		input.pushback(c);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////
 	// Identifier (variable names) and keyword (ex. imm, print) lexical analysis	
 	private Token scanIdentifier(LocatedChar firstChar) {
 		StringBuffer buffer = new StringBuffer();
@@ -193,7 +221,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		char c = lc.getCharacter();
 
 		if (c == '\'') {
-			debug.out("isCharacterStart: " + lc.getCharacter());
+			//debug.out("isCharacterStart: " + lc.getCharacter());
 			
 			return lc.isCharacter();
 		} else {
@@ -201,28 +229,17 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		}
 	}
 	
-	// unused
-//	private boolean isBackSlash(LocatedChar lc) {
-//		char c = lc.getCharacter();
-//		char nextCharacter = input.peek().getCharacter();
-//		
-//		debug.out("PEEKED CHAR: " + nextCharacter);
-//		
-//		// If next token is a "/" then it is a comment, if it is a blank then it is a Punctuator
-//		// otherwise, it's an error
-//		if (nextCharacter == '/') {
-//			// Then we have a Comment
-//			
-//		} else if (nextCharacter == ' ') {
-//			// Then we have a Punctuator
-//			
-//		} else {
-//			// Throw an error
-//			
-//		}
-//		
-//		return isCommentStartingCharacter(c);
-//	}
+	private boolean isStringStart(LocatedChar lc) {
+		char c = lc.getCharacter();
+
+		if (c == '"') {
+			debug.out("isStringStart: " + lc.getCharacter());
+			
+			return lc.isString();
+		} else {
+			return false;
+		}
+	}
 	
 	@SuppressWarnings("unused")
 	private boolean isCommentStartingCharacter(char c) {

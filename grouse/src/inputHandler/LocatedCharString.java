@@ -32,7 +32,7 @@ public class LocatedCharString {
 		
 		string = string.intern();
 		
-		//debug.out("Located String Stream: " + string);
+		debug.out("Located String Stream: " + string);
 	}		
 	
 	public LocatedChar chopTail() {

@@ -54,6 +54,10 @@ public class LocatedChar {
 		return isAsciiCharactersInRange(character, 32, 126);
 	}
 	
+	public boolean isString() {
+		return isValidStringCharacter(character);
+	}
+	
 	public boolean isLowerCase() {
 		return Character.isLowerCase(character);
 	}
@@ -67,6 +71,20 @@ public class LocatedChar {
 	}
 	
 	// Helper functions
+	private boolean isValidStringCharacter(char character) {
+		String newline = System.getProperty("line.separator");
+		
+		boolean hasNewline = "d".contains(newline);
+		
+		/*if (character == '\n' || character) {
+			
+		} else if () {
+			
+		}*/
+		
+		return false;
+	}
+	
 	private boolean isAsciiCharactersInRange(char character, int startOfRange, int endOfRange) {
 		if (startOfRange > endOfRange) return false;
 		

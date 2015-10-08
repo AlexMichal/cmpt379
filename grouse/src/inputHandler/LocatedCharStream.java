@@ -7,6 +7,7 @@ import utilities.Debug;
 // Locate each character and it's location
 public class LocatedCharStream implements Iterator<LocatedChar> {
 	private static Debug debug = new Debug();
+	private static ParsingState parsingState;
 	
 	public static final char NULL_CHAR = '\0';
 	public static final LocatedChar FLAG_END_OF_INPUT = new LocatedChar(NULL_CHAR, new TextLocation("null", -1, -1));
@@ -16,6 +17,11 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 	private int index;
 	private LocatedChar next;
 	private InputHandler input;
+	private enum ParsingState {
+		DEFAULT,
+		STRING,
+		COMMENT;
+	}
 	
 	// Constructor (instantiate a LocatedCharStream)
 	// Only gets instantiated once
@@ -25,6 +31,7 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 		this.inputIterator = input.iterator();
 		this.index = 0;
 		this.line = "";
+		parsingState = ParsingState.DEFAULT;
 		preloadChar();
 	}
 	
@@ -36,34 +43,44 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 	
 	private static int lineNumberOfRestOfLineToDelete = -1;
 	
-	// Returns each and every character in the file
+	// Returns each and every character in the file one at a time
 	private LocatedChar nextCharInLine() {
 		if (endOfInput()) return FLAG_END_OF_INPUT;
 		
 		TextLocation location = new TextLocation(input.fileName(), input.lineNumber(), index);
 		
-		// Get next character in input stream
-		char character = line.charAt(index);
+		char character = line.charAt(index); // Get next character in input stream
 		
-		// Return a null character if it's a character after "//" 
-		if (lineNumberOfRestOfLineToDelete == input.lineNumber()) {
-			index++;
-			
-			return new LocatedChar(' ', location);
-		}
-	
-		// Check if the current character is a '/'
-		if (character == '/') {
-			// Check if the next character in the input is also a '/'
-			// If so, we have found the beginning of a comment
-			// And we need to remove everything TODO: until we find a '/n'
-			if (line.charAt(index + 1) == '/') {
-				lineNumberOfRestOfLineToDelete = input.lineNumber();
+		debug.out("CURRENT STATE: " + parsingState);
+		switch (parsingState) {
+			case DEFAULT:
+				// Check if the current character is a '/' for a Comment
+				if (character == '/') {
+					// Check if the next character in the input is also a '/'
+					// If so, we have found the beginning of a comment
+					// And we need to remove everything TODO: until we find a '/n'
+					if (line.charAt(index + 1) == '/') {
+						parsingState = ParsingState.COMMENT;
+						
+						lineNumberOfRestOfLineToDelete = input.lineNumber();
+						
+						index++;
+						
+						return new LocatedChar(' ', location);
+					}
+				}
 				
-				index++;
+			case COMMENT: 
+				// Return a null character if it's a character after "//" 
+				if (lineNumberOfRestOfLineToDelete == input.lineNumber()) {
+					index++;
+					
+					return new LocatedChar(' ', location);
+				}
 				
-				return new LocatedChar(' ', location);
-			}
+				break;	
+			case STRING:
+				return null;
 		}
 
 		// Increase the index
@@ -91,11 +108,10 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 		index = 0;
 	}
 	
-//////////////////////////////////////////////////////////////////////////////
-// Iterator<LocatedChar> overrides
-// next() extra-politely returns a fully-formed LocatedChar (FLAG_END_OF_INPUT)
-//         if hasNext() is false.  FLAG_END_OF_INPUT is a lightweight Null Object.
-
+	//////////////////////////////////////////////////////////////////////////////
+	// Iterator<LocatedChar> overrides
+	// next() extra-politely returns a fully-formed LocatedChar (FLAG_END_OF_INPUT)
+	//         if hasNext() is false.  FLAG_END_OF_INPUT is a lightweight Null Object.
 	@Override
 	public boolean hasNext() {
 		return next != FLAG_END_OF_INPUT;

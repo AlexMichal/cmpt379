@@ -31,6 +31,6 @@ public class CharacterToken extends TokenImp {
 	
 	@Override
 	protected String rawString() {
-		return "number, " + value;
+		return "character, " + value;
 	}
 }
