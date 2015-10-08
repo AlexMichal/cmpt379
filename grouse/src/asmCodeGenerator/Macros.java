@@ -110,6 +110,4 @@ public class Macros {
 		printStackTop(code, "<%d>\n");
 		code.add(Pop);			// [... ptr]
 	}
-	
-	
 }

@@ -6,6 +6,7 @@ public class RunTime {
 	public static final String EAT_LOCATION_ZERO      = "$eat-location-zero";		// helps us distinguish null pointers from real ones.
 	public static final String INTEGER_PRINT_FORMAT   = "$print-format-integer";
 	public static final String FLOAT_PRINT_FORMAT     = "$print-format-float";
+	public static final String CHARACTER_PRINT_FORMAT = "$print-format-character";
 	public static final String BOOLEAN_PRINT_FORMAT   = "$print-format-boolean";
 	public static final String NEWLINE_PRINT_FORMAT   = "$print-format-newline";
 	public static final String SEPARATOR_PRINT_FORMAT = "$print-format-separator";
@@ -41,6 +42,8 @@ public class RunTime {
 		frag.add(DataS, "%d");
 		frag.add(DLabel, FLOAT_PRINT_FORMAT);
 		frag.add(DataS, "%g");
+		frag.add(DLabel, CHARACTER_PRINT_FORMAT);
+		frag.add(DataS, "%c");
 		frag.add(DLabel, BOOLEAN_PRINT_FORMAT);
 		frag.add(DataS, "%s");
 		frag.add(DLabel, NEWLINE_PRINT_FORMAT);
@@ -55,7 +58,6 @@ public class RunTime {
 		return frag;
 	}
 	
-	
 	private ASMCodeFragment runtimeErrors() {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
 		
@@ -64,6 +66,7 @@ public class RunTime {
 		
 		return frag;
 	}
+	
 	private ASMCodeFragment generalRuntimeError(ASMCodeFragment frag) {
 		String generalErrorMessage = "$errors-general-message";
 
@@ -76,6 +79,7 @@ public class RunTime {
 		frag.add(Halt);
 		return frag;
 	}
+	
 	private void integerDivideByZeroError(ASMCodeFragment frag) {
 		String intDivideByZeroMessage = "$errors-int-divide-by-zero";
 		

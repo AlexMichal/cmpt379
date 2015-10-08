@@ -2,27 +2,30 @@ package parseTree.nodeTypes;
 
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import lexicalAnalyzer.Keyword;
+import tokens.CharacterToken;
 import tokens.IntegerToken;
+import tokens.LextantToken;
 import tokens.Token;
 
-public class IntegerConstantNode extends ParseNode {
-	public IntegerConstantNode(Token token) {
+public class CharacterConstantNode extends ParseNode {
+	public CharacterConstantNode(Token token) {
 		super(token);
-		assert(token instanceof IntegerToken);
+		assert(token instanceof CharacterToken);
 	}
 	
-	public IntegerConstantNode(ParseNode node) {
+	public CharacterConstantNode(ParseNode node) {
 		super(node);
 	}
 
 	////////////////////////////////////////////////////////////
 	// attributes
-	public int getValue() {
-		return numberToken().getValue();
+	public char getValue() {
+		return characterToken().getValue();
 	}
 
-	public IntegerToken numberToken() {
-		return (IntegerToken)token;
+	public CharacterToken characterToken() {
+		return (CharacterToken)token;
 	}	
 
 	///////////////////////////////////////////////////////////

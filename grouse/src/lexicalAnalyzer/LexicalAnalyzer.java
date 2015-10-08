@@ -51,11 +51,11 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			// if we find a digit, keep parsing input until we find a blank space or a period 
 			return scanNumber(ch);
 		}
-		else if (ch.isLowerCase()) {
-			return scanIdentifier(ch);
-		} 
 		else if (isCharacterStart(ch)) {
 			return scanCharacter(ch);
+		} 
+		else if (ch.isLowerCase()) {
+			return scanIdentifier(ch);
 		} 
 		else if (isPunctuatorStart(ch)) {
 			return PunctuatorScanner.scan(ch, input);
@@ -75,6 +75,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		while(ch.isWhitespace()) {
 			ch = input.next();
 		}
+		
 		return ch;
 	}
 	
@@ -88,7 +89,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		
 		numberType = appendSubsequentDigits(buffer);
 		
-		debug.out("scanned number value: " + buffer.toString());
+		//debug.out("scanned number value: " + buffer.toString());
 		
 		if (numberType == NumberType.INTEGER) { // It is an Integer
 			return IntegerToken.make(firstChar.getLocation(), buffer.toString());
@@ -136,7 +137,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	private Token scanCharacter(LocatedChar lc) {
 		LocatedChar c = input.next();
 		
-		//debug.out("SCAN CHARACTER: " + c.getCharacter().toString());
+		debug.out("SCAN CHARACTER: " + c.getCharacter().toString());
 		
 		if (c.isCharacter()) {
 			return CharacterToken.make(lc.getLocation(), c.getCharacter().toString());
@@ -190,13 +191,16 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	
 	private boolean isCharacterStart(LocatedChar lc) {
 		char c = lc.getCharacter();
-		
+
 		if (c == '\'') {
+			debug.out("isCharacterStart: " + lc.getCharacter());
+			
 			return lc.isCharacter();
 		} else {
 			return false;
 		}
-	}	
+	}
+	
 	// unused
 //	private boolean isBackSlash(LocatedChar lc) {
 //		char c = lc.getCharacter();
@@ -220,14 +224,13 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 //		return isCommentStartingCharacter(c);
 //	}
 	
-	// unused
+	@SuppressWarnings("unused")
 	private boolean isCommentStartingCharacter(char c) {
 		return true;
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////
 	// Error-reporting	
-
 	private void lexicalError(LocatedChar ch) {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.lexicalAnalyzer");
 		log.severe("Lexical error: invalid character " + ch);
@@ -237,7 +240,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	// Punctuator lexical analysis	
 	// old method left in to show a simple scanning method.
 	// current method is the algorithm object PunctuatorScanner.java
-	
 	@SuppressWarnings("unused")
 	private Token oldScanPunctuator(LocatedChar ch) {
 		TextLocation location = ch.getLocation();

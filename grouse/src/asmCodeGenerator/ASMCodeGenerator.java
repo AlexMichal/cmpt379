@@ -11,6 +11,7 @@ import lexicalAnalyzer.Punctuator;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatConstantNode;
@@ -152,17 +153,20 @@ public class ASMCodeGenerator {
 				turnAddressIntoValue(code, node);
 			}	
 		}
+		
 		private void turnAddressIntoValue(ASMCodeFragment code, ParseNode node) {
-			if(node.getType() == PrimitiveType.INTEGER) {
+			if (node.getType() == PrimitiveType.INTEGER) {
 				code.add(LoadI);
-			} else if(node.getType() == PrimitiveType.BOOLEAN) {
+			} else if (node.getType() == PrimitiveType.BOOLEAN) {
 				code.add(LoadC);
-			} else if(node.getType() == PrimitiveType.FLOAT) {
+			} else if (node.getType() == PrimitiveType.FLOAT) {
 				code.add(LoadF);
-			}	
-			else {
+			} else if (node.getType() == PrimitiveType.CHARACTER) {
+				code.add(LoadC);
+			} else {
 				assert false : "node " + node;
 			}
+			
 			code.markAsValue();
 		}
 		
@@ -280,6 +284,9 @@ public class ASMCodeGenerator {
 			if(type == PrimitiveType.FLOAT) {
 				return StoreF;
 			}
+			if(type == PrimitiveType.CHARACTER) {
+				return StoreC;
+			}
 			assert false: "Type " + type + " unimplemented in opcodeForStore()";
 			return null;
 		}
@@ -395,6 +402,11 @@ public class ASMCodeGenerator {
 			
 			code.add(PushF, node.getValue());
 		}
+		
+		public void visit(CharacterConstantNode node) {
+			newValueCode(node);
+			
+			code.add(PushI, node.getValue());
+		}
 	}
-
 }

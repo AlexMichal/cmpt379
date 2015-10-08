@@ -10,6 +10,7 @@ public class FloatConstantNode extends ParseNode {
 		super(token);
 		assert(token instanceof FloatToken);
 	}
+	
 	public FloatConstantNode(ParseNode node) {
 		super(node);
 	}
