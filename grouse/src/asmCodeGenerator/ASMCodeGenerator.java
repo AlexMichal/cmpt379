@@ -2,6 +2,7 @@ package asmCodeGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
@@ -21,6 +22,7 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -72,6 +74,7 @@ public class ASMCodeGenerator {
 		code.add(DataZ, globalBlockSize);
 		return code;
 	}
+	
 	private ASMCodeFragment programASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
 		
@@ -81,12 +84,12 @@ public class ASMCodeGenerator {
 		
 		return code;
 	}
+	
 	private ASMCodeFragment programCode() {
 		CodeVisitor visitor = new CodeVisitor();
 		root.accept(visitor);
 		return visitor.removeRootCode(root);
 	}
-
 
 	private class CodeVisitor extends ParseNodeVisitor.Default {
 		private Map<ParseNode, ASMCodeFragment> codeMap;
@@ -128,7 +131,7 @@ public class ASMCodeGenerator {
 		private ASMCodeFragment removeValueCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
 			makeFragmentValueCode(frag, node);
-			debug.out("removeValueCode: " + node);
+			debug.out("removeValueCode: " + node); // TODO: delete me
 			return frag;
 		}
 		
@@ -162,6 +165,8 @@ public class ASMCodeGenerator {
 			} else if (node.getType() == PrimitiveType.FLOAT) {
 				code.add(LoadF);
 			} else if (node.getType() == PrimitiveType.CHARACTER) {
+				code.add(LoadC);
+			} else if (node.getType() == PrimitiveType.STRING) {
 				code.add(LoadC);
 			} else {
 				assert false : "node " + node;
@@ -254,6 +259,8 @@ public class ASMCodeGenerator {
 			case INTEGER:	return RunTime.INTEGER_PRINT_FORMAT;
 			case BOOLEAN:	return RunTime.BOOLEAN_PRINT_FORMAT;
 			case FLOAT:		return RunTime.FLOAT_PRINT_FORMAT;
+			case CHARACTER:	return RunTime.CHARACTER_PRINT_FORMAT;
+			case STRING:	return RunTime.STRING_PRINT_FORMAT;
 			default:		
 				assert false : "Type " + type + " unimplemented in ASMCodeGenerator.printFormat()";
 				return "";
@@ -285,6 +292,9 @@ public class ASMCodeGenerator {
 				return StoreF;
 			}
 			if(type == PrimitiveType.CHARACTER) {
+				return StoreC;
+			}
+			if(type == PrimitiveType.STRING) {
 				return StoreC;
 			}
 			assert false: "Type " + type + " unimplemented in opcodeForStore()";
@@ -407,6 +417,23 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 			
 			code.add(PushI, node.getValue());
+		}
+
+		public void visit(StringConstantNode node) { // TODO: string constant
+			Random randomGenerator = new Random();
+			int randomNumber = randomGenerator.nextInt(100000);
+			String label = "str_const_";
+			
+			label = "$" + label + randomNumber + node.getValue().length();;
+			
+			debug.out("VISIT: " + label);
+			
+			newValueCode(node);
+			
+			code.add(DLabel, label);
+			code.add(DataS, node.getValue());
+			code.add(Label, label + 1);
+			code.add(PushD, label);
 		}
 	}
 }
