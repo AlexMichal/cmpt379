@@ -11,6 +11,7 @@ import tokens.FloatToken;
 import tokens.IdentifierToken;
 import tokens.LextantToken;
 import tokens.NullToken;
+import tokens.StringToken;
 import tokens.IntegerToken;
 import tokens.Token;
 import utilities.Debug;
@@ -45,7 +46,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		LocatedChar ch = nextNonWhitespaceChar();
 		
 		// beginning of each potential token
-		debug.out("Potential Token spot: " + ch.toString());
+		//debug.out("Potential Token spot: " + ch.toString());
 		
 		if (ch.isDigit()) {
 			// if we find a digit, keep parsing input until we find a blank space or a period 
@@ -112,9 +113,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
-		
-		//debug.out("Character: " + c.getCharacter());
-		
+
 		// If we found a '.', we have found a Float, otherwise it is an Integer
 		if (c.getCharacter() == '.') {
 			buffer.append(c.getCharacter());
@@ -140,7 +139,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	private Token scanCharacter(LocatedChar lc) {
 		LocatedChar c = input.next();
 		
-		debug.out("SCAN CHARACTER: " + c.getCharacter().toString());
+		//debug.out("SCAN CHARACTER: " + c.getCharacter().toString());
 		
 		if (c.isCharacter()) {
 			return CharacterToken.make(lc.getLocation(), c.getCharacter().toString());
@@ -152,24 +151,36 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 	//////////////////////////////////////////////////////////////////////////////
 	// String lexical analysis
 	private Token scanString(LocatedChar lc) {
-		LocatedChar c = input.next();
+		StringBuffer buffer = new StringBuffer();
 		
-		debug.out("SCAN STRING: " + c.getCharacter().toString());
+		buffer.append(lc.getCharacter());
 		
-		if (c.isCharacter()) {
-			return CharacterToken.make(lc.getLocation(), c.getCharacter().toString());
-		} else {
-			throw new IllegalArgumentException("found : character is not a Character");
-		}
+		appendSubsequentStringCharacters(buffer);
+		
+		//debug.out("scanString: " + buffer.toString());
+		
+		return StringToken.make(lc.getLocation(), buffer.toString());
+		
+		/*} else { // TODO: fix
+			lexicalError(lc);
+			findNextToken();
+			
+			throw new IllegalArgumentException("found : value is not a string");
+		}*/
 	}
 	
 	private void appendSubsequentStringCharacters(StringBuffer buffer) {
 		LocatedChar c = input.next();
 		
-		while(c.isLowerCase()) {
+		while (c.isStringCharacter()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
+		
+		buffer.append(c.getCharacter());
+		c = input.next();
+		
+		//debug.out("STRING CHAAAAAAAAAAR: " + c.getCharacter());
 		
 		input.pushback(c);
 	}
@@ -221,8 +232,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		char c = lc.getCharacter();
 
 		if (c == '\'') {
-			//debug.out("isCharacterStart: " + lc.getCharacter());
-			
 			return lc.isCharacter();
 		} else {
 			return false;
@@ -233,9 +242,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		char c = lc.getCharacter();
 
 		if (c == '"') {
-			debug.out("isStringStart: " + lc.getCharacter());
-			
-			return lc.isString();
+			return true;
 		} else {
 			return false;
 		}
