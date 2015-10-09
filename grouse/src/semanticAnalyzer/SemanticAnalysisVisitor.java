@@ -113,6 +113,8 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		//debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childTypes).resultType());
 		//debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildrenNodes);
 		
+		// TODO: here maybe use the getVariant() to get the variant
+		
 		if (signature.accepts(childTypes)) {
 			node.setType(typeOfChildrenNodes);
 		} else { 

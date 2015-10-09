@@ -189,25 +189,40 @@ public class Parser {
 	///////////////////////////////////////////////////////////
 	// expressions
 	// expr  -> expr1
-	// expr1 -> expr2 [> expr2]?
-	// expr2 -> expr3 [+ expr3]*  (left-assoc)
-	// expr3 -> expr4 [MULT expr4]*  (left-assoc)
-	// expr4 -> literal
-	// literal -> intNumber | floatNumber | characterConstant | identifier | booleanConstant
+	// expr1 -> ( expr2 )?
+	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
+	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
+	// expr4 -> expr5 [(<|<=|==|!=|>|>=) expr5]?
+	// expr5 -> literal
+	// literal -> intNumber | floatNumber | characterConstant | booleanConstant | stringConstant | identifier
 
 	// expr  -> expr1
 	private ParseNode parseExpression() {		
 		if(!startsExpression(nowReading)) return syntaxErrorNode("expression");
 		
-		return parseExpression1();
+		return parseExpression2();
 	}
 	
 	private boolean startsExpression(Token token) {
-		return startsExpression1(token);
+		return startsExpression2(token);
 	}
 
-	// expr1 -> expr2 [> expr2]?
-	private ParseNode parseExpression1() {
+	// expr1 -> ( expr2 )?
+	/*private ParseNode parseExpression1() {
+		if(!startsExpression1(nowReading)) return syntaxErrorNode("expression<1>");
+		
+		ParseNode left = parseExpression2();
+		if(nowReading.isLextant(Punctuator.OPEN_BRACKET)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression2();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		return left;
+	
+	}*/
+	/*private ParseNode parseExpression1() {
 		if(!startsExpression1(nowReading)) return syntaxErrorNode("expression<1>");
 		
 		ParseNode left = parseExpression2();
@@ -220,25 +235,23 @@ public class Parser {
 		}
 		return left;
 
-	}
+	}*/
 	
-	private boolean startsExpression1(Token token) {
+	/*private boolean startsExpression1(Token token) {
 		return startsExpression2(token);
-	}
+	}*/
 
-	// expr2 -> expr3 [+ expr3]*  (left-assoc)
+	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
 	private ParseNode parseExpression2() {
-		if(!startsExpression2(nowReading)) {
-			return syntaxErrorNode("expression<2>");
-		}
+		if(!startsExpression2(nowReading)) return syntaxErrorNode("expression<2>");
 		
 		ParseNode left = parseExpression3();
-		while(nowReading.isLextant(Punctuator.ADD)) {
-			Token additiveToken = nowReading;
+		while(nowReading.isLextant(Punctuator.ADD) || nowReading.isLextant(Punctuator.SUBTRACT)) {
+			Token token = nowReading;
 			readToken();
 			ParseNode right = parseExpression3();
 			
-			left = BinaryOperatorNode.withChildren(additiveToken, left, right);
+			left = BinaryOperatorNode.withChildren(token, left, right);
 		}
 		return left;
 	}
@@ -247,14 +260,12 @@ public class Parser {
 		return startsLiteral(token);
 	}	
 
-	// expr3 -> expr4 [MULT expr4]*  (left-assoc)
+	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
 	private ParseNode parseExpression3() {
-		if(!startsExpression3(nowReading)) {
-			return syntaxErrorNode("expression<3>");
-		}
+		if(!startsExpression3(nowReading)) return syntaxErrorNode("expression<3>");
 		
 		ParseNode left = parseExpression4();
-		while(nowReading.isLextant(Punctuator.MULTIPLY)) {
+		while(nowReading.isLextant(Punctuator.MULTIPLY) || nowReading.isLextant(Punctuator.DIVIDE)) {
 			Token multiplicativeToken = nowReading;
 			readToken();
 			ParseNode right = parseExpression4();
@@ -268,17 +279,43 @@ public class Parser {
 		return startsExpression4(token);
 	}
 	
-	// expr4 -> literal
+	// expr4 -> expr5 [(<|<=|==|!=|>|>=) expr5]?
 	private ParseNode parseExpression4() {
-		if(!startsExpression4(nowReading)) {
-			return syntaxErrorNode("expression<4>");
+		if(!startsExpression4(nowReading)) return syntaxErrorNode("expression<4>");
+		
+		ParseNode left = parseExpression5();
+		if(nowReading.isLextant(Punctuator.GREATER) ||
+				nowReading.isLextant(Punctuator.LESSER) ||
+				nowReading.isLextant(Punctuator.LESSER_OR_EQUAL) ||
+				nowReading.isLextant(Punctuator.EQUAL) ||
+				nowReading.isLextant(Punctuator.NOT_EQUAL) ||
+				nowReading.isLextant(Punctuator.GREATER) ||
+				nowReading.isLextant(Punctuator.GREATER_OR_EQUAL)) {
+			Token compareToken = nowReading;
+			readToken();
+			ParseNode right = parseExpression5();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
 		}
-		return parseLiteral();
+		
+		return left;
 	}
 	
 	private boolean startsExpression4(Token token) {
-		return startsLiteral(token);
+		return startsExpression5(token);
 	}
+	
+	// expr5 -> literal
+		private ParseNode parseExpression5() {
+			if(!startsExpression4(nowReading)) {
+				return syntaxErrorNode("expression<5>");
+			}
+			return parseLiteral();
+		}
+		
+		private boolean startsExpression5(Token token) {
+			return startsLiteral(token);
+		}
 	
 	// literal -> integerConst | floatConst | booleanConst | characterConst| stringConst | identifier 
 	private ParseNode parseLiteral() {

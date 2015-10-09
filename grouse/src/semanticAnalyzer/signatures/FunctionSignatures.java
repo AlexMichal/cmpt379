@@ -78,6 +78,26 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		    new FunctionSignature(ASMOpcode.FAdd, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT)
 		);
 		
+		new FunctionSignatures(Punctuator.SUBTRACT,
+		    new FunctionSignature(ASMOpcode.Subtract, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+		    new FunctionSignature(ASMOpcode.FSubtract, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT)
+		);
+		
+		new FunctionSignatures(Punctuator.DIVIDE,
+		    new FunctionSignature(ASMOpcode.Divide, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+		    new FunctionSignature(ASMOpcode.FDivide, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT)
+		);
+		
+		new FunctionSignatures(Punctuator.MULTIPLY,
+		    new FunctionSignature(ASMOpcode.Multiply, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.INTEGER),
+		    new FunctionSignature(ASMOpcode.FMultiply, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT)
+		);
+		
+		/*new FunctionSignatures(Punctuator.GREATER,
+		    new FunctionSignature(ASMOpcode.Add, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(ASMOpcode.FAdd, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);*/
+		
 		// First, we use the operator itself (in this case the Punctuator ADD) as the key.
 		// Then, we give that key two signatures: one an (INT x INT -> INT) and the other
 		// a (FLOAT x FLOAT -> FLOAT).  Each signature has a "whichVariant" parameter where

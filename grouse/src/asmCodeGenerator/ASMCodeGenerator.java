@@ -372,14 +372,18 @@ public class ASMCodeGenerator {
 			
 			if ((leftChildType == PrimitiveType.INTEGER) && (rightChildType == PrimitiveType.INTEGER))  {
 				switch(punctuator) {
-					case ADD: 	   	return Add;				// type-dependent!
-					case MULTIPLY: 	return Multiply;		// type-dependent!
+					case ADD: 	   	return Add;
+					case SUBTRACT: 	return Subtract;
+					case MULTIPLY: 	return Multiply;
+					case DIVIDE: 	return Divide;
 					default:		assert false : "integer - unimplemented operator in opcodeForOperator";
 				}
 			} else if ((leftChildType == PrimitiveType.FLOAT) && (rightChildType == PrimitiveType.FLOAT)) {
 				switch(punctuator) {
-					case ADD: 	   	return FAdd;			// type-dependent!
-					case MULTIPLY: 	return FMultiply;		// type-dependent!
+					case ADD: 	   	return FAdd;
+					case SUBTRACT: 	return FSubtract;
+					case MULTIPLY: 	return FMultiply;
+					case DIVIDE: 	return FDivide;
 					default:		assert false : "float - unimplemented operator in opcodeForOperator";
 				}
 			}

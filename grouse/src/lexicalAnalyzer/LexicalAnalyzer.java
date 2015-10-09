@@ -46,7 +46,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		LocatedChar ch = nextNonWhitespaceChar();
 		
 		// beginning of each potential token
-		//debug.out("Potential Token spot: " + ch.toString());
+		debug.out("Potential Token spot: " + ch.toString());
 		
 		if (ch.isDigit()) {
 			// if we find a digit, keep parsing input until we find a blank space or a period 
