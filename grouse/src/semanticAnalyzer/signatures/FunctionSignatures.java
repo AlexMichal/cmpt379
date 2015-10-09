@@ -64,11 +64,17 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		return signatures.acceptingSignature(types);
 	}
 
+	private class Greater {
+		
+		
+		public Greater(Object obj) {
+			
+		}
+	}
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////
 	// Put the signatures for operators in the following static block.
-	
 	static {
 		// here's one example to get you started with FunctionSignatures: the signatures for addition.		
 		// for this to work, you should statically import PrimitiveType.*
@@ -93,10 +99,35 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		    new FunctionSignature(ASMOpcode.FMultiply, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.FLOAT)
 		);
 		
-		/*new FunctionSignatures(Punctuator.GREATER,
-		    new FunctionSignature(ASMOpcode.Add, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
-		    new FunctionSignature(ASMOpcode.FAdd, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
-		);*/
+		new FunctionSignatures(Punctuator.GREATER,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
+
+		new FunctionSignatures(Punctuator.GREATER_OR_EQUAL,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
+		
+		new FunctionSignatures(Punctuator.EQUAL,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
+		
+		new FunctionSignatures(Punctuator.NOT_EQUAL,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
+		
+		new FunctionSignatures(Punctuator.LESSER,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
+		
+		new FunctionSignatures(Punctuator.LESSER_OR_EQUAL,
+		    new FunctionSignature(1, PrimitiveType.INTEGER, PrimitiveType.INTEGER, PrimitiveType.BOOLEAN),
+		    new FunctionSignature(1, PrimitiveType.FLOAT, PrimitiveType.FLOAT, PrimitiveType.BOOLEAN)
+		);
 		
 		// First, we use the operator itself (in this case the Punctuator ADD) as the key.
 		// Then, we give that key two signatures: one an (INT x INT -> INT) and the other

@@ -1,10 +1,16 @@
 main {
-    imm quarters := 50.2;
+    imm quarters := 5;
     imm dimes := 3;
-    imm nickels := 44.45;
-    imm pennies := 17; //asdsa
-
-    imm value := quarters + 25.1 + 21.1;
-
+    imm nickels := 7;
+    imm pennies := 17;
+    imm value := quarters * 25 +
+    			 dimes * 10 +
+    			 nickels * 5 +
+    			 pennies;
     print value nl;
+    
+
+    imm bad :=  nickels > nickels;
+
+print bad;
 }
