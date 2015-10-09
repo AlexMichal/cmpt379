@@ -22,7 +22,7 @@ public class StringToken extends TokenImp {
 		
 		debug.out("String token: " + lexeme);
 		
-		result.setValue(lexeme); // TODO: Remove debugs
+		result.setValue(removeDoubleQuotes(lexeme)); // TODO: Remove debugs
 		
 		debug.out("String token (after): " + result.getValue());
 		
@@ -32,5 +32,10 @@ public class StringToken extends TokenImp {
 	@Override
 	protected String rawString() {
 		return "string, " + value;
+	}
+	
+	// Helper function
+	private static String removeDoubleQuotes(String str) {
+		return str.replace("\"", "");
 	}
 }
