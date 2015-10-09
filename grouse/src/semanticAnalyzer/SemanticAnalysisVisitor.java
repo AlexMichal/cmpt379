@@ -20,6 +20,7 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StringConstantNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
@@ -109,8 +110,8 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		Type typeOfChildrenNodes = FunctionSignatures.signature(signature.getKey(), childTypes).resultType();
 
-		debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childTypes).resultType());
-		debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildrenNodes);
+		//debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childTypes).resultType());
+		//debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildrenNodes);
 		
 		if (signature.accepts(childTypes)) {
 			node.setType(typeOfChildrenNodes);
@@ -151,6 +152,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visit(CharacterConstantNode node) {
 		node.setType(PrimitiveType.CHARACTER);
+	}
+	
+	@Override
+	public void visit(StringConstantNode node) {
+		node.setType(PrimitiveType.STRING);
 	}
 	
 	@Override
