@@ -4,16 +4,29 @@ import tokens.LextantToken;
 import tokens.Token;
 
 public enum Punctuator implements Lextant {
+	// Arithmetic operator:
 	ADD("+"),
+	SUBTRACT("-"),
 	MULTIPLY("*"),
+	DIVIDE("/"),
+	// Comparison operator:
+	LESSER("<"),
+	LESSER_OR_EQUAL("<="),
+	EQUAL("=="),
+	NOT_EQUAL("!="),
 	GREATER(">"),
-	ASSIGN(":="),
+	GREATER_OR_EQUAL(">="),
+	// Punctuation:
+	TERMINATOR(";"),
 	SEPARATOR(","),
-	TERMINATOR(";"), 
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
+	OPEN_BRACKET("("),
+	CLOSE_BRACKET(")"),
+	COLON(":"),
+	ASSIGN(":="),
+	// Other:
 	NULL_PUNCTUATOR("");
-	//FORWARD_SLASH("/");
 
 	private String lexeme;
 	private Token prototype;
