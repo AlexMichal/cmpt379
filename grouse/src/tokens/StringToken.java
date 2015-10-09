@@ -22,9 +22,9 @@ public class StringToken extends TokenImp {
 		
 		debug.out("String token: " + lexeme);
 		
-		result.setValue(lexeme); // TODO: character related HERE
+		result.setValue(lexeme); // TODO: Remove debugs
 		
-		debug.out("String token: " + result.getValue());
+		debug.out("String token (after): " + result.getValue());
 		
 		return result;
 	}
