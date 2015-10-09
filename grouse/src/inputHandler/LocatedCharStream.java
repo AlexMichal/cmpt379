@@ -50,43 +50,73 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 		TextLocation location = new TextLocation(input.fileName(), input.lineNumber(), index);
 		
 		char character = line.charAt(index); // Get next character in input stream
+		char charToReturn = ' ';
 		
-		debug.out("CURRENT STATE: " + parsingState);
+		//debug.out("CURRENT STATE: " + parsingState);
+		
 		switch (parsingState) {
 			case DEFAULT:
-				// Check if the current character is a '/' for a Comment
-				if (character == '/') {
-					// Check if the next character in the input is also a '/'
-					// If so, we have found the beginning of a comment
-					// And we need to remove everything TODO: until we find a '/n'
-					if (line.charAt(index + 1) == '/') {
+				if (character == '/') { // comment start
+					if (line.charAt(index + 1) == '/') { // Check if the next character in the input is also a '/'
 						parsingState = ParsingState.COMMENT;
 						
 						lineNumberOfRestOfLineToDelete = input.lineNumber();
 						
-						index++;
-						
-						return new LocatedChar(' ', location);
+						charToReturn = ' ';
+					} else { // punctuator found
+						charToReturn = character;
 					}
+				} else if (character == '"') { // string start
+					if (line.charAt(index + 1) == '"') { // Check if the next character in the input is also a '"'
+						throw new IllegalArgumentException("located char stream: invalid empty string");
+					};
+					parsingState = ParsingState.STRING;
+					
+					charToReturn = character;
+				} else { // normal
+					charToReturn = character;
 				}
 				
+				break;
 			case COMMENT: 
-				// Return a null character if it's a character after "//" 
-				if (lineNumberOfRestOfLineToDelete == input.lineNumber()) {
-					index++;
+				if (lineNumberOfRestOfLineToDelete == input.lineNumber()) { // Delete the rest of the line
+					charToReturn = ' ';
+				} else { // It's the first character on the next line
+					parsingState = ParsingState.DEFAULT;
 					
-					return new LocatedChar(' ', location);
+					charToReturn = character;
 				}
 				
 				break;	
 			case STRING:
-				return null;
+				/*String str = "";
+				
+				str = "" + character + line.charAt(index + 1);
+				debug.out("AAAAAAAAAAAAAAAAAAAAAAAAAA: " + str);98
+				
+				/*if (line.charAt(index + 1) =='\n') {
+					debug.out("AAAAAAAAAAAAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A: ");
+				}*/
+				
+				if (character == '"') { // TODO: fix
+					parsingState = ParsingState.DEFAULT;
+					
+					charToReturn = character;
+				} else if (character == '\n') {
+					charToReturn = character;
+				} else {
+					charToReturn = character;
+				}
+				
+				break;
+			default:
+				throw new IllegalArgumentException("located char stream: invalid parsing state");
 		}
 
 		// Increase the index
 		index++;
 				
-		return new LocatedChar(character, location);
+		return new LocatedChar(charToReturn, location);
 	}
 	
 	private void ensureLineHasACharacter() {
