@@ -17,6 +17,7 @@ import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StringConstantNode;
 import tokens.*;
 import utilities.Debug;
 import lexicalAnalyzer.Keyword;
@@ -279,7 +280,7 @@ public class Parser {
 		return startsLiteral(token);
 	}
 	
-	// literal -> integerConst | floatConst | booleanConst | characterConst| identifier 
+	// literal -> integerConst | floatConst | booleanConst | characterConst| stringConst | identifier 
 	private ParseNode parseLiteral() {
 		if(!startsLiteral(nowReading)) return syntaxErrorNode("literal");
 		
@@ -298,7 +299,11 @@ public class Parser {
 		if(startsCharacterConstant(nowReading)) {
 			return parseCharacterConstant();
 		}
-
+		
+		if(startsStringConstant(nowReading)) {
+			return parseStringConstant();
+		}
+		
 		if(startsIdentifier(nowReading)) {
 			return parseIdentifier();
 		}
@@ -308,7 +313,12 @@ public class Parser {
 	}
 	
 	private boolean startsLiteral(Token token) {
-		return startsIntNumber(token) || startsFloatNumber(token) || startsCharacterConstant(token) || startsIdentifier(token) || startsBooleanConstant(token);
+		return startsIntNumber(token) || 
+				startsFloatNumber(token) || 
+				startsCharacterConstant(token) || 
+				startsStringConstant(token) || 
+				startsIdentifier(token) || 
+				startsBooleanConstant(token);
 	}
 
 	// number (terminal)
@@ -348,6 +358,18 @@ public class Parser {
 		return token instanceof CharacterToken;
 	}
 	
+	// string (terminal)
+	private ParseNode parseStringConstant() {
+		if(!startsStringConstant(nowReading)) return syntaxErrorNode("string constant");
+		
+		readToken();
+		return new StringConstantNode(previouslyRead);
+	}
+	
+	private boolean startsStringConstant(Token token) {
+		return token instanceof StringToken;
+	}
+		
 	// identifier (terminal)
 	private ParseNode parseIdentifier() {
 		if(!startsIdentifier(nowReading)) return syntaxErrorNode("identifier");
@@ -375,6 +397,8 @@ public class Parser {
 
 	private void readToken() {
 		previouslyRead = nowReading;
+		
+		debug.out("LAST TOKEN: " + nowReading);
 		
 		nowReading = scanner.next();
 	}	
