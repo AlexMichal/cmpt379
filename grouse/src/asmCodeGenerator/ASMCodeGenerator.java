@@ -131,7 +131,7 @@ public class ASMCodeGenerator {
 		private ASMCodeFragment removeValueCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
 			makeFragmentValueCode(frag, node);
-			debug.out("removeValueCode: " + node); // TODO: delete me
+			//debug.out("removeValueCode: " + node); // TODO: delete me
 			return frag;
 		}
 		
@@ -307,20 +307,44 @@ public class ASMCodeGenerator {
 		public void visitLeave(BinaryOperatorNode node) {
 			Lextant operator = node.getOperator();
 
-			if(operator == Punctuator.GREATER) {
+			if(isComparisonOperator(operator)) {
 				visitComparisonOperatorNode(node, operator);
-			}
-			else {
+			} else if (isArithmeticOperator(operator)) {
 				visitNormalBinaryOperatorNode(node);
 			}
 		}
 		
-		private void visitComparisonOperatorNode(BinaryOperatorNode node,
-				Lextant operator) {
-
+		// disgusting code, I know
+		public boolean isComparisonOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.GREATER) ||
+					lexeme.equals(Punctuator.GREATER_OR_EQUAL) ||
+					lexeme.equals(Punctuator.EQUAL) ||
+					lexeme.equals(Punctuator.NOT_EQUAL) ||
+					lexeme.equals(Punctuator.LESSER) ||
+					lexeme.equals(Punctuator.LESSER_OR_EQUAL)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		// disgusting code, I know
+		public boolean isArithmeticOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.ADD) ||
+					lexeme.equals(Punctuator.SUBTRACT) ||
+					lexeme.equals(Punctuator.MULTIPLY) ||
+					lexeme.equals(Punctuator.DIVIDE)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		private void visitComparisonOperatorNode(BinaryOperatorNode node, Lextant operator) { // TODO: CURRENT
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
-
+			String leftChild = node.child(0).getToken().getLexeme();
+			String rightChild = node.child(1).getToken().getLexeme();
 			String startLabel = labeller.newLabel("-compare-arg1-", "");
 			String arg2Label  = labeller.newLabelSameNumber("-compare-arg2-", "");
 			String subLabel   = labeller.newLabelSameNumber("-compare-sub-", "");
@@ -328,25 +352,141 @@ public class ASMCodeGenerator {
 			String falseLabel = labeller.newLabelSameNumber("-compare-false-", "");
 			String joinLabel  = labeller.newLabelSameNumber("-compare-join-", "");
 			
+			double leftChildValue = Double.parseDouble(leftChild);
+			double rightChildValue = Double.parseDouble(rightChild);
+
+			
 			newValueCode(node);
+			// arg1
 			code.add(Label, startLabel);
 			code.append(arg1);
+			// arg2
 			code.add(Label, arg2Label);
 			code.append(arg2);
+			// comparison
 			code.add(Label, subLabel);
-			code.add(Subtract);
 			
-			code.add(JumpPos, trueLabel);
-			code.add(Jump, falseLabel);
-
+			if (operator == Punctuator.GREATER) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					// jump to trueLabel if it's positive (greater than)
+					code.add(JumpPos, trueLabel);
+					// jump to falseLabel if it's negative (lesser than)
+					code.add(Jump, falseLabel);
+				} else { // float
+					code.add(FSubtract);
+					// jump to trueLabel if it's positive (greater than)
+					code.add(JumpFPos, trueLabel);
+					// jump to falseLabel if it's negative (lesser than)
+					code.add(Jump, falseLabel);
+				}
+			} else if (operator == Punctuator.GREATER_OR_EQUAL) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					if ((leftChildValue - rightChildValue) == 0) {
+						// jump to trueLabel if it's 0
+						code.add(JumpFalse, trueLabel);
+					} else {
+						// jump to trueLabel if it's positive (greater than)
+						code.add(JumpPos, trueLabel);
+					}
+					// jump to falseLabel if it's negative (lesser than)
+					code.add(Jump, falseLabel);
+				} else { // float
+					code.add(FSubtract);
+					if ((leftChildValue - rightChildValue) == 0) {
+						// jump to trueLabel if it's 0
+						code.add(JumpFZero, trueLabel);
+					} else {
+						// jump to trueLabel if it's positive (greater than)
+						code.add(JumpFPos, trueLabel);
+					}
+					// jump to falseLabel if it's negative (lesser than)
+					code.add(Jump, falseLabel);
+				}
+			} else if (operator == Punctuator.EQUAL) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					// jump to trueLabel if it's 0
+					code.add(JumpFalse, trueLabel);
+					// jump to falseLabel if it's anything else
+					code.add(Jump, falseLabel);
+				} else { // float
+					code.add(FSubtract);
+					// jump to trueLabel if it's 0
+					code.add(JumpFZero, trueLabel);
+					// jump to falseLabel if it's anything else
+					code.add(Jump, falseLabel);
+				}
+			} else if (operator == Punctuator.NOT_EQUAL) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					// jump to falseLabel if it's 0)
+					code.add(JumpFalse, falseLabel);
+					// jump to trueLabel if it's anything else
+					code.add(Jump, trueLabel);
+				} else { // float
+					code.add(FSubtract);
+					// jump to falseLabel if it's 0
+					code.add(JumpFZero, falseLabel);
+					// jump to trueLabel if it's anything else
+					code.add(Jump, trueLabel);
+				}
+			} else if (operator == Punctuator.LESSER) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					// jump to trueLabel if it's negative (lesser than)
+					code.add(JumpNeg, trueLabel);
+					// jump to falseLabel if it's positive (greater than)
+					code.add(Jump, falseLabel);
+				} else { // float
+					code.add(FSubtract);
+					// jump to trueLabel if it's negative (lesser than)
+					code.add(JumpFNeg, trueLabel);
+					// jump to falseLabel if it's positive (greater than)
+					code.add(Jump, falseLabel);
+				}
+			} else if (operator == Punctuator.LESSER_OR_EQUAL) {
+				if (node.child(0).getType() == PrimitiveType.INTEGER &&
+						node.child(1).getType() == PrimitiveType.INTEGER) {
+					code.add(Subtract);
+					if ((leftChildValue - rightChildValue) == 0) {
+						// jump to trueLabel if it's 0
+						code.add(JumpFalse, trueLabel);
+					} else {
+						// jump to trueLabel if it's negative (lesser than)
+						code.add(JumpNeg, trueLabel);
+					}
+					// jump to falseLabel if it's positive (greater than)
+					code.add(Jump, falseLabel);
+				} else { // float
+					code.add(FSubtract);
+					if ((leftChildValue - rightChildValue) == 0) {
+						// jump to trueLabel if it's 0
+						code.add(JumpFZero, trueLabel);
+					} else {
+						// jump to trueLabel if it's negative (lesser than)
+						code.add(JumpFNeg, trueLabel);
+					}
+					// jump to falseLabel if it's positive (greater than)
+					code.add(Jump, falseLabel);
+				}
+			}
+			// true
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);
 			code.add(Jump, joinLabel);
+			// false
 			code.add(Label, falseLabel);
 			code.add(PushI, 0);
 			code.add(Jump, joinLabel);
-			code.add(Label, joinLabel);
-
+			// end of statement
+			code.add(Label, joinLabel); 
 		}
 		
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
@@ -423,12 +563,8 @@ public class ASMCodeGenerator {
 			code.add(PushI, node.getValue());
 		}
 
-		public void visit(StringConstantNode node) { // TODO: string constant
-			Random randomGenerator = new Random();
-			int randomNumber = randomGenerator.nextInt(100000);
-			String label = "str_const_";
-			
-			label = "$" + label + randomNumber + node.getValue().length();;
+		public void visit(StringConstantNode node) {
+			String label = labeller.newLabel("-str-constant-", "");
 			
 			debug.out("VISIT: " + label);
 			
@@ -436,7 +572,6 @@ public class ASMCodeGenerator {
 			
 			code.add(DLabel, label);
 			code.add(DataS, node.getValue());
-			code.add(Label, label + 1);
 			code.add(PushD, label);
 		}
 	}
