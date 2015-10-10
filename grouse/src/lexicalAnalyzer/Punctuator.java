@@ -44,6 +44,32 @@ public enum Punctuator implements Lextant {
 		return prototype;
 	}
 	
+	// disgusting code, I know
+	public boolean isComparisonOperator(String lexeme) {
+		if (lexeme.equals(Punctuator.GREATER) ||
+				lexeme.equals(Punctuator.GREATER_OR_EQUAL) ||
+				lexeme.equals(Punctuator.EQUAL) ||
+				lexeme.equals(Punctuator.NOT_EQUAL) ||
+				lexeme.equals(Punctuator.LESSER) ||
+				lexeme.equals(Punctuator.LESSER_OR_EQUAL)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	// disgusting code, I know
+	public boolean isArithmeticOperator(String lexeme) {
+		if (lexeme.equals(Punctuator.ADD) ||
+				lexeme.equals(Punctuator.SUBTRACT) ||
+				lexeme.equals(Punctuator.MULTIPLY) ||
+				lexeme.equals(Punctuator.DIVIDE)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public static Punctuator forLexeme(String lexeme) {
 		for(Punctuator punctuator: values()) {
 			if(punctuator.lexeme.equals(lexeme)) return punctuator;
