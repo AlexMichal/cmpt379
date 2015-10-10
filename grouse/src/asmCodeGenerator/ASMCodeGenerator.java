@@ -343,18 +343,14 @@ public class ASMCodeGenerator {
 		private void visitComparisonOperatorNode(BinaryOperatorNode node, Lextant operator) { // TODO: CURRENT
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
-			String leftChild = node.child(0).getToken().getLexeme();
-			String rightChild = node.child(1).getToken().getLexeme();
 			String startLabel = labeller.newLabel("-compare-arg1-", "");
 			String arg2Label  = labeller.newLabelSameNumber("-compare-arg2-", "");
 			String subLabel   = labeller.newLabelSameNumber("-compare-sub-", "");
 			String trueLabel  = labeller.newLabelSameNumber("-compare-true-", "");
 			String falseLabel = labeller.newLabelSameNumber("-compare-false-", "");
 			String joinLabel  = labeller.newLabelSameNumber("-compare-join-", "");
-			
-			double leftChildValue = Double.parseDouble(leftChild);
-			double rightChildValue = Double.parseDouble(rightChild);
-
+			double leftChildValue = Double.parseDouble(node.child(0).getToken().getLexeme());
+			double rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());
 			
 			newValueCode(node);
 			// arg1
@@ -493,14 +489,17 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
-			
 			Type leftChildType = node.child(0).getType();
 			Type rightChildType = node.child(1).getType();
+			double rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());
 			
 			code.append(arg1);
 			code.append(arg2);
-		
+
+			if (rightChildValue == 0) code.add(Jump, RunTime.INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+			
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), leftChildType, rightChildType);
+									
 			code.add(opcode); // type-dependent!
 		}
 		
@@ -509,6 +508,8 @@ public class ASMCodeGenerator {
 			Punctuator punctuator = (Punctuator)lextant;
 			
 			//debug.out("opcodeForOperator: " + (leftChildType) + "    " + (PrimitiveType.INTEGER));
+			
+			
 			
 			if ((leftChildType == PrimitiveType.INTEGER) && (rightChildType == PrimitiveType.INTEGER))  {
 				switch(punctuator) {
