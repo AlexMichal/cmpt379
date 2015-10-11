@@ -272,9 +272,9 @@ public class ASMCodeGenerator {
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));	
 			ASMCodeFragment rvalue = removeValueCode(node.child(1));
 			
-			debug.out("LEFT VALUE: \n" + lvalue);
+			//debug.out("LEFT VALUE: \n" + lvalue);
 			code.append(lvalue);
-			debug.out("RIGHT VALUE: \n" + rvalue);
+			//debug.out("RIGHT VALUE: \n" + rvalue);
 			code.append(rvalue);
 			
 			Type type = node.getType();
@@ -349,8 +349,8 @@ public class ASMCodeGenerator {
 			String trueLabel  = labeller.newLabelSameNumber("-compare-true-", "");
 			String falseLabel = labeller.newLabelSameNumber("-compare-false-", "");
 			String joinLabel  = labeller.newLabelSameNumber("-compare-join-", "");
-			String leftChildValue = node.child(0).getToken().getLexeme();
-			String rightChildValue = node.child(1).getToken().getLexeme();
+			String strLeftChildValue = node.child(0).getToken().getLexeme();
+			String strRightChildValue = node.child(1).getToken().getLexeme();
 			Double dblLeftChildValue = 0.0;
 			Double dblRightChildValue = 0.0;
 			char chrLeftChildValue = ' ';
@@ -358,11 +358,11 @@ public class ASMCodeGenerator {
 			
 			if ((node.child(0).getType() == PrimitiveType.INTEGER) ||
 				(node.child(0).getType() == PrimitiveType.FLOAT)) {
-				dblLeftChildValue = Double.parseDouble(leftChildValue);
-				dblRightChildValue = Double.parseDouble(rightChildValue);
+				dblLeftChildValue = Double.parseDouble(strLeftChildValue);
+				dblRightChildValue = Double.parseDouble(strRightChildValue);
 			} else if (node.child(0).getType() == PrimitiveType.CHARACTER) {
-				chrLeftChildValue = leftChildValue.charAt(0);
-				chrRightChildValue = rightChildValue.charAt(0);
+				chrLeftChildValue = strLeftChildValue.charAt(0);
+				chrRightChildValue = strRightChildValue.charAt(0);
 			}
 			
 			newValueCode(node);
@@ -390,12 +390,6 @@ public class ASMCodeGenerator {
 					code.add(JumpFPos, trueLabel);
 					// jump to falseLabel if it's negative (lesser than)
 					code.add(Jump, falseLabel);
-				/*} else if (node.child(0).getType() == PrimitiveType.CHARACTER) { // character
-					code.add(Subtract);
-					// jump to trueLabel if it's positive (greater than)
-					code.add(JumpPos, trueLabel);
-					// jump to falseLabel if it's negative (lesser than)
-					code.add(Jump, falseLabel);*/
 				}
 			} else if (operator == Punctuator.GREATER_OR_EQUAL) {
 				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
@@ -433,7 +427,9 @@ public class ASMCodeGenerator {
 					// jump to falseLabel if it's negative (lesser than)
 					code.add(Jump, falseLabel);
 				}
+			// EQUAL ( == )
 			} else if (operator == Punctuator.EQUAL) {
+				// INTEGER AND CHARACTER
 				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
 						node.child(1).getType() == PrimitiveType.INTEGER) ||
 						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
@@ -448,8 +444,32 @@ public class ASMCodeGenerator {
 					code.add(JumpFZero, trueLabel);
 					// jump to falseLabel if it's anything else
 					code.add(Jump, falseLabel);
+				// STRING
+				} else if (node.child(0).getType() == PrimitiveType.STRING) { // string // TODO: doesn't fully work. need to implement "xx" == variable
+					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
+						code.add(Subtract);
+						if (strLeftChildValue.equals(strRightChildValue)) {
+							code.add(JumpFalse, trueLabel);
+						} else {
+							code.add(Jump, falseLabel);
+						}
+					} else {
+						code.add(BEqual);
+						if (strLeftChildValue.equals(strRightChildValue)) {
+							code.add(JumpTrue, trueLabel);
+						} else {
+							code.add(Jump, falseLabel);
+						}
+					}
+				// BOOLEAN
+				} else if (node.child(0).getType() == PrimitiveType.BOOLEAN) { // boolean
+					code.add(BEqual);
+					code.add(JumpTrue, trueLabel);
+					code.add(Jump, falseLabel);
 				}
+			// NOT EQUAL ( != )
 			} else if (operator == Punctuator.NOT_EQUAL) {
+				// INTEGER AND CHARACTER
 				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
 						node.child(1).getType() == PrimitiveType.INTEGER) ||
 						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
@@ -458,13 +478,37 @@ public class ASMCodeGenerator {
 					code.add(JumpFalse, falseLabel);
 					// jump to trueLabel if it's anything else
 					code.add(Jump, trueLabel);
-				} if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				// FLOAT
+				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
 					code.add(FSubtract);
 					// jump to falseLabel if it's 0
 					code.add(JumpFZero, falseLabel);
 					// jump to trueLabel if it's anything else
 					code.add(Jump, trueLabel);
+				// STRING
+				} else if (node.child(0).getType() == PrimitiveType.STRING) { // string // TODO: doesn't fully work
+					debug.out("HERE");
+					
+					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
+						debug.out("THERE: \"");
+						
+						code.add(Subtract); // TODO: doesn't work
+						code.add(JumpPos, falseLabel);
+						code.add(Jump, trueLabel);
+					} else {
+						debug.out("THERE: NONE");
+						
+						code.add(Subtract);
+						code.add(JumpNeg, trueLabel);
+						code.add(Jump, falseLabel);
+					}
+				// BOOLEAN
+				} else if (node.child(0).getType() == PrimitiveType.BOOLEAN) { // boolean
+					code.add(BEqual);
+					code.add(JumpFalse, trueLabel);
+					code.add(Jump, falseLabel);
 				}
+			// LESSER ( < )
 			} else if (operator == Punctuator.LESSER) {
 				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
 						node.child(1).getType() == PrimitiveType.INTEGER) ||
@@ -481,6 +525,7 @@ public class ASMCodeGenerator {
 					// jump to falseLabel if it's positive (greater than)
 					code.add(Jump, falseLabel);
 				}
+			// LESSER OR EQUAL ( <= )
 			} else if (operator == Punctuator.LESSER_OR_EQUAL) {
 				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
 						node.child(1).getType() == PrimitiveType.INTEGER)) {
