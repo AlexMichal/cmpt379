@@ -314,6 +314,14 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		public boolean isPunctuator(Lextant lexeme) {
+			if (isComparisonOperator(lexeme) || isArithmeticOperator(lexeme)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
 		// disgusting code, I know
 		public boolean isComparisonOperator(Lextant lexeme) {
 			if (lexeme.equals(Punctuator.GREATER) ||
@@ -577,17 +585,24 @@ public class ASMCodeGenerator {
 		
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
 			newValueCode(node);
+			
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			Type leftChildType = node.child(0).getType();
 			Type rightChildType = node.child(1).getType();
-			double rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());
+			double rightChildValue;
+
+			try {  
+			    rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());  
+		    } catch(NumberFormatException nfe) {
+		    	rightChildValue = -1.0;
+			}  
 			
 			code.append(arg1);
 			code.append(arg2);
 
 			// Divide by 0 error
-			if ((node.getToken().getLexeme() == Punctuator.DIVIDE.getLexeme()) & (rightChildValue == 0)) {
+			if ((node.getToken().getLexeme() == Punctuator.DIVIDE.getLexeme()) && (rightChildValue == 0)) {
 				code.add(Jump, RunTime.NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
 			}
 			
