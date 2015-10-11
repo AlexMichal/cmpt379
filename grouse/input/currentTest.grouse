@@ -1,16 +1,18 @@
 main {
-    imm quarters := 5;
-    imm dimes := 3;
-    imm nickels := 7;
-    imm pennies := 17;
-    imm value := quarters * 25 +
-    			 dimes * 10 +
-    			 nickels * 5 +
-    			 pennies;
-    print value nl;
-    
+    	var quarters := 'd;
+    	imm Dimes := "xx";
+	imm dimesxddd2_ := "asdasdasd asd asd2";
+    	imm nickelsD := 7;
+    	imm pennies := 17;
+        imm x := true;
+	imm y := false;
 
-    imm bad :=  nickels > nickels;
+    	imm bad := 23 * 10 + 14;
+	let bad := 25;
+	let quarters := 'z;
 
-print bad;
+	print bad nl;
+	print Dimes dimesxddd2_ nl;
+	print dimesxddd2_ nl;
+	print quarters nl;
 }

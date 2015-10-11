@@ -7,6 +7,7 @@ import tokens.Token;
 public enum Keyword implements Lextant {
 	IMMUTABLE("imm"),
 	VARIABLE("var"),
+	LET("let"),
 	PRINT("print"),
 	NEWLINE("nl"),
 	TRUE("true"),
@@ -25,6 +26,7 @@ public enum Keyword implements Lextant {
 	public String getLexeme() {
 		return lexeme;
 	}
+	
 	public Token prototype() {
 		return prototype;
 	}
@@ -37,6 +39,7 @@ public enum Keyword implements Lextant {
 		}
 		return NULL_KEYWORD;
 	}
+	
 	public static boolean isAKeyword(String lexeme) {
 		return forLexeme(lexeme) != NULL_KEYWORD;
 	}

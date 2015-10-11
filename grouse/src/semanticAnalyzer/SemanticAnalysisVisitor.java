@@ -16,6 +16,7 @@ import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IntegerConstantNode;
+import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
@@ -75,7 +76,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// statements and declarations
+	// statements, declarations, and let statements
 	@Override
 	public void visitLeave(PrintStatementNode node) {
 	}
@@ -92,6 +93,18 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		identifier.setType(declarationType);
 		addBinding(identifier, declarationType);
+	}
+	
+	@Override
+	public void visitLeave(LetStatementNode node) {
+		IdentifierNode identifier = (IdentifierNode) node.child(0);
+		ParseNode initializer = node.child(1);
+		
+		Type letStatementType = initializer.getType();
+		node.setType(letStatementType);
+		
+		identifier.setType(letStatementType);
+		addBinding(identifier, letStatementType);
 	}
 
 	///////////////////////////////////////////////////////////////////////////

@@ -64,14 +64,11 @@
         PushD        $errors-general-message   
         Printf                                 
         Halt                                   
-        DLabel       $errors-int-divide-by-zero 
-        DataC        105                       %% "integer divide by zero"
+        DLabel       $errors-num-divide-by-zero 
+        DataC        99                        %% "cant divide by zero"
+        DataC        97                        
         DataC        110                       
         DataC        116                       
-        DataC        101                       
-        DataC        103                       
-        DataC        101                       
-        DataC        114                       
         DataC        32                        
         DataC        100                       
         DataC        105                       
@@ -89,104 +86,126 @@
         DataC        111                       
         DataC        0                         
         Label        $$i-divide-by-zero        
-        PushD        $errors-int-divide-by-zero 
+        PushD        $errors-num-divide-by-zero 
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        21                        
+        DataZ        28                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
         Add                                    %% quarters
+        PushI        100                       
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        1                         
+        Add                                    %% Dimes
+        DLabel       -str-constant-1           
+        DataC        120                       %% "xx"
+        DataC        120                       
+        DataC        0                         
+        PushD        -str-constant-1           
+        StoreC                                 
+        PushD        $global-memory-block      
         PushI        5                         
-        StoreI                                 
+        Add                                    %% dimesxddd2_
+        DLabel       -str-constant-2           
+        DataC        97                        %% "asdasdasd asd asd2"
+        DataC        115                       
+        DataC        100                       
+        DataC        97                        
+        DataC        115                       
+        DataC        100                       
+        DataC        97                        
+        DataC        115                       
+        DataC        100                       
+        DataC        32                        
+        DataC        97                        
+        DataC        115                       
+        DataC        100                       
+        DataC        32                        
+        DataC        97                        
+        DataC        115                       
+        DataC        100                       
+        DataC        50                        
+        DataC        0                         
+        PushD        -str-constant-2           
+        StoreC                                 
         PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% dimes
-        PushI        3                         
-        StoreI                                 
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
+        PushI        9                         
+        Add                                    %% nickelsD
         PushI        7                         
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        12                        
+        PushI        13                        
         Add                                    %% pennies
         PushI        17                        
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% value
+        PushI        17                        
+        Add                                    %% x
+        PushI        1                         
+        StoreC                                 
         PushD        $global-memory-block      
+        PushI        18                        
+        Add                                    %% y
         PushI        0                         
-        Add                                    %% quarters
-        LoadI                                  
-        PushI        25                        
-        Multiply                               
+        StoreC                                 
         PushD        $global-memory-block      
-        PushI        4                         
-        Add                                    %% dimes
-        LoadI                                  
+        PushI        19                        
+        Add                                    %% bad
+        PushI        23                        
         PushI        10                        
         Multiply                               
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        PushI        5                         
-        Multiply                               
-        Add                                    
-        PushD        $global-memory-block      
-        PushI        12                        
-        Add                                    %% pennies
-        LoadI                                  
+        PushI        14                        
         Add                                    
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        16                        
-        Add                                    %% value
+        PushI        23                        
+        Add                                    %% bad
+        PushI        25                        
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        27                        
+        Add                                    %% quarters
+        PushI        122                       
+        StoreC                                 
+        PushD        $global-memory-block      
+        PushI        23                        
+        Add                                    %% bad
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 
         PushD        $print-format-newline     
         Printf                                 
         PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% bad
-        Label        -compare-arg1-1           
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        Label        -compare-arg2-1           
-        PushD        $global-memory-block      
-        PushI        8                         
-        Add                                    %% nickels
-        LoadI                                  
-        Label        -compare-sub-1            
-        Subtract                               
-        JumpPos      -compare-true-1           
-        Jump         -compare-false-1          
-        Label        -compare-true-1           
         PushI        1                         
-        Jump         -compare-join-1           
-        Label        -compare-false-1          
-        PushI        0                         
-        Jump         -compare-join-1           
-        Label        -compare-join-1           
-        StoreC                                 
-        PushD        $global-memory-block      
-        PushI        20                        
-        Add                                    %% bad
+        Add                                    %% Dimes
         LoadC                                  
-        JumpTrue     -print-boolean-true2      
-        PushD        $boolean-false-string     
-        Jump         -print-boolean-join2      
-        Label        -print-boolean-true2      
-        PushD        $boolean-true-string      
-        Label        -print-boolean-join2      
-        PushD        $print-format-boolean     
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        5                         
+        Add                                    %% dimesxddd2_
+        LoadC                                  
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        5                         
+        Add                                    %% dimesxddd2_
+        LoadC                                  
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        27                        
+        Add                                    %% quarters
+        LoadC                                  
+        PushD        $print-format-character   
+        Printf                                 
+        PushD        $print-format-newline     
         Printf                                 
         Halt                                   

@@ -5,6 +5,7 @@ import logging.GrouseLogger;
 import parseTree.nodeTypes.IdentifierNode;
 import semanticAnalyzer.types.Type;
 import tokens.Token;
+import utilities.Debug;
 
 public class Scope {
 	private Scope baseScope;
@@ -60,11 +61,18 @@ public class Scope {
 		return allocator.getMaxAllocatedSize();
 	}
 
-///////////////////////////////////////////////////////////////////////
-//bindings
-	public Binding createBinding(IdentifierNode identifierNode, Type type) {
+	///////////////////////////////////////////////////////////////////////
+	//bindings
+	public Binding createBinding(IdentifierNode identifierNode, Type type) { // TODO: let binding here
 		Token token = identifierNode.getToken();
-		symbolTable.errorIfAlreadyDefined(token);
+		
+		Debug debug = new Debug();
+		debug.out("MESSAGE: " + identifierNode.toString());
+		debug.out("MESSAGE: " + identifierNode.getParent().getToken().getLexeme());
+		
+		if (identifierNode.getParent().getToken().getLexeme() == "imm") {
+			symbolTable.errorIfAlreadyDefined(token);
+		}
 
 		String lexeme = token.getLexeme();
 		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);	

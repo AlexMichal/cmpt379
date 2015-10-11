@@ -7,20 +7,21 @@ import lexicalAnalyzer.Lextant;
 import tokens.LextantToken;
 import tokens.Token;
 
-public class DeclarationNode extends ParseNode {
+public class LetStatementNode extends ParseNode {
 
-	public DeclarationNode(Token token) {
+	public LetStatementNode(Token token) {
 		super(token);
-		assert(token.isLextant(Keyword.IMMUTABLE) || token.isLextant(Keyword.VARIABLE));
+
+		assert(token.isLextant(Keyword.LET));
 	}
 
-	public DeclarationNode(ParseNode node) {
+	public LetStatementNode(ParseNode node) {
 		super(node);
 	}
 	
 	////////////////////////////////////////////////////////////
 	// attributes
-	public Lextant getDeclarationType() {
+	public Lextant getLetStatementType() {
 		return lextantToken().getLextant();
 	}
 	
@@ -30,8 +31,8 @@ public class DeclarationNode extends ParseNode {
 	
 	////////////////////////////////////////////////////////////
 	// convenience factory
-	public static DeclarationNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
-		DeclarationNode node = new DeclarationNode(token);
+	public static LetStatementNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
+		LetStatementNode node = new LetStatementNode(token);
 		node.appendChild(declaredName);
 		node.appendChild(initializer);
 		return node;

@@ -21,8 +21,8 @@ public enum Punctuator implements Lextant {
 	SEPARATOR(","),
 	OPEN_BRACE("{"),
 	CLOSE_BRACE("}"),
-	OPEN_BRACKET("("),
-	CLOSE_BRACKET(")"),
+	OPEN_PAREN("("),
+	CLOSE_PAREN(")"),
 	COLON(":"),
 	ASSIGN(":="),
 	// Other:
