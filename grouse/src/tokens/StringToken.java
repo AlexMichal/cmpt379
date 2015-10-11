@@ -20,11 +20,11 @@ public class StringToken extends TokenImp {
 	public static StringToken make(TextLocation location, String lexeme) {
 		StringToken result = new StringToken(location, lexeme);
 		
-		debug.out("String token: " + lexeme);
+		//debug.out("String token: " + lexeme);
 		
 		result.setValue(removeDoubleQuotes(lexeme)); // TODO: Remove debugs
 		
-		debug.out("String token (after): " + result.getValue());
+		//debug.out("String token (after): " + result.getValue());
 		
 		return result;
 	}
