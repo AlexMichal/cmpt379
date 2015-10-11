@@ -586,7 +586,10 @@ public class ASMCodeGenerator {
 			code.append(arg1);
 			code.append(arg2);
 
-			if (rightChildValue == 0) code.add(Jump, RunTime.INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+			// Divide by 0 error
+			if ((node.getToken().getLexeme() == Punctuator.DIVIDE.getLexeme()) & (rightChildValue == 0)) {
+				code.add(Jump, RunTime.NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+			}
 			
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), leftChildType, rightChildType);
 									

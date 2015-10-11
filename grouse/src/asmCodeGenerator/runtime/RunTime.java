@@ -18,7 +18,7 @@ public class RunTime {
 	public static final String MAIN_PROGRAM_LABEL     = "$$main";
 	
 	public static final String GENERAL_RUNTIME_ERROR = "$$general-runtime-error";
-	public static final String INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
+	public static final String NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR = "$$i-divide-by-zero";
 
 	private ASMCodeFragment environmentASM() {
 		ASMCodeFragment result = new ASMCodeFragment(GENERATES_VOID);
@@ -65,7 +65,7 @@ public class RunTime {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
 		
 		generalRuntimeError(frag);
-		integerDivideByZeroError(frag);
+		numberDivideByZeroError(frag);
 		
 		return frag;
 	}
@@ -83,14 +83,14 @@ public class RunTime {
 		return frag;
 	}
 	
-	private void integerDivideByZeroError(ASMCodeFragment frag) {
-		String intDivideByZeroMessage = "$errors-int-divide-by-zero";
+	private void numberDivideByZeroError(ASMCodeFragment frag) {
+		String numberDivideByZeroMessage = "$errors-num-divide-by-zero";
 		
-		frag.add(DLabel, intDivideByZeroMessage);
-		frag.add(DataS, "integer divide by zero");
+		frag.add(DLabel, numberDivideByZeroMessage);
+		frag.add(DataS, "cant divide by zero");
 		
-		frag.add(Label, INTEGER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
-		frag.add(PushD, intDivideByZeroMessage);
+		frag.add(Label, NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+		frag.add(PushD, numberDivideByZeroMessage);
 		frag.add(Jump, GENERAL_RUNTIME_ERROR);
 	}
 	

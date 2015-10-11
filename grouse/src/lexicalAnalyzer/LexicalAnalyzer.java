@@ -58,7 +58,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		else if (isStringStart(ch)) {
 			return scanString(ch);
 		} 
-		else if (ch.isLowerCase()) {
+		else if (isIdentifierStart(ch)) {
 			return scanIdentifier(ch);
 		} 
 		else if (isPunctuatorStart(ch)) {
@@ -180,8 +180,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		buffer.append(c.getCharacter());
 		c = input.next();
 		
-		//debug.out("STRING CHAAAAAAAAAAR: " + c.getCharacter());
-		
 		input.pushback(c);
 	}
 	
@@ -191,7 +189,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		StringBuffer buffer = new StringBuffer();
 		
 		buffer.append(firstChar.getCharacter());
-		appendSubsequentLowercase(buffer);
+		appendSubsequentValidIdentifierCharacters(buffer);
 
 		String lexeme = buffer.toString();
 		
@@ -205,10 +203,10 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		}
 	}
 	
-	private void appendSubsequentLowercase(StringBuffer buffer) {
+	private void appendSubsequentValidIdentifierCharacters(StringBuffer buffer) {
 		LocatedChar c = input.next();
 		
-		while(c.isLowerCase()) {
+		while(c.isValidIdentifierCharacter()) {
 			buffer.append(c.getCharacter());
 			c = input.next();
 		}
@@ -247,6 +245,17 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 			return false;
 		}
 	}
+	
+	private boolean isIdentifierStart(LocatedChar lc) {
+		char c = lc.getCharacter();
+		
+		if ((Character.isLetter(c)) || (c == '_')) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	
 	@SuppressWarnings("unused")
 	private boolean isCommentStartingCharacter(char c) {

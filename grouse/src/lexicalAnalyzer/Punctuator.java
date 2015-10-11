@@ -44,7 +44,7 @@ public enum Punctuator implements Lextant {
 		return prototype;
 	}
 	
-	// disgusting code, I know
+	// disgusting code, I know // TODO: DELETE POTNETIAOANALLY?
 	public boolean isComparisonOperator(String lexeme) {
 		if (lexeme.equals(Punctuator.GREATER) ||
 				lexeme.equals(Punctuator.GREATER_OR_EQUAL) ||

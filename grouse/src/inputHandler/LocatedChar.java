@@ -62,6 +62,16 @@ public class LocatedChar {
 		return Character.isLowerCase(character);
 	}
 	
+	public boolean isValidIdentifierCharacter() {
+		if (Character.isLetterOrDigit(character) || 
+				(character == '_') ||
+				(character == '~')) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean isDigit() {
 		return Character.isDigit(character);
 	}
