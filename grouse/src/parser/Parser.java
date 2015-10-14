@@ -215,7 +215,8 @@ public class Parser {
 	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]?
 	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
 	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
-	// expr1 -> ( expr2 )?
+	// expr4 -> cast // TODO: cast
+	// expr5 -> ( expr6 )? TODO: ( ) 
 	// expr6 -> literal
 	// literal -> intNumber | floatNumber | characterConstant | booleanConstant | stringConstant | identifier
 

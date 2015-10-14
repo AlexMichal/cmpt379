@@ -168,7 +168,7 @@ public class ASMCodeGenerator {
 			} else if (node.getType() == PrimitiveType.CHARACTER) {
 				code.add(LoadC);
 			} else if (node.getType() == PrimitiveType.STRING) {
-				code.add(LoadC);
+				code.add(LoadI);
 			} else {
 				assert false : "node " + node;
 			}
@@ -310,7 +310,7 @@ public class ASMCodeGenerator {
 				return StoreC;
 			}
 			if(type == PrimitiveType.STRING) {
-				return StoreC;
+				return StoreI;
 			}
 			assert false: "Type " + type + " unimplemented in opcodeForStore()";
 			return null;
