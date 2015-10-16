@@ -58,10 +58,6 @@ public class LocatedChar {
 		return isValidStringCharacter(character);
 	}
 	
-	public boolean isLowerCase() {
-		return Character.isLowerCase(character);
-	}
-	
 	public boolean isValidIdentifierCharacter() {
 		if (Character.isLetterOrDigit(character) || 
 				(character == '_') ||
@@ -74,6 +70,14 @@ public class LocatedChar {
 	
 	public boolean isDigit() {
 		return Character.isDigit(character);
+	}
+	
+	public boolean isNegative() {
+		if (character == '-') {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public boolean isWhitespace() {
