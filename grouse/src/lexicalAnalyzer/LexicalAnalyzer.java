@@ -48,8 +48,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		// beginning of each potential token
 		debug.out("Potential Token spot: " + ch.toString());
 		
-		if (ch.isDigit()) {
-			// if we find a digit, keep parsing input until we find a blank space or a period 
+		if (isNumberStart(ch)) {
 			return scanNumber(ch);
 		}
 		else if (isCharacterStart(ch)) {
@@ -216,6 +215,14 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 
 	//////////////////////////////////////////////////////////////////////////////
 	// Character-classification routines specific to Grouse scanning.	
+	private boolean isNumberStart(LocatedChar lc) {
+		return (lc.isDigit() || isNegativeFollowedByNumber(lc));
+	}
+	
+	private boolean isNegativeFollowedByNumber(LocatedChar lc) {
+		return (lc.isNegative() && input.peek().isDigit());
+	}
+	
 	private boolean isPunctuatorStart(LocatedChar lc) {
 		char c = lc.getCharacter();
 		
@@ -255,7 +262,6 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		
 		return false;
 	}
-	
 	
 	@SuppressWarnings("unused")
 	private boolean isCommentStartingCharacter(char c) {

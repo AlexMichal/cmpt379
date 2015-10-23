@@ -1,6 +1,7 @@
 package tokens;
 
 import inputHandler.TextLocation;
+import utilities.Debug;
 
 public class IntegerToken extends TokenImp {
 	protected int value;
@@ -15,8 +16,12 @@ public class IntegerToken extends TokenImp {
 		return value;
 	}
 	
+	static Debug debug = new Debug();
+	
 	public static IntegerToken make(TextLocation location, String lexeme) {
 		IntegerToken result = new IntegerToken(location, lexeme);
+		
+		debug.out("HERE: " + lexeme);
 		
 		result.setValue(Integer.parseInt(lexeme));
 		

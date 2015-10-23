@@ -52,11 +52,10 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 		char character = line.charAt(index); // Get next character in input stream
 		char charToReturn = ' ';
 		
-		//debug.out("CURRENT STATE: " + parsingState);
-		
 		switch (parsingState) {
 			case DEFAULT:
-				if (character == '/') { // comment start
+				// COMMENT 
+				if (character == '/') {
 					if (line.charAt(index + 1) == '/') { // Check if the next character in the input is also a '/'
 						parsingState = ParsingState.COMMENT;
 						
@@ -66,14 +65,16 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 					} else { // punctuator found
 						charToReturn = character;
 					}
-				} else if (character == '"') { // string start
+				// STRING 
+				} else if (character == '"') {
 					if (line.charAt(index + 1) == '"') { // Check if the next character in the input is also a '"'
 						throw new IllegalArgumentException("located char stream: invalid empty string");
 					};
 					parsingState = ParsingState.STRING;
 					
 					charToReturn = character;
-				} else { // normal
+				// NORMAL
+				} else {
 					charToReturn = character;
 				}
 				
@@ -89,15 +90,6 @@ public class LocatedCharStream implements Iterator<LocatedChar> {
 				
 				break;	
 			case STRING:
-				/*String str = "";
-				
-				str = "" + character + line.charAt(index + 1);
-				debug.out("AAAAAAAAAAAAAAAAAAAAAAAAAA: " + str);98
-				
-				/*if (line.charAt(index + 1) =='\n') {
-					debug.out("AAAAAAAAAAAAAAAAAAAAAAAAA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!A: ");
-				}*/
-				
 				if (character == '"') { // TODO: fix
 					parsingState = ParsingState.DEFAULT;
 					

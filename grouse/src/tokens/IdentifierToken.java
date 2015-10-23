@@ -4,7 +4,7 @@ import inputHandler.TextLocation;
 
 public class IdentifierToken extends TokenImp {
 	protected IdentifierToken(TextLocation location, String lexeme) {
-		super(location, lexeme.intern());
+		super (location, lexeme.intern());
 	}
 	
 	public static IdentifierToken make(TextLocation location, String lexeme) {

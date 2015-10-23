@@ -65,7 +65,6 @@ public interface ParseNodeVisitor {
 		public void defaultVisitForLeaf(ParseNode node) {
 			defaultVisit(node);
 		}
-		
 		public void visitEnter(BinaryOperatorNode node) {
 			defaultVisitEnter(node);
 		}

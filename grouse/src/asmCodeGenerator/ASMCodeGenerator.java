@@ -363,7 +363,7 @@ public class ASMCodeGenerator {
 			}
 		}
 		
-		private void visitComparisonOperatorNode(BinaryOperatorNode node, Lextant operator) { // TODO: CURRENT
+		private void visitComparisonOperatorNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			String startLabel = labeller.newLabel("-compare-arg1-", "");

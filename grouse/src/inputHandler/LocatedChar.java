@@ -73,11 +73,7 @@ public class LocatedChar {
 	}
 	
 	public boolean isNegative() {
-		if (character == '-') {
-			return true;
-		} else {
-			return false;
-		}
+		return (character == '-');
 	}
 	
 	public boolean isWhitespace() {

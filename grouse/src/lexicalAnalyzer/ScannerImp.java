@@ -32,11 +32,7 @@ public abstract class ScannerImp implements Scanner {
 	public Token next() {
 		Token result = nextToken;
 		
-		//debug.out("RESULT: " + nextToken.getLocation().getLineNumber());
-		
 		nextToken = findNextToken();
-		
-		//debug.out("NEXT TOKEN: " + nextToken);`
 		
 		return result;
 	}
