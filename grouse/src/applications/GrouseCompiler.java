@@ -36,10 +36,10 @@ public class GrouseCompiler extends GrouseApplication {
 		Scanner scanner         = LexicalAnalyzer.make(filename);
 		ParseNode syntaxTree    = Parser.parse(scanner);
 		
-		debug.out("Semantic Analyzer starting: ");
+		debug.out("~~Semantic Analyzer starting~~");
 		ParseNode decoratedTree = SemanticAnalyzer.analyze(syntaxTree);
 
-		debug.out("Generate code starting: ");
+		debug.out("~~Generate code starting~~");
 		generateCodeIfNoErrors(filename, decoratedTree);
 	}
 

@@ -524,13 +524,13 @@ public class ASMCodeGenerator {
 					debug.out("HERE");
 					
 					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
-						debug.out("THERE: \"");
+						//debug.out("THERE: \"");
 						
 						code.add(Subtract); // TODO: doesn't work
 						code.add(JumpPos, falseLabel);
 						code.add(Jump, trueLabel);
 					} else {
-						debug.out("THERE: NONE");
+						//debug.out("THERE: NONE");
 						
 						code.add(Subtract);
 						code.add(JumpNeg, trueLabel);
@@ -652,6 +652,8 @@ public class ASMCodeGenerator {
 			lextantHashMap.put(Punctuator.AND, And);
 			lextantHashMap.put(Punctuator.OR, Or);
 			
+			//debug.out("---------OPERATOR: " + operator + "\n --------LEFT CHILD: \n" + arg1 + " --------RIGHT CHILD: \n" + arg2);
+			
 			newValueCode(node);
 			// arg1
 			code.add(Label, startLabel);
@@ -663,7 +665,7 @@ public class ASMCodeGenerator {
 			code.add(Label, subLabel);
 			
 			// operate on children
-			code.add(lextantHashMap.get(operator)); // TODO: BOOLEAN OPERATORS
+			code.add(lextantHashMap.get(operator));
 			code.add(JumpTrue, trueLabel);
 			code.add(Jump, falseLabel);
 			
@@ -739,7 +741,7 @@ public class ASMCodeGenerator {
 		public void visit(StringConstantNode node) {
 			String label = labeller.newLabel("-str-constant-", "");
 			
-			debug.out("VISIT: " + label);
+			//debug.out("VISIT: " + label);
 			
 			newValueCode(node);
 			

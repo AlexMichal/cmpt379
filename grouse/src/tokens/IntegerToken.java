@@ -21,8 +21,6 @@ public class IntegerToken extends TokenImp {
 	public static IntegerToken make(TextLocation location, String lexeme) {
 		IntegerToken result = new IntegerToken(location, lexeme);
 		
-		debug.out("HERE: " + lexeme);
-		
 		result.setValue(Integer.parseInt(lexeme));
 		
 		return result;

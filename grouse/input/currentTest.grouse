@@ -1,5 +1,6 @@
 main {
-	imm bool1 := true;
+	imm bool3 := true;
+	imm bool1 := ! true;
 	imm bool2 := true;
 	imm boolCompare := (bool1 && bool2) && true;
     	imm quarters := (1 + 3) * 4;
@@ -27,6 +28,7 @@ main {
 	print "Quarters:" , quarters nl;
 	print "Xxx:" , xxx nl;
 	print "Xxxx:" , xxxx nl;
+	print "Bool1 Negate:" , bool1 nl;
 	print "Compare string:" , zxcv nl;
-	print "BOOLS:" , boolCompare;
+	print "Bool compare:" , boolCompare nl;
 }

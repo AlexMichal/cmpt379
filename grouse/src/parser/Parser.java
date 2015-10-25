@@ -19,6 +19,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import semanticAnalyzer.types.PrimitiveType;
 import tokens.*;
 import utilities.Debug;
 import lexicalAnalyzer.Keyword;
@@ -228,10 +229,6 @@ public class Parser {
 		return parseBooleanOperator_Or();
 	}
 	
-	private boolean startsExpression(Token token) {
-		return startsBooleanOperator_Or(token);
-	}
-
 	// expr1 -> BooleanComparison
 	private ParseNode parseBooleanOperator_Or() {
 		if (!startsBooleanOperator_Or(nowReading)) return syntaxErrorNode("BooleanOperator_Or");
@@ -241,8 +238,6 @@ public class Parser {
 		if (nowReading.isLextant(Punctuator.OR)) {
 			Token compareToken = nowReading;
 			
-			debug.out("IN 'OR' IS TRUE? " + nowReading);
-			
 			readToken();
 			
 			ParseNode right = parseBooleanOperator_And();
@@ -251,10 +246,6 @@ public class Parser {
 		}
 		
 		return left;
-	}
-	
-	private boolean startsBooleanOperator_Or(Token token) {
-		return startsBooleanOperator_And(token);
 	}
 	
 	// expr1 -> BooleanComparison
@@ -274,10 +265,6 @@ public class Parser {
 		}
 		
 		return left;
-	}
-	
-	private boolean startsBooleanOperator_And(Token token) {
-		return startsComparisonOperators(token);
 	}
 	
 	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]?
@@ -304,12 +291,7 @@ public class Parser {
 		
 		return left;
 	}
-
 	
-	private boolean startsComparisonOperators(Token token) {
-		return startsExpression2(token);
-	}
-
 	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
 	private ParseNode parseExpression2() {
 		if (!startsExpression2(nowReading)) return syntaxErrorNode("expression<2>");
@@ -326,73 +308,45 @@ public class Parser {
 		
 		return left;
 	}
-	
-	private boolean startsExpression2(Token token) {
-		return startsExpression3(token);
-	}	
 
 	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
 	private ParseNode parseExpression3() {
 		if (!startsExpression3(nowReading)) return syntaxErrorNode("expression<3>");
 		
-		ParseNode left = parseExpression5();
+		ParseNode left = parseExpression4();
 		
 		while (nowReading.isLextant(Punctuator.MULTIPLY) || nowReading.isLextant(Punctuator.DIVIDE)) {
-			Token token = nowReading;
-			readToken();
-			ParseNode right = parseExpression5();
-			
-			left = BinaryOperatorNode.withChildren(token, left, right);
-		}
-		
-		return left;
-	}
-	
-	private boolean startsExpression3(Token token) {
-		return startsExpression5(token);
-	}
-	
-	// expr4 -> expr : cast
-	/*private ParseNode parseExpression4() {
-		/*9if (!startsExpression4(nowReading)) return syntaxErrorNode("expression<4>");
-		
-		ParseNode left = parseExpression5();
-
-		debug.out("PARSE EXPRESSION 4 ( ) : " + nowReading);
-		
-		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
 			Token token = nowReading;
 			readToken();
 			ParseNode right = parseExpression4();
 			
 			left = BinaryOperatorNode.withChildren(token, left, right);
-			
-			expect(Punctuator.CLOSE_PAREN);
 		}
 		
 		return left;
 	}
 	
-	private boolean startsExpression4(Token token) {
-		return startsExpression(token);
-	}*/
+	// expr4 -> ! expr (TODO: OR copy)
+	private ParseNode parseExpression4() {
+		if (!startsExpressionWithHighestPrecendence(nowReading)) return syntaxErrorNode("expression<4>");
+		
+		ParseNode left;
+		
+		if (nowReading.isLextant(Punctuator.NOT)) expect(Punctuator.NOT);
+		
+		left = parseExpression5();
+				
+		return left;
+	}
 	
 	// expr5 -> literal OR ( expr )
 	private ParseNode parseExpression5() {
-		if (!startsExpression5(nowReading)) return syntaxErrorNode("expression<5>");
+		if (!startsExpressionWithHighestPrecendence(nowReading)) return syntaxErrorNode("expression<5>");
 		
 		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
 			return parseExpressionInBetweenParentheses();
 		} else {
 			return parseLiteral();
-		}
-	}
-	
-	private boolean startsExpression5(Token token) {
-		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
-			return startsExpressionInBetweenParentheses(token);
-		} else {
-			return startsLiteral(token);
 		}
 	}
 	
@@ -427,19 +381,10 @@ public class Parser {
 		assert false : "bad token " + nowReading + " in parseLiteral()";
 		return null;
 	}
-	
-	private boolean startsLiteral(Token token) {
-		return startsIntNumber(token) || 
-				startsFloatNumber(token) || 
-				startsCharacterConstant(token) || 
-				startsStringConstant(token) || 
-				startsIdentifier(token) || 
-				startsBooleanConstant(token);
-	}
-	
+
 	// expr -> ( expr )
 	private ParseNode parseExpressionInBetweenParentheses() {
-		if (!startsExpressionInBetweenParentheses(nowReading)) return syntaxErrorNode("statement in parenthesis");
+		if (!startsExpressionInBetweenParentheses(nowReading)) return syntaxErrorNode("statement in parentheses");
 		
 		ParseNode left;
 		
@@ -452,8 +397,63 @@ public class Parser {
 		return left;
 	}
 	
+	// starts expressions
+	private boolean startsExpression(Token token) {
+		return startsBooleanOperator_Or(token);
+	}
+	
+	private boolean startsBooleanOperator_Or(Token token) {
+		return startsBooleanOperator_And(token);
+	}
+	
+	private boolean startsBooleanOperator_And(Token token) {
+		return startsComparisonOperators(token);
+	}
+	
+	private boolean startsComparisonOperators(Token token) {
+		return startsExpression2(token);
+	}
+	
+	private boolean startsExpression2(Token token) {
+		return startsExpression3(token);
+	}	
+	
+	private boolean startsExpression3(Token token) {
+		return startsExpression4(token);
+	}
+	
+	private boolean startsExpression4(Token token) {
+		return startsExpressionWithHighestPrecendence(token);
+	}
+	
+	private boolean startsExpressionWithHighestPrecendence(Token token) {
+		if (isValidExpression()) {
+			return true;
+		} else {
+			return startsLiteral(token);
+		}
+	}
+	
+	private boolean startsLiteral(Token token) {
+		return startsIntNumber(token) || 
+				startsFloatNumber(token) || 
+				startsCharacterConstant(token) || 
+				startsStringConstant(token) || 
+				startsIdentifier(token) || 
+				startsBooleanConstant(token);
+	}
+
 	private boolean startsExpressionInBetweenParentheses(Token token) {
-		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
+		if (token.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private boolean isValidExpression() {
+		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET) ||
+				nowReading.isLextant(Punctuator.NOT)) {
 			return true;
 		} else {
 			return false;
@@ -538,7 +538,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		debug.out("LAST READ TOKEN: " + nowReading); // TODO: DEBUG OUT
+		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: TOKEN: DEBUG OUT
 		
 		nowReading = scanner.next();
 	}	

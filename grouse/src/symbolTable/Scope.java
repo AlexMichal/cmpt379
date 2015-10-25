@@ -63,12 +63,12 @@ public class Scope {
 
 	///////////////////////////////////////////////////////////////////////
 	//bindings
-	public Binding createBinding(IdentifierNode identifierNode, Type type) { // TODO: let binding here
+	public Binding createBinding(IdentifierNode identifierNode, Type type) { // TODO: LET  binding here
 		Token token = identifierNode.getToken();
 		
 		Debug debug = new Debug();
-		debug.out("MESSAGE: " + identifierNode.toString());
-		debug.out("MESSAGE: " + identifierNode.getParent().getToken().getLexeme());
+		//debug.out("MESSAGE: " + identifierNode.toString()); // TODO: DEBUG CREATE BINDING
+		//debug.out("MESSAGE: " + identifierNode.getParent().getToken().getLexeme());
 		
 		if (identifierNode.getParent().getToken().getLexeme() == "imm") {
 			symbolTable.errorIfAlreadyDefined(token);

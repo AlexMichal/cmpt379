@@ -9,6 +9,7 @@ import symbolTable.Binding;
 import symbolTable.Scope;
 import symbolTable.SymbolTable;
 import tokens.Token;
+import utilities.Debug;
 
 public class ParseNode {
 	public static final ParseNode NO_PARENT = null;
@@ -37,6 +38,8 @@ public class ParseNode {
 	public Token getToken() {
 		return token;
 	}
+	
+	static Debug debug = new Debug();
 	
 	////////////////////////////////////////////////////////////////////////////////////
 	// attributes
