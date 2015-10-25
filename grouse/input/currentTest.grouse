@@ -1,5 +1,5 @@
 main {
-    	imm quarters := ( 1 + 3 ) * 4;
+    	imm quarters := (1 + 3) * 4;
 	imm xxxx := 1 < 3;
     	imm Dimes := "xx";
 	imm dimesxddd2_ := "asdasdasd asd asd2";
@@ -10,7 +10,7 @@ main {
 	imm dimesxddd3_ := "asssdasdasd asd asd2";
 	imm ddddd:= "asssddddddddddddddasdasd asd asd2";
     	imm bad := 25;
-	// let quarters := ( -3 - 1 ) * 2 - 4;
+	let quarters := ((-3 - 1 ) * 2 + 3) * 2 - 4;
 	var xxx := nickelsD - pennies;
 	print bad nl;
 	print Dimes dimesxddd2_ nl;
