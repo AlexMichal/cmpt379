@@ -214,10 +214,10 @@ public class Parser {
 	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]? // lowest precedence
 	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
 	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
-	// expr4 -> cast // TODO: cast
-	// expr4 -> ( expr5 )? TODO: ( ) 
-	// expr5 -> literal
+	// 	expr4 -> expr5 : type (cast) // TODO: cast
+	// expr5 -> literal OR ( expr )
 	// literal -> intNumber | floatNumber | characterConstant | booleanConstant | stringConstant | identifier
+	// expr -> parseExpressionInBetweenParentheses
 
 	// expr  -> expr1
 	private ParseNode parseExpression() {		
@@ -258,7 +258,6 @@ public class Parser {
 	
 	private boolean startsExpression1(Token token) {
 		return startsExpression2(token);
-		//return startsLiteral(token);
 	}
 
 	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
@@ -279,7 +278,6 @@ public class Parser {
 	}
 	
 	private boolean startsExpression2(Token token) {
-		//return startsLiteral(token);
 		return startsExpression3(token);
 	}	
 
@@ -301,11 +299,10 @@ public class Parser {
 	}
 	
 	private boolean startsExpression3(Token token) {
-		//return startsLiteral(token);
 		return startsExpression5(token);
 	}
 	
-	// expr4 -> ( expr5 )?
+	// expr4 -> expr : cast
 	/*private ParseNode parseExpression4() {
 		/*9if (!startsExpression4(nowReading)) return syntaxErrorNode("expression<4>");
 		
@@ -334,22 +331,16 @@ public class Parser {
 	private ParseNode parseExpression5() {
 		if (!startsExpression5(nowReading)) return syntaxErrorNode("expression<5>");
 		
-		debug.out("LITERAL TOKEN (in parseExpression5): " + nowReading); // TODO: delete this after TOKEN
-		
 		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
-			return parseStatementInBetweenParentheses();
+			return parseExpressionInBetweenParentheses();
 		} else {
 			return parseLiteral();
 		}
 	}
 	
 	private boolean startsExpression5(Token token) {
-		debug.out("LITERAL TOKEN (in startsExpression5): " + nowReading); // TODO: delete this after TOKEN
-		
 		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
-			debug.out("LITERAL TOKEN (in startsExpression5 OPEN PAREN): " + nowReading); // TODO: delete this after TOKEN
-			
-			return startsStatementInBetweenParentheses(token);
+			return startsExpressionInBetweenParentheses(token);
 		} else {
 			return startsLiteral(token);
 		}
@@ -396,9 +387,9 @@ public class Parser {
 				startsBooleanConstant(token);
 	}
 	
-	// stmt -> ( stmt )
-	private ParseNode parseStatementInBetweenParentheses() {
-		if (!startsStatementInBetweenParentheses(nowReading)) return syntaxErrorNode("statement in parenthesis");
+	// expr -> ( expr )
+	private ParseNode parseExpressionInBetweenParentheses() {
+		if (!startsExpressionInBetweenParentheses(nowReading)) return syntaxErrorNode("statement in parenthesis");
 		
 		ParseNode left;
 		
@@ -411,7 +402,7 @@ public class Parser {
 		return left;
 	}
 	
-	private boolean startsStatementInBetweenParentheses(Token token) {
+	private boolean startsExpressionInBetweenParentheses(Token token) {
 		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
 			return true;
 		} else {
@@ -497,7 +488,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		debug.out("LAST TOKEN: " + nowReading); // TODO: DEBUG OUT
+		debug.out("LAST READ TOKEN: " + nowReading); // TODO: DEBUG OUT
 		
 		nowReading = scanner.next();
 	}	

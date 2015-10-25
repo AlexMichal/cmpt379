@@ -471,6 +471,7 @@ public class ASMCodeGenerator {
 				} else if (node.child(0).getType() == PrimitiveType.STRING) { // string // TODO: doesn't fully work. need to implement "xx" == variable
 					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
 						code.add(Subtract);
+						
 						if (strLeftChildValue.equals(strRightChildValue)) {
 							code.add(JumpFalse, trueLabel);
 						} else {
