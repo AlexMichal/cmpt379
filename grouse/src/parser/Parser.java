@@ -81,7 +81,7 @@ public class Parser {
 		if (!startsMainBlock(nowReading)) return syntaxErrorNode("mainBlock");
 		
 		ParseNode mainBlock = new MainBlockNode(nowReading);
-		expect(Punctuator.OPEN_BRACE);
+		expect(Punctuator.OPEN_CURLY_BRACKET);
 		
 		// Parse each statement in between the opening and closing braces
 		while(startsStatement(nowReading)) {
@@ -89,12 +89,12 @@ public class Parser {
 			mainBlock.appendChild(statement);
 		}
 		
-		expect(Punctuator.CLOSE_BRACE);
+		expect(Punctuator.CLOSE_CURLY_BRACKET);
 		return mainBlock;
 	}
 	
 	private boolean startsMainBlock(Token token) {
-		return token.isLextant(Punctuator.OPEN_BRACE);
+		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -210,8 +210,10 @@ public class Parser {
 	
 	///////////////////////////////////////////////////////////
 	// expressions
-	// expr  -> expr1
-	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]? // lowest precedence
+	// expr  -> exprBooleanComparison_Or
+	// exprBooleanComparison_Or -> exprBooleanComparison_And || exprBooleanComparison_And
+	// exprBooleanComparison_And -> exprComparisonOperators && exprComparisonOperators
+	// exprComparisonOperators -> expr2 [(<|<=|==|!=|>|>=) expr2]?
 	// expr2 -> expr3 [(+|-) expr3]*  (left-assoc)
 	// expr3 -> expr4 [(*|/) expr4]*  (left-assoc)
 	// 	expr4 -> expr5 : type (cast) // TODO: cast
@@ -223,16 +225,64 @@ public class Parser {
 	private ParseNode parseExpression() {		
 		if (!startsExpression(nowReading)) return syntaxErrorNode("expression");
 		
-		return parseExpression1();
+		return parseBooleanOperator_Or();
 	}
 	
 	private boolean startsExpression(Token token) {
-		return startsExpression1(token);
+		return startsBooleanOperator_Or(token);
 	}
 
+	// expr1 -> BooleanComparison
+	private ParseNode parseBooleanOperator_Or() {
+		if (!startsBooleanOperator_Or(nowReading)) return syntaxErrorNode("BooleanOperator_Or");
+		
+		ParseNode left = parseBooleanOperator_And();
+		
+		if (nowReading.isLextant(Punctuator.OR)) {
+			Token compareToken = nowReading;
+			
+			debug.out("IN 'OR' IS TRUE? " + nowReading);
+			
+			readToken();
+			
+			ParseNode right = parseBooleanOperator_And();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		
+		return left;
+	}
+	
+	private boolean startsBooleanOperator_Or(Token token) {
+		return startsBooleanOperator_And(token);
+	}
+	
+	// expr1 -> BooleanComparison
+	private ParseNode parseBooleanOperator_And() {
+		if (!startsBooleanOperator_And(nowReading)) return syntaxErrorNode("BooleanOperator_And");
+		
+		ParseNode left = parseComparisonOperators();
+		
+		if (nowReading.isLextant(Punctuator.AND)) {
+			Token compareToken = nowReading;
+			
+			readToken();
+			
+			ParseNode right = parseComparisonOperators();
+			
+			return BinaryOperatorNode.withChildren(compareToken, left, right);
+		}
+		
+		return left;
+	}
+	
+	private boolean startsBooleanOperator_And(Token token) {
+		return startsComparisonOperators(token);
+	}
+	
 	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]?
-	private ParseNode parseExpression1() {
-		if (!startsExpression1(nowReading)) return syntaxErrorNode("expression<1>");
+	private ParseNode parseComparisonOperators() {
+		if (!startsComparisonOperators(nowReading)) return syntaxErrorNode("expression<1>");
 		
 		ParseNode left = parseExpression2();
 		
@@ -256,7 +306,7 @@ public class Parser {
 	}
 
 	
-	private boolean startsExpression1(Token token) {
+	private boolean startsComparisonOperators(Token token) {
 		return startsExpression2(token);
 	}
 
@@ -331,7 +381,7 @@ public class Parser {
 	private ParseNode parseExpression5() {
 		if (!startsExpression5(nowReading)) return syntaxErrorNode("expression<5>");
 		
-		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
+		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
 			return parseExpressionInBetweenParentheses();
 		} else {
 			return parseLiteral();
@@ -339,7 +389,7 @@ public class Parser {
 	}
 	
 	private boolean startsExpression5(Token token) {
-		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
+		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
 			return startsExpressionInBetweenParentheses(token);
 		} else {
 			return startsLiteral(token);
@@ -393,17 +443,17 @@ public class Parser {
 		
 		ParseNode left;
 		
-		expect(Punctuator.OPEN_PAREN);
+		expect(Punctuator.OPEN_ROUND_BRACKET);
 		
 		left = parseExpression();
 		
-		expect(Punctuator.CLOSE_PAREN);
+		expect(Punctuator.CLOSE_ROUND_BRACKET);
 		
 		return left;
 	}
 	
 	private boolean startsExpressionInBetweenParentheses(Token token) {
-		if (nowReading.isLextant(Punctuator.OPEN_PAREN)) {
+		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
 			return true;
 		} else {
 			return false;

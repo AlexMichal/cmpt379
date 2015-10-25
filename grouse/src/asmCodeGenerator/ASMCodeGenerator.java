@@ -322,10 +322,12 @@ public class ASMCodeGenerator {
 		public void visitLeave(BinaryOperatorNode node) {
 			Lextant operator = node.getOperator();
 
-			if(isComparisonOperator(operator)) {
-				visitComparisonOperatorNode(node, operator);
+			if (isComparisonOperator(operator)) {
+				visitComparisonNode(node, operator);
 			} else if (isArithmeticOperator(operator)) {
 				visitNormalBinaryOperatorNode(node);
+			} else if (isBooleanOperator(operator)) {
+				visitBooleanOperatorNode(node);
 			}
 		}
 		
@@ -337,7 +339,6 @@ public class ASMCodeGenerator {
 			}
 		}
 		
-		// disgusting code, I know
 		public boolean isComparisonOperator(Lextant lexeme) {
 			if (lexeme.equals(Punctuator.GREATER) ||
 					lexeme.equals(Punctuator.GREATER_OR_EQUAL) ||
@@ -351,7 +352,6 @@ public class ASMCodeGenerator {
 			}
 		}
 		
-		// disgusting code, I know
 		public boolean isArithmeticOperator(Lextant lexeme) {
 			if (lexeme.equals(Punctuator.ADD) ||
 					lexeme.equals(Punctuator.SUBTRACT) ||
@@ -363,7 +363,17 @@ public class ASMCodeGenerator {
 			}
 		}
 		
-		private void visitComparisonOperatorNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
+		public boolean isBooleanOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.AND) ||
+					lexeme.equals(Punctuator.OR) ||
+					lexeme.equals(Punctuator.NOT)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		private void visitComparisonNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			String startLabel = labeller.newLabel("-compare-arg1-", "");
@@ -625,6 +635,48 @@ public class ASMCodeGenerator {
 			ASMOpcode opcode = opcodeForOperator(node.getOperator(), leftChildType, rightChildType);
 									
 			code.add(opcode);
+		}
+		
+		private void visitBooleanOperatorNode(BinaryOperatorNode node) {
+			ASMCodeFragment arg1 = removeValueCode(node.child(0));
+			ASMCodeFragment arg2 = removeValueCode(node.child(1));
+			String startLabel = labeller.newLabel("-compare-arg1-bool-", "");
+			String arg2Label  = labeller.newLabelSameNumber("-compare-arg2-bool-", "");
+			String subLabel   = labeller.newLabelSameNumber("-compare-sub-bool-", "");
+			String trueLabel  = labeller.newLabelSameNumber("-compare-true-bool-", "");
+			String falseLabel = labeller.newLabelSameNumber("-compare-false-bool-", "");
+			String joinLabel  = labeller.newLabelSameNumber("-compare-join-bool-", "");
+			Lextant operator = node.getOperator();
+			HashMap<Lextant, ASMOpcode> lextantHashMap = new HashMap<Lextant, ASMOpcode>();
+			
+			lextantHashMap.put(Punctuator.AND, And);
+			lextantHashMap.put(Punctuator.OR, Or);
+			
+			newValueCode(node);
+			// arg1
+			code.add(Label, startLabel);
+			code.append(arg1);
+			// arg2
+			code.add(Label, arg2Label);
+			code.append(arg2);
+			// comparison
+			code.add(Label, subLabel);
+			
+			// operate on children
+			code.add(lextantHashMap.get(operator)); // TODO: BOOLEAN OPERATORS
+			code.add(JumpTrue, trueLabel);
+			code.add(Jump, falseLabel);
+			
+			// true
+			code.add(Label, trueLabel);
+			code.add(PushI, 1);
+			code.add(Jump, joinLabel);
+			// false
+			code.add(Label, falseLabel);
+			code.add(PushI, 0);
+			code.add(Jump, joinLabel);
+			// end of statement
+			code.add(Label, joinLabel); 
 		}
 		
 		private ASMOpcode opcodeForOperator(Lextant lextant, Type leftChildType, Type rightChildType) {
