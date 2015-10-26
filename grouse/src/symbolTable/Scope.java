@@ -12,12 +12,14 @@ public class Scope {
 	private MemoryAllocator allocator;
 	private SymbolTable symbolTable;
 	
-//////////////////////////////////////////////////////////////////////
-// factories
-
+	//////////////////////////////////////////////////////////////////////
+	// FACTORIES
+	//////////////////////////////////////////////////////////////////////
+	
 	public static Scope createProgramScope() {
 		return new Scope(programScopeAllocator(), nullInstance());
 	}
+	
 	public Scope createSubscope() {
 		return new Scope(allocator, this);
 	}
@@ -28,8 +30,10 @@ public class Scope {
 				MemoryLocation.GLOBAL_VARIABLE_BLOCK);
 	}
 	
-//////////////////////////////////////////////////////////////////////
-// private constructor.	
+	//////////////////////////////////////////////////////////////////////
+	// PRIVATE CONSTRUCTOR
+	//////////////////////////////////////////////////////////////////////
+	
 	private Scope(MemoryAllocator allocator, Scope baseScope) {
 		super();
 		this.baseScope = (baseScope == null) ? this : baseScope;
@@ -39,30 +43,39 @@ public class Scope {
 		allocator.saveState();
 	}
 	
-///////////////////////////////////////////////////////////////////////
-//  basic queries	
+	///////////////////////////////////////////////////////////////////////
+	// BASIC QUERIES	
+	///////////////////////////////////////////////////////////////////////
+	
 	public Scope getBaseScope() {
 		return baseScope;
 	}
+	
 	public MemoryAllocator getAllocationStrategy() {
 		return allocator;
 	}
+	
 	public SymbolTable getSymbolTable() {
 		return symbolTable;
 	}
 	
-///////////////////////////////////////////////////////////////////////
-//memory allocation
+	///////////////////////////////////////////////////////////////////////
+	// MEMORY ALLOCATION
+	///////////////////////////////////////////////////////////////////////
+	
 	// must call leave() when destroying/leaving a scope.
 	public void leave() {
 		allocator.restoreState();
 	}
+	
 	public int getAllocatedSize() {
 		return allocator.getMaxAllocatedSize();
 	}
 
 	///////////////////////////////////////////////////////////////////////
-	//bindings
+	// BINDINGS
+	///////////////////////////////////////////////////////////////////////
+	
 	public Binding createBinding(IdentifierNode identifierNode, Type type) { // TODO: LET  binding here
 		Token token = identifierNode.getToken();
 		
@@ -80,13 +93,16 @@ public class Scope {
 
 		return binding;
 	}
+	
 	private Binding allocateNewBinding(Type type, TextLocation textLocation, String lexeme) {
 		MemoryLocation memoryLocation = allocator.allocate(type.getSize());
 		return new Binding(type, textLocation, memoryLocation, lexeme);
 	}
 	
-///////////////////////////////////////////////////////////////////////
-//toString
+	///////////////////////////////////////////////////////////////////////
+	//toString
+	///////////////////////////////////////////////////////////////////////
+	
 	public String toString() {
 		String result = "scope: ";
 		result += " hash "+ hashCode() + "\n";
@@ -94,11 +110,14 @@ public class Scope {
 		return result;
 	}
 
-////////////////////////////////////////////////////////////////////////////////////
-//Null Scope object - lazy singleton (Lazy Holder) implementation pattern
+	////////////////////////////////////////////////////////////////////////////////////
+	// NULL SCOPE OBJECT - LAZY SINGLETON (Lazy Holder) IMPLEMENTATION PATTERN
+	////////////////////////////////////////////////////////////////////////////////////
+	
 	public static Scope nullInstance() {
 		return NullScope.instance;
 	}
+	
 	private static class NullScope extends Scope {
 		private static NullScope instance = new NullScope();
 
@@ -106,14 +125,17 @@ public class Scope {
 			super(	new PositiveMemoryAllocator(MemoryAccessMethod.NULL_ACCESS, "", 0),
 					null);
 		}
+		
 		public String toString() {
 			return "scope: the-null-scope";
 		}
+		
 		@Override
 		public Binding createBinding(IdentifierNode identifierNode, Type type) {
 			unscopedIdentifierError(identifierNode.getToken());
 			return super.createBinding(identifierNode, type);
 		}
+		
 		// subscopes of null scope need their own strategy.  Assumes global block is static.
 		public Scope createSubscope() {
 			return new Scope(programScopeAllocator(), this);
@@ -121,12 +143,13 @@ public class Scope {
 	}
 
 
-///////////////////////////////////////////////////////////////////////
-//error reporting
+	///////////////////////////////////////////////////////////////////////
+	// ERROR REPORTING
+	///////////////////////////////////////////////////////////////////////
+	
 	private static void unscopedIdentifierError(Token token) {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.scope");
 		log.severe("variable " + token.getLexeme() + 
 				" used outside of any scope at " + token.getLocation());
 	}
-
 }
