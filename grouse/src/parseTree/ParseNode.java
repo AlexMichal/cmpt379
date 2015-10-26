@@ -35,6 +35,7 @@ public class ParseNode {
 		this.type = node.type;
 		this.scope = node.scope;
 	}
+	
 	public Token getToken() {
 		return token;
 	}
@@ -89,37 +90,43 @@ public class ParseNode {
 		return symbolTable.lookup(identifier);
 	}
 	
-////////////////////////////////////////////////////////////////////////////////////
-// dealing with children and parent
-//
-// note: there is no provision as of yet for removal of children.  Be sure to update
-// the removed child's parent pointer if you do implement it.
-	
+	////////////////////////////////////////////////////////////////////////////////////
+	// dealing with children and parent
+	//
+	// note: there is no provision as of yet for removal of children.  Be sure to update
+	// the removed child's parent pointer if you do implement it.
 	public ParseNode getParent() {
 		return parent;
 	}
+	
 	protected void setParent(ParseNode parent) {
 		this.parent = parent;
 	}
+	
 	public List<ParseNode> getChildren() {
 		return children;
 	}
+	
 	public ParseNode child(int i) {
 		return children.get(i);
 	}
+	
 	public void initChildren() {
 		children = new ArrayList<ParseNode>();
 	}
+	
 	// adds a new child to this node (as first child) and sets its parent link.
 	public void insertChild(ParseNode child) {
 		children.add(0, child);
 		child.setParent(this);
 	}
+	
 	// adds a new child to this node (as last child) and sets its parent link.
 	public void appendChild(ParseNode child) {
 		children.add(child);
 		child.setParent(this);
 	}
+	
 	// do not do this in the middle of a visit; the children list traversal may be zapped if you do.
 	// (throws a ConcurrentModificationException.)
 	public void replaceChild(ParseNode oldChild, ParseNode newChild) {
@@ -132,37 +139,34 @@ public class ParseNode {
 			}
 		}	
 	}
+	
 	public int nChildren() {
 		return children.size();
 	}
 	
-////////////////////////////////////////////////////////////////////////////////////
-//Iterable<ParseNode> pathToRoot
-
+	////////////////////////////////////////////////////////////////////////////////////
+	//Iterable<ParseNode> pathToRoot
 	public Iterable<ParseNode> pathToRoot() {
 		return new PathToRootIterable(this);
 	}
 	
-////////////////////////////////////////////////////////////////////////////////////
-// toString() 
-
+	////////////////////////////////////////////////////////////////////////////////////
+	// toString() 
 	public String toString() {
 		return ParseTreePrinter.print(this);
 	}
-
 	
-////////////////////////////////////////////////////////////////////////////////////
-// for visitors
-			
+	////////////////////////////////////////////////////////////////////////////////////
+	// for visitors	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);
 		visitor.visitLeave(this);
 	}
+	
 	protected void visitChildren(ParseNodeVisitor visitor) {
 		for(ParseNode child : children) {
 			child.accept(visitor);
 		}
 	}
-
 }

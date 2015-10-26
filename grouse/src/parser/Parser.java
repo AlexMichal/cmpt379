@@ -19,6 +19,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.UnaryOperatorNode;
 import semanticAnalyzer.types.PrimitiveType;
 import tokens.*;
 import utilities.Debug;
@@ -317,7 +318,9 @@ public class Parser {
 		
 		while (nowReading.isLextant(Punctuator.MULTIPLY) || nowReading.isLextant(Punctuator.DIVIDE)) {
 			Token token = nowReading;
+			
 			readToken();
+			
 			ParseNode right = parseExpression4();
 			
 			left = BinaryOperatorNode.withChildren(token, left, right);
@@ -332,7 +335,15 @@ public class Parser {
 		
 		ParseNode left;
 		
-		if (nowReading.isLextant(Punctuator.NOT)) expect(Punctuator.NOT);
+		if (nowReading.isLextant(Punctuator.NOT)) {
+			Token negateToken = nowReading;
+			
+			readToken();
+			
+			ParseNode node = parseExpression5();
+			
+			return UnaryOperatorNode.withChild(negateToken, node);
+		}
 		
 		left = parseExpression5();
 				

@@ -22,6 +22,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.UnaryOperatorNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
@@ -135,13 +136,43 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 			node.setType(PrimitiveType.ERROR);
 		}
 	}
-	
+
 	private Lextant operatorFor(BinaryOperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
 		
 		return token.getLextant();
 	}
+	
+	public void visitLeave(UnaryOperatorNode node) {
+		assert node.nChildren() == 1;
+		
+		ParseNode right  = node.child(0);
+		
+		List<Type> childType = Arrays.asList(right.getType());
+		
+		Lextant operator = operatorFor(node);
+		
+		FunctionSignatures signature = FunctionSignatures.signaturesOf(operator);
+		
+		Type typeOfChildNode = FunctionSignatures.signature(signature.getKey(), childType).resultType();
 
+		debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childType).resultType());
+		debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildNode);
+
+		if (signature.accepts(childType)) {
+			node.setType(typeOfChildNode);
+		} else { 
+			typeCheckError(node, childType);
+			node.setType(PrimitiveType.ERROR);
+		}
+	}
+	
+
+	private Lextant operatorFor(UnaryOperatorNode node) {
+		LextantToken token = (LextantToken) node.getToken();
+		
+		return token.getLextant();
+	}
 	///////////////////////////////////////////////////////////////////////////
 	// simple leaf nodes
 	@Override
@@ -183,6 +214,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	public void visit(SeparatorNode node) {
 //		node.setType(PrimitiveType.INTEGER);
 	}
+	
 	///////////////////////////////////////////////////////////////////////////
 	// IdentifierNodes, with helper methods
 	@Override
@@ -195,10 +227,12 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 		// else parent DeclarationNode does the processing.
 	}
+	
 	private boolean isBeingDeclared(IdentifierNode node) {
 		ParseNode parent = node.getParent();
 		return (parent instanceof DeclarationNode) && (node == parent.child(0));
 	}
+	
 	private void addBinding(IdentifierNode identifierNode, Type type) {
 		Scope scope = identifierNode.getLocalScope();
 		Binding binding = scope.createBinding(identifierNode, type);
@@ -207,13 +241,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	///////////////////////////////////////////////////////////////////////////
 	// error logging/printing
-
 	private void typeCheckError(ParseNode node, List<Type> operandTypes) {
 		Token token = node.getToken();
 		
 		logError("operator " + token.getLexeme() + " not defined for types " 
 				 + operandTypes  + " at " + token.getLocation());	
 	}
+	
 	private void logError(String message) {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.semanticAnalyzer");
 		log.severe(message);

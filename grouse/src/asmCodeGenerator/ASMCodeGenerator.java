@@ -1,9 +1,10 @@
 package asmCodeGenerator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
+import asmCodeGenerator.codeStorage.ASMCodeChunk;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.runtime.RunTime;
@@ -24,12 +25,12 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.UnaryOperatorNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
 import utilities.Debug;
-
 import static asmCodeGenerator.codeStorage.ASMCodeFragment.CodeType.*;
 import static asmCodeGenerator.codeStorage.ASMOpcode.*;
 
@@ -132,7 +133,6 @@ public class ASMCodeGenerator {
 		private ASMCodeFragment removeValueCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
 			makeFragmentValueCode(frag, node);
-			//debug.out("removeValueCode: " + node); // TODO: delete me
 			return frag;
 		}
 		
@@ -269,13 +269,14 @@ public class ASMCodeGenerator {
 		}
 
 		public void visitLeave(DeclarationNode node) {
+			//debug.out("---\nchild 0: \n" + node.child(0) + "\nchild 1: \n" + node.child(1));
+			//debug.out("NODE: \n" + node);
+			
 			newVoidCode(node);
-			ASMCodeFragment lvalue = removeAddressCode(node.child(0));	
+			ASMCodeFragment lvalue = removeAddressCode(node.child(0));
 			ASMCodeFragment rvalue = removeValueCode(node.child(1));
 			
-			//debug.out("LEFT VALUE: \n" + lvalue);
 			code.append(lvalue);
-			//debug.out("RIGHT VALUE: \n" + rvalue);
 			code.append(rvalue);
 			
 			Type type = node.getType();
@@ -331,11 +332,11 @@ public class ASMCodeGenerator {
 			}
 		}
 		
-		public boolean isPunctuator(Lextant lexeme) {
-			if (isComparisonOperator(lexeme) || isArithmeticOperator(lexeme)) {
-				return true;
-			} else {
-				return false;
+		public void visitLeave(UnaryOperatorNode node) {
+			Lextant operator = node.getOperator();
+			
+			if (isBooleanOperator(operator)) {
+				visitNormalUnaryOperatorNode(node);
 			}
 		}
 		
@@ -652,8 +653,6 @@ public class ASMCodeGenerator {
 			lextantHashMap.put(Punctuator.AND, And);
 			lextantHashMap.put(Punctuator.OR, Or);
 			
-			//debug.out("---------OPERATOR: " + operator + "\n --------LEFT CHILD: \n" + arg1 + " --------RIGHT CHILD: \n" + arg2);
-			
 			newValueCode(node);
 			// arg1
 			code.add(Label, startLabel);
@@ -681,6 +680,38 @@ public class ASMCodeGenerator {
 			code.add(Label, joinLabel); 
 		}
 		
+		private void visitNormalUnaryOperatorNode(UnaryOperatorNode node) {
+			newValueCode(node);
+			
+			ASMCodeFragment arg = removeValueCode(node.child(0));
+			String lexeme = node.child(0).getToken().getLexeme();
+			String str = arg.toString();
+
+			if (lexeme.equals("true") || lexeme.equals("false")) {
+				if (lexeme.equals("true")) {
+					code.add(PushI, 0);
+				} else if (lexeme.equals("false")) {
+					code.add(PushI, 1);
+				}
+			} else {
+				String[] arguments = str.split(System.getProperty("line.separator"));
+
+				code.add(PushD, "$global-memory-block");
+				
+				// negate the boolean value
+				for (int i = 0; i < arguments.length; i++) {
+					if (arguments[i].contains("  1  ")) {
+						code.add(PushI, 0);
+					} else if (arguments[i].contains("  0  ")) {
+						code.add(PushI, 1);
+					}
+				}
+				
+				code.add(Add);
+				code.add(LoadC);
+			}
+		}
+		
 		private ASMOpcode opcodeForOperator(Lextant lextant, Type leftChildType, Type rightChildType) {
 			assert(lextant instanceof Punctuator);
 			Punctuator punctuator = (Punctuator)lextant;
@@ -706,6 +737,19 @@ public class ASMCodeGenerator {
 			return null;
 		}
 
+		private ASMOpcode opcodeForOperator(Lextant lextant, Type childType) {
+			assert(lextant instanceof Punctuator);
+			Punctuator punctuator = (Punctuator)lextant;
+			
+			if (childType == PrimitiveType.BOOLEAN)  {
+				switch(punctuator) {
+					case NOT: 		return Negate;
+					default:		assert false : "boolean - unimplemented operator in opcodeForOperator";
+				}
+			}
+			
+			return null;
+		}
 		///////////////////////////////////////////////////////////////////////////
 		// leaf nodes (ErrorNode not necessary)
 		public void visit(BooleanConstantNode node) {
