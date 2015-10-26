@@ -19,7 +19,9 @@ public class IfStatementNode extends ParseNode {
 	}
 
 	////////////////////////////////////////////////////////////
-	// attributes
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
+	
 	public Lextant getIfStatementType() {
 		return lextantToken().getLextant();
 	}
@@ -29,17 +31,18 @@ public class IfStatementNode extends ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////
-	// convenience factory
-	public static IfStatementNode withChildren(Token token, ParseNode expression, ParseNode block) {
+	// CONVENIENCE FACTORY
+	////////////////////////////////////////////////////////////
+	
+	public static IfStatementNode withChildren(Token token, ParseNode expression, ParseNode ifStatementBlock) {
 		IfStatementNode node = new IfStatementNode(token);
 		
 		node.appendChild(expression);
-		node.appendChild(block);
+		node.appendChild(ifStatementBlock);
 		
 		return node;
 	}
 	
-	// With an ELSE statement
 	public static IfStatementNode withChildren(Token token, ParseNode expression, ParseNode ifStatementBlock, ParseNode elseStatementBlock) {
 		IfStatementNode node = new IfStatementNode(token);
 		
@@ -51,7 +54,9 @@ public class IfStatementNode extends ParseNode {
 	}
 	
 	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
+	// BOILERPLATE FOR VISITORS
+	///////////////////////////////////////////////////////////
+	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);
