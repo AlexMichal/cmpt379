@@ -686,7 +686,7 @@ public class ASMCodeGenerator {
 			ASMCodeFragment arg = removeValueCode(node.child(0));
 			String lexeme = node.child(0).getToken().getLexeme();
 			String str = arg.toString();
-
+			
 			if (lexeme.equals("true") || lexeme.equals("false")) {
 				if (lexeme.equals("true")) {
 					code.add(PushI, 0);
