@@ -58,9 +58,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		leaveScope(node);
 	}
 	
-	public void visitEnter(MainBlockNode node) {}
+	public void visitEnter(MainBlockNode node) {
+	}
 	
-	public void visitLeave(MainBlockNode node) {}
+	public void visitLeave(MainBlockNode node) {
+	}
 	
 	public void visitEnter(BlockStatementNode node) {
 		enterSubscope(node);
@@ -112,8 +114,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(DeclarationNode node) {
-		IdentifierNode identifier = (IdentifierNode) node.child(0);
-		ParseNode initializer = node.child(1);
+		//ParseNode 		typeOfIdentifier 	= node.child(0);
+		IdentifierNode 	identifier 			= (IdentifierNode) node.child(0);
+		ParseNode 		initializer 		= node.child(1);
 		
 		Type declarationType = initializer.getType();
 		node.setType(declarationType);
@@ -128,8 +131,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(LetStatementNode node) {
-		IdentifierNode identifier = (IdentifierNode) node.child(0);
-		ParseNode initializer = node.child(1);
+		//ParseNode 		typeOfIdentifier	= node.child(0);
+		IdentifierNode 	identifier 			= (IdentifierNode) node.child(0);
+		ParseNode 		initializer 		= node.child(1);
 		
 		Type letStatementType = initializer.getType();
 		node.setType(letStatementType);
@@ -277,7 +281,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visit(IdentifierNode node) {
-		if(!isBeingDeclared(node)) {		
+		if (!isBeingDeclared(node)) {		
 			Binding binding = node.findVariableBinding();
 			
 			node.setType(binding.getType());
@@ -294,8 +298,16 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private void addBinding(IdentifierNode identifierNode, Type type) {
 		Scope scope = identifierNode.getLocalScope();
 		Binding binding = scope.createBinding(identifierNode, type);
+		
 		identifierNode.setBinding(binding);
 	}
+	
+	/*private void addBinding(IdentifierNode identifierNode, Type type) {
+		Scope scope = identifierNode.getLocalScope();
+		Binding binding = scope.createBinding(identifierNode, type);
+		
+		identifierNode.setBinding(binding);
+	}*/
 	
 	///////////////////////////////////////////////////////////////////////////
 	// ERROR LOGGING/PRINTING

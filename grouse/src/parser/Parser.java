@@ -8,6 +8,7 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
+import parseTree.nodeTypes.ImmutableIdentifierNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -22,6 +23,7 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
+import parseTree.nodeTypes.VariableIdentifierNode;
 import semanticAnalyzer.types.PrimitiveType;
 import tokens.*;
 import utilities.Debug;
@@ -97,7 +99,7 @@ public class Parser {
 		expect(Punctuator.OPEN_CURLY_BRACKET);
 		
 		// Parse each statement in between the opening and closing braces
-		while(startsStatement(nowReading)) {
+		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
 			mainBlock.appendChild(statement);
 		}
@@ -206,15 +208,31 @@ public class Parser {
 		if (!startsDeclaration(nowReading)) return syntaxErrorNode("declaration");
 		
 		Token declarationToken = nowReading;
+		//ParseNode typeOfIdentifier;
+		
 		readToken();
 		
-		ParseNode identifier = parseIdentifier();
+		//debug.out("---------------------------------: \n" + nowReading.getLexeme());
+		//debug.out(nowReading.getLexeme());
+		
+		/*if (nowReading.getLexeme().equals("imm")) {
+			typeOfIdentifier = parseImmutableIdentifierNode();
+		} else if (nowReading.getLexeme().equals("var")) {
+			typeOfIdentifier = parseVariableIdentifierNode();
+		} else {
+			expect(Keyword.VARIABLE, Keyword.IMMUTABLE);
+			
+			typeOfIdentifier = null;
+		}*/
+
+		//debug.out(nowReading.getLexeme());
+		ParseNode identifierName = parseIdentifier();
 		expect(Punctuator.ASSIGN);
 		
 		ParseNode initializer = parseExpression();
 		expect(Punctuator.TERMINATOR);
 		
-		return DeclarationNode.withChildren(declarationToken, identifier, initializer);
+		return DeclarationNode.withChildren(declarationToken, identifierName, initializer);
 	}
 	
 	private boolean startsDeclaration(Token token) {
@@ -303,7 +321,7 @@ public class Parser {
 		expect(Punctuator.OPEN_CURLY_BRACKET);
 		
 		// Parse each statement in between the opening and closing braces
-		while(startsStatement(nowReading)) {
+		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
 			block.appendChild(statement);
 		}
@@ -653,6 +671,38 @@ public class Parser {
 	
 	private boolean startsBooleanConstant(Token token) {
 		return token.isLextant(Keyword.TRUE, Keyword.FALSE);
+	}
+	
+	/*****************************/
+	/* VARIABLE IDENTIFIER TOKEN */
+	/*****************************/
+	
+	private ParseNode parseVariableIdentifierNode() {
+		if(!startsVariableIdentifierNode(nowReading)) return syntaxErrorNode("variable identifier node");
+	
+		readToken();
+		
+		return new VariableIdentifierNode(previouslyRead);
+	}
+	
+	private boolean startsVariableIdentifierNode(Token token) {
+		return token.isLextant(Keyword.VARIABLE);
+	}
+	
+	/******************************/
+	/* IMMUTABLE IDENTIFIER TOKEN */
+	/******************************/
+	
+	private ParseNode parseImmutableIdentifierNode() {
+		if(!startsImmutableIdentifierNode(nowReading)) return syntaxErrorNode("immutable identifier node");
+	
+		readToken();
+		
+		return new ImmutableIdentifierNode(previouslyRead);
+	}
+	
+	private boolean startsImmutableIdentifierNode(Token token) {
+		return token.isLextant(Keyword.IMMUTABLE);
 	}
 
 	private void readToken() {

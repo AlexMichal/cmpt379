@@ -19,7 +19,9 @@ public class DeclarationNode extends ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////
-	// attributes
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
+	
 	public Lextant getDeclarationType() {
 		return lextantToken().getLextant();
 	}
@@ -29,16 +31,21 @@ public class DeclarationNode extends ParseNode {
 	}	
 	
 	////////////////////////////////////////////////////////////
-	// convenience factory
+	// CONVENIENCE FACTORY
+	////////////////////////////////////////////////////////////
+	
 	public static DeclarationNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
 		DeclarationNode node = new DeclarationNode(token);
+		//node.appendChild(typeOfIdentifier);
 		node.appendChild(declaredName);
 		node.appendChild(initializer);
 		return node;
 	}
 	
 	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
+	// BOILERPLATE FOR VISITORS
+	///////////////////////////////////////////////////////////
+	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);

@@ -3,10 +3,12 @@ main {
     	imm quarters := (1 + 3) * 4;
 	imm xxxx := 1 < 3;
 	var bool2 := true;
+	//var bool2 := false;
 
-	if (true) {
-		let bool2 := false;
-	}
+	//if (true) {
+		let bool1 := false;
+		//print "IN IF STATEMENT" nl;
+	//}
 
 	print "xxxx:" , xxxx nl;
 	print "quarters:" , quarters nl;

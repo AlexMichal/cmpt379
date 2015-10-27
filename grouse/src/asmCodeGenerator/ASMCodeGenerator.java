@@ -150,7 +150,7 @@ public class ASMCodeGenerator {
 		
 		private ASMCodeFragment removeVoidCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
-			debug.out("REMOVE VOID NODE:\n" + node);
+			//debug.out("REMOVE VOID NODE:\n" + node);
 			
 			assert frag.isVoid();
 			return frag;
@@ -271,9 +271,10 @@ public class ASMCodeGenerator {
 			
 			debug.out("---If Statement \nchild 0: \n" + node.child(0) + "\nchild 1: \n" + node.child(1));
 			debug.out("NODE: \n" + node);
+			debug.out("SIZE OF CHILDREN: \n" + node.getChildren().size());
 			
 			ASMCodeFragment expression = removeValueCode(node.child(0));
-			ASMCodeFragment blockStatement = removeVoidCode(node.child(1));
+			ParseNode blockStatementNode = node.child(1);
 			String startLabel = labeller.newLabel("-if-arg1-", "");
 			String falseLabel = labeller.newLabelSameNumber("-if-false-", "");
 			String endLabel  = labeller.newLabelSameNumber("-if-end-", "");
@@ -283,14 +284,21 @@ public class ASMCodeGenerator {
 			// if (expr) ...
 			code.add(Label, startLabel);
 			code.append(expression);
-			// If false, jump to falseLabel ...
-			code.add(JumpFalse);
-			// If true, do block statement
-			code.append(blockStatement);
 			
+			// ... If false, jump to falseLabel ...
+			code.add(JumpFalse, endLabel);
+			
+			// ... If true, do block statement ...
+			for (ParseNode child : blockStatementNode.getChildren()) {
+				ASMCodeFragment childCode = removeVoidCode(child);
+				code.append(childCode);
+			}
+			// ... Jump to End label
 			code.add(Jump, endLabel);
-			// Expression was false, so just end the If statement
+			
+			// Expression was False, so perform Else Block
 			code.add(Label, falseLabel);
+			
 			code.add(Jump, endLabel);
 			
 			
@@ -370,19 +378,19 @@ public class ASMCodeGenerator {
 		}
 
 		private ASMOpcode opcodeForStore(Type type) {
-			if(type == PrimitiveType.INTEGER) {
+			if (type == PrimitiveType.INTEGER) {
 				return StoreI;
 			}
-			if(type == PrimitiveType.BOOLEAN) {
+			if (type == PrimitiveType.BOOLEAN) {
 				return StoreC;
 			}
-			if(type == PrimitiveType.FLOAT) {
+			if (type == PrimitiveType.FLOAT) {
 				return StoreF;
 			}
-			if(type == PrimitiveType.CHARACTER) {
+			if (type == PrimitiveType.CHARACTER) {
 				return StoreC;
 			}
-			if(type == PrimitiveType.STRING) {
+			if (type == PrimitiveType.STRING) {
 				return StoreI;
 			}
 			assert false: "Type " + type + " unimplemented in opcodeForStore()";

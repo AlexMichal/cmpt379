@@ -67,27 +67,32 @@ public class ParseNode {
 	}
 	
 	public Scope getLocalScope() {
-		for(ParseNode current : pathToRoot()) {
-			if(current.hasScope()) {
+		for (ParseNode current : pathToRoot()) {
+			if (current.hasScope()) {
 				return current.getScope();
 			}
 		}
+		
 		return Scope.nullInstance();
 	}
 	
 	public boolean containsBindingOf(String identifier) {
-		if(!hasScope()) {
+		if (!hasScope()) {
 			return false;
 		}
+		
 		SymbolTable symbolTable = scope.getSymbolTable();
+		
 		return symbolTable.containsKey(identifier);
 	}
 	
 	public Binding bindingOf(String identifier) {
-		if(!hasScope()) {
+		if (!hasScope()) {
 			return Binding.nullInstance();
 		}
+		
 		SymbolTable symbolTable = scope.getSymbolTable();
+		
 		return symbolTable.lookup(identifier);
 	}
 	

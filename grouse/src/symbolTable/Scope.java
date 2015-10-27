@@ -2,12 +2,15 @@ package symbolTable;
 
 import inputHandler.TextLocation;
 import logging.GrouseLogger;
+import parseTree.ParseNode;
 import parseTree.nodeTypes.IdentifierNode;
 import semanticAnalyzer.types.Type;
 import tokens.Token;
 import utilities.Debug;
 
 public class Scope {
+	private static Debug debug = new Debug();
+	
 	private Scope baseScope;
 	private MemoryAllocator allocator;
 	private SymbolTable symbolTable;
@@ -76,31 +79,53 @@ public class Scope {
 	// BINDINGS
 	///////////////////////////////////////////////////////////////////////
 	
-	public Binding createBinding(IdentifierNode identifierNode, Type type) { // TODO: LET  binding here
+	public Binding createBinding(IdentifierNode identifierNode, Type type) {
 		Token token = identifierNode.getToken();
+		String typeOfIdentifier = identifierNode.getParent().getToken().getLexeme();
 		
-		Debug debug = new Debug();
-		//debug.out("MESSAGE: " + identifierNode.toString()); // TODO: DEBUG CREATE BINDING
-		//debug.out("MESSAGE: " + identifierNode.getParent().getToken().getLexeme());
+		debug.out("MESSAGE: " + token.getLexeme()); // TODO: DEBUG CREATE BINDING
+		debug.out("typeOfIdentifier: " + typeOfIdentifier);
+		//debug.out("TYPE OF ORIGINAL IDENTIFIER: " + typeOfOriginalIdentifier);
 		
-		if (identifierNode.getParent().getToken().getLexeme() == "imm") {
+		// Ensure that this identifier is not already defined
+		if (typeOfIdentifier.contains("let")) {
+					} else { // it's an immutable or a variable
 			symbolTable.errorIfAlreadyDefined(token);
 		}
 
 		String lexeme = token.getLexeme();
-		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);	
+		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);
+		
 		symbolTable.install(lexeme, binding);
 
 		return binding;
 	}
 	
+	/*public Binding createBinding(IdentifierNode identifierNode, Type type) {
+		Token token = identifierNode.getToken();
+		String typeOfIdentifier = identifierNode.getParent().getToken().getLexeme();
+		String typeOfOriginalIdentifier = "" + identifierNode.getParent();
+		
+		debug.out("LET: TokenName:\n" + token.getLexeme()); // TODO: DEBUG CREATE BINDING
+		debug.out("LET: typeOfIdentifier:\n" + typeOfIdentifier);
+		debug.out("LET: TYPE OF ORIGINAL IDENTIFIER:\n" + typeOfOriginalIdentifier);
+
+		String lexeme = token.getLexeme();
+		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);
+		
+		symbolTable.install(lexeme, binding);
+
+		return binding;
+	}*/
+	
 	private Binding allocateNewBinding(Type type, TextLocation textLocation, String lexeme) {
 		MemoryLocation memoryLocation = allocator.allocate(type.getSize());
+		
 		return new Binding(type, textLocation, memoryLocation, lexeme);
 	}
 	
 	///////////////////////////////////////////////////////////////////////
-	//toString
+	// toString
 	///////////////////////////////////////////////////////////////////////
 	
 	public String toString() {
