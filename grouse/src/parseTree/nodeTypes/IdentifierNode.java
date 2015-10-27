@@ -17,19 +17,20 @@ public class IdentifierNode extends ParseNode {
 		assert(token instanceof IdentifierToken);
 		this.binding = null;
 	}
+	
 	public IdentifierNode(ParseNode node) {
 		super(node);
 		
-		if(node instanceof IdentifierNode) {
+		if (node instanceof IdentifierNode) {
 			this.binding = ((IdentifierNode)node).binding;
-		}
-		else {
+		} else {
 			this.binding = null;
 		}
 	}
 	
-////////////////////////////////////////////////////////////
-// attributes
+	////////////////////////////////////////////////////////////
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
 	
 	public IdentifierToken identifierToken() {
 		return (IdentifierToken)token;
@@ -38,23 +39,27 @@ public class IdentifierNode extends ParseNode {
 	public void setBinding(Binding binding) {
 		this.binding = binding;
 	}
+	
 	public Binding getBinding() {
 		return binding;
 	}
 	
-////////////////////////////////////////////////////////////
-// Speciality functions
-
+	////////////////////////////////////////////////////////////
+	// SPECIALTY FUNCTIONS
+	////////////////////////////////////////////////////////////
+	
 	public Binding findVariableBinding() {
 		String identifier = token.getLexeme();
 
-		for(ParseNode current : pathToRoot()) {
-			if(current.containsBindingOf(identifier)) {
+		for (ParseNode current : pathToRoot()) {
+			if (current.containsBindingOf(identifier)) {
 				declarationScope = current.getScope();
 				return current.bindingOf(identifier);
 			}
 		}
+		
 		useBeforeDefineError();
+		
 		return Binding.nullInstance();
 	}
 
@@ -62,15 +67,17 @@ public class IdentifierNode extends ParseNode {
 		findVariableBinding();
 		return declarationScope;
 	}
+	
 	public void useBeforeDefineError() {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.semanticAnalyzer.identifierNode");
 		Token token = getToken();
 		log.severe("identifier " + token.getLexeme() + " used before defined at " + token.getLocation());
 	}
 	
-///////////////////////////////////////////////////////////
-// accept a visitor
-		
+	///////////////////////////////////////////////////////////
+	// ACCEPT A VISITOR
+	///////////////////////////////////////////////////////////	
+	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visit(this);
 	}
