@@ -1,34 +1,15 @@
 main {
-	imm bool1 := !true;
-	imm bool2 := true;
-	imm bool3 := 3 + 3;
-	imm boolCompare := (!bool1 && bool2) || true;
+	imm bool1 := true;
     	imm quarters := (1 + 3) * 4;
 	imm xxxx := 1 < 3;
-    	imm Dimes := "xx";
-	imm dimesxddd2_ := "asdasdasd asd asd2";
-    	imm nickelsD := -17.0;
-    	imm pennies := 17.1;
-        imm x := true;
-	imm y := false;
-	imm dimesxddd3_ := "asssdasdasd asd asd2";
-	imm ddddd := "asssddddddddddddddasdasd asd asd2";
-	imm zxcv := dimesxddd2_ == dimesxddd2_;
-    	imm bad := 25;
-	let quarters := ((-3 - 1 ) * 2 + 3) * 2 - 4;
-	var xxx := nickelsD - pennies;
-	print bad nl;
-	print Dimes dimesxddd2_ nl;
-	print dimesxddd2_ nl;
-	print dimesxddd2_ nl;
-	print dimesxddd3_ nl;
-	print dimesxddd3_ nl;
-	print dimesxddd3_ nl;
-	print dimesxddd3_ nl;
-	print "Quarters:" , quarters nl;
-	print "Xxx:" , xxx nl;
-	print "Xxxx:" , xxxx nl;
-	print "Compare string:" , zxcv nl;
-	print "Bool1 Negate:" , bool1 nl;
-	print "Bool compare:" , boolCompare nl;
+	var bool2 := true;
+
+	if (true) {
+		let bool2 := false;
+	}
+
+	print "xxxx:" , xxxx nl;
+	print "quarters:" , quarters nl;
+	print "bool1: " , bool1 nl;
+	print "bool2 (false):" , bool2 nl;
 }

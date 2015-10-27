@@ -18,8 +18,6 @@ public abstract class ScannerImp implements Scanner {
 		this.input = input;
 		
 		nextToken = findNextToken();
-		
-		debug.out(nextToken.fullString());
 	}
 
 	// Iterator<Token> implementation

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import logging.GrouseLogger;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
@@ -12,6 +13,7 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
@@ -28,6 +30,9 @@ import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import lexicalAnalyzer.Scanner;
 
+// PARSER (AKA SYNTACTICAL ANALYZER)
+// Input: Tokens
+// Output: Abstract State Tree
 public class Parser {
 	private static Debug debug = new Debug();
 	
@@ -54,8 +59,10 @@ public class Parser {
 	}
 
 	////////////////////////////////////////////////////////////
-	// "program" is the start symbol S
-	// S -> MAIN mainBlock
+	// "program" IS THE START SYMBOL 'S'
+	////////////////////////////////////////////////////////////
+	
+	// S -> main { block }
 	private ParseNode parseProgram() {
 		if (!startsProgram(nowReading)) return syntaxErrorNode("program");
 		
@@ -64,6 +71,7 @@ public class Parser {
 		
 		// Parsing the main block of code
 		ParseNode mainBlock = parseMainBlock();
+		//debug.out("" + mainBlock); // TODO: zPARSE TREE PRINT
 		program.appendChild(mainBlock);
 		
 		if (!(nowReading instanceof NullToken)) return syntaxErrorNode("end of program");
@@ -76,13 +84,16 @@ public class Parser {
 	}
 	
 	///////////////////////////////////////////////////////////
-	// mainBlock
+	// MAIN BLOCK STATEMENT
+	///////////////////////////////////////////////////////////
 	
-	// mainBlock -> { statement* }
+	// block -> { statement* }
 	private ParseNode parseMainBlock() {
-		if (!startsMainBlock(nowReading)) return syntaxErrorNode("mainBlock");
+		if (!startsMainBlockStatement(nowReading)) return syntaxErrorNode("main block statement");
 		
 		ParseNode mainBlock = new MainBlockNode(nowReading);
+		
+		// ... { ...
 		expect(Punctuator.OPEN_CURLY_BRACKET);
 		
 		// Parse each statement in between the opening and closing braces
@@ -91,19 +102,23 @@ public class Parser {
 			mainBlock.appendChild(statement);
 		}
 		
+		// ... } ...
 		expect(Punctuator.CLOSE_CURLY_BRACKET);
+		
 		return mainBlock;
 	}
 	
-	private boolean startsMainBlock(Token token) {
+	private boolean startsMainBlockStatement(Token token) {
 		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
 	}
 	
 	///////////////////////////////////////////////////////////
-	// statements
+	// STATEMENTS
+	///////////////////////////////////////////////////////////
 	
-	// statement-> declaration | letStmt | printStmt
-	// Parses each statement of the main
+	// statement -> printStmt | declaration | letStmt | if statement
+	
+	// Parses each statement of a block statement
 	private ParseNode parseStatement() {
 		if (!startsStatement(nowReading)) return syntaxErrorNode("statement");
 		
@@ -113,13 +128,25 @@ public class Parser {
 		
 		if (startsPrintStatement(nowReading)) return parsePrintStatement();
 		
+		if (startsIfStatement(nowReading)) return parseIfStatement();
+
+		if (startsBlockStatement(nowReading)) return parseBlockStatement();
+		
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
 	
 	private boolean startsStatement(Token token) {
-		return startsPrintStatement(token) || startsLetStatement(token) || startsDeclaration(token);
+		return startsDeclaration(token) ||
+				startsLetStatement(token) || 
+				startsPrintStatement(token) || 
+				startsIfStatement(token) ||
+				startsBlockStatement(token);
 	}
+	
+	/*******************/
+	/* PRINT STATEMENT */
+	/*******************/
 	
 	// printStmt -> PRINT printExpressionList ;
 	private ParseNode parsePrintStatement() {
@@ -170,6 +197,10 @@ public class Parser {
 		return startsExpression(token) || token.isLextant(Punctuator.SEPARATOR, Keyword.NEWLINE) ;
 	}
 	
+	/*************************/
+	/* DECLARATION STATEMENT */
+	/*************************/
+	
 	// declaration -> [IMMUTABLE|VARIABLE] identifier := expression ;
 	private ParseNode parseDeclaration() {
 		if (!startsDeclaration(nowReading)) return syntaxErrorNode("declaration");
@@ -189,6 +220,10 @@ public class Parser {
 	private boolean startsDeclaration(Token token) {
 		return token.isLextant(Keyword.IMMUTABLE, Keyword.VARIABLE);
 	}
+	
+	/*****************/
+	/* LET STATEMENT */
+	/*****************/
 	
 	// letStatement -> identifier (variable) := expression;
 	private ParseNode parseLetStatement() {
@@ -210,8 +245,81 @@ public class Parser {
 		return token.isLextant(Keyword.LET);
 	}
 	
+	/****************/
+	/* IF STATEMENT */
+	/****************/
+	
+	// ifStatement -> if (expression) block (else block)?
+	private ParseNode parseIfStatement() {
+		ParseNode ifStatementBlock;
+		
+		// if ...
+		if (!startsIfStatement(nowReading)) return syntaxErrorNode("if statement");
+		Token ifStatementToken = nowReading;
+		readToken();
+
+		// ... ( expr ) ...
+		expect(Punctuator.OPEN_ROUND_BRACKET);
+		ParseNode expression = parseExpression();
+		expect(Punctuator.CLOSE_ROUND_BRACKET);
+		
+		// ... { block } ...
+		ifStatementBlock = parseBlockStatement();
+		
+		// OPTIONAL:
+		// ... else { block }
+		/*if (startsElseStatement(nowReading)) {
+			ParseNode elseStatementBlock;
+			
+			expect(Keyword.ELSE);
+			
+			elseStatementBlock = parseBlockStatement();
+			
+			return IfStatementNode.withChildren(ifStatementToken, expression, ifStatementBlock, elseStatementBlock);
+		}*/
+		
+		return IfStatementNode.withChildren(ifStatementToken, expression, ifStatementBlock);
+	}
+	
+	private boolean startsIfStatement(Token token) {
+		return token.isLextant(Keyword.IF);
+	}
+	
+	private boolean startsElseStatement(Token token) {
+		return token.isLextant(Keyword.ELSE);
+	}
+	
+	/*******************/
+	/* BLOCK STATEMENT */	
+	/*******************/
+	
+	// block -> { statement* }
+	private ParseNode parseBlockStatement() {
+		if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
+		
+		ParseNode block = new BlockStatementNode(nowReading);
+		
+		// ... { ...
+		expect(Punctuator.OPEN_CURLY_BRACKET);
+		
+		// Parse each statement in between the opening and closing braces
+		while(startsStatement(nowReading)) {
+			ParseNode statement = parseStatement();
+			block.appendChild(statement);
+		}
+		
+		// ... } ...
+		expect(Punctuator.CLOSE_CURLY_BRACKET);
+		
+		return block;
+	}
+	
+	private boolean startsBlockStatement(Token token) {
+		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
+	}
+		
 	///////////////////////////////////////////////////////////
-	// expressions
+	// EXPRESSIONS
 	// expr  -> exprBooleanComparison_Or
 	// exprBooleanComparison_Or -> exprBooleanComparison_And || exprBooleanComparison_And
 	// exprBooleanComparison_And -> exprComparisonOperators && exprComparisonOperators
@@ -222,15 +330,16 @@ public class Parser {
 	// expr5 -> literal OR ( expr )
 	// literal -> intNumber | floatNumber | characterConstant | booleanConstant | stringConstant | identifier
 	// expr -> parseExpressionInBetweenParentheses
-
-	// expr  -> expr1
+	///////////////////////////////////////////////////////////
+	
+	// expr  -> exprBooleanComparison_Or
 	private ParseNode parseExpression() {		
 		if (!startsExpression(nowReading)) return syntaxErrorNode("expression");
 		
 		return parseBooleanOperator_Or();
 	}
 	
-	// expr1 -> BooleanComparison
+	// exprBooleanComparison_Or -> exprBooleanOperator_And
 	private ParseNode parseBooleanOperator_Or() {
 		if (!startsBooleanOperator_Or(nowReading)) return syntaxErrorNode("BooleanOperator_Or");
 		
@@ -249,7 +358,7 @@ public class Parser {
 		return left;
 	}
 	
-	// expr1 -> BooleanComparison
+	// exprBooleanOperator_And -> BooleanComparison
 	private ParseNode parseBooleanOperator_And() {
 		if (!startsBooleanOperator_And(nowReading)) return syntaxErrorNode("BooleanOperator_And");
 		
@@ -268,7 +377,7 @@ public class Parser {
 		return left;
 	}
 	
-	// expr1 -> expr2 [(<|<=|==|!=|>|>=) expr2]?
+	// exprComparisonOperators -> expr2 [(<|<=|==|!=|>|>=) expr2]?
 	private ParseNode parseComparisonOperators() {
 		if (!startsComparisonOperators(nowReading)) return syntaxErrorNode("expression<1>");
 		
@@ -549,7 +658,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: TOKEN: DEBUG OUT
+		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
 	}	
@@ -558,9 +667,8 @@ public class Parser {
 	// if the current token is one of the given lextants, read the next token.
 	// otherwise, give a syntax error and read next token (to avoid endless looping).
 	private void expect(Lextant ...lextants ) { // ... means we can pass in 0 or more Lextants
-		if (!nowReading.isLextant(lextants)) {
-			syntaxError(nowReading, "expecting " + Arrays.toString(lextants));
-		}
+		if (!nowReading.isLextant(lextants)) syntaxError(nowReading, "expecting " + Arrays.toString(lextants));
+		
 		readToken();
 	}	
 	

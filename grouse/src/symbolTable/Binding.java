@@ -19,47 +19,56 @@ public class Binding {
 		this.lexeme = lexeme;
 	}
 	
-
 	public String toString() {
 		return "[" + lexeme +
 				" " + type +  // " " + textLocation +	
 				" " + memoryLocation +
 				"]";
 	}	
+	
 	public String getLexeme() {
 		return lexeme;
 	}
+	
 	public Type getType() {
 		return type;
 	}
+	
 	public TextLocation getLocation() {
 		return textLocation;
 	}
+	
 	public MemoryLocation getMemoryLocation() {
 		return memoryLocation;
 	}
+	
 	public void generateAddress(ASMCodeFragment code) {
 		memoryLocation.generateAddress(code, "%% " + lexeme);
 	}
 	
-////////////////////////////////////////////////////////////////////////////////////
-//Null Binding object
-////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	//Null Binding object
+	////////////////////////////////////////////////////////////////////////////////////
 
 	public static Binding nullInstance() {
 		return NullBinding.getInstance();
 	}
+	
 	private static class NullBinding extends Binding {
-		private static NullBinding instance=null;
+		private static NullBinding instance = null;
+		
 		private NullBinding() {
 			super(PrimitiveType.ERROR,
 					TextLocation.nullInstance(),
 					MemoryLocation.nullInstance(),
 					"the-null-binding");
 		}
+		
 		public static NullBinding getInstance() {
-			if(instance==null)
+			if (instance == null) {
 				instance = new NullBinding();
+			}
+			
 			return instance;
 		}
 	}

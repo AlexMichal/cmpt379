@@ -3,11 +3,14 @@ package semanticAnalyzer;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sun.org.apache.xpath.internal.ExpressionNode;
+
 import lexicalAnalyzer.Lextant;
 import logging.GrouseLogger;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
 import parseTree.nodeTypes.BinaryOperatorNode;
+import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
@@ -15,6 +18,7 @@ import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.IdentifierNode;
+import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
@@ -42,7 +46,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// constructs larger than statements
+	// CONSTRUCTS THAT ARE  LARGER THAN STATEMENTS
+	///////////////////////////////////////////////////////////////////////////
+	
 	@Override
 	public void visitEnter(ProgramNode node) {
 		enterProgramScope(node);
@@ -52,42 +58,62 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		leaveScope(node);
 	}
 	
-	public void visitEnter(MainBlockNode node) {
+	public void visitEnter(MainBlockNode node) {}
+	
+	public void visitLeave(MainBlockNode node) {}
+	
+	public void visitEnter(BlockStatementNode node) {
+		enterSubscope(node);
 	}
 	
-	public void visitLeave(MainBlockNode node) {
+	public void visitLeave(BlockStatementNode node) {
+		leaveScope(node);
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// helper methods for scoping.
+	// HELPER METHODS FOR SCOPING
+	///////////////////////////////////////////////////////////////////////////
+	
 	private void enterProgramScope(ParseNode node) {
+		debug.out("ENTERED PROGRAM SCOPE");
+		
 		Scope scope = Scope.createProgramScope();
 		node.setScope(scope);
 	}
 	
-	@SuppressWarnings("unused")
 	private void enterSubscope(ParseNode node) {
+		debug.out("ENTERED SUB - SCOPE");
+		
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
 		node.setScope(scope);
 	}
 	
 	private void leaveScope(ParseNode node) {
+		debug.out("LEFT SCOPE");
+		
 		node.getScope().leave();
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// statements, declarations, and let statements
+	// STATEMENTS, DECLARATIONS, LET STATEMENTS, IF STATEMENTS
+	///////////////////////////////////////////////////////////////////////////
+	
+	/*******************/
+	/* PRINT STATEMENT */
+	/*******************/
+	
 	@Override
-	public void visitLeave(PrintStatementNode node) {
-	}
+	public void visitLeave(PrintStatementNode node) {}
+	
+	/*************************/
+	/* DECLARATION STATEMENT */
+	/*************************/
 	
 	@Override
 	public void visitLeave(DeclarationNode node) {
 		IdentifierNode identifier = (IdentifierNode) node.child(0);
 		ParseNode initializer = node.child(1);
-		
-		//debug.out("VISIT LEAVE GET TYPE: " + initializer.getType());
 		
 		Type declarationType = initializer.getType();
 		node.setType(declarationType);
@@ -95,6 +121,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		identifier.setType(declarationType);
 		addBinding(identifier, declarationType);
 	}
+	
+	/*****************/
+	/* LET STATEMENT */
+	/*****************/
 	
 	@Override
 	public void visitLeave(LetStatementNode node) {
@@ -107,9 +137,31 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		identifier.setType(letStatementType);
 		addBinding(identifier, letStatementType);
 	}
+	
+	/****************/
+	/* IF STATEMENT */
+	/****************/
+	
+	@Override
+	public void visitLeave(IfStatementNode node) {
+		/*ParseNode expression = (ParseNode) node.child(0);
+		ParseNode block = node.child(1);
+
+		debug.out("VISIT LEAVE GET TYPE: " + expression.getType());
+		
+		Type ifStatementType = expression.getType();
+		node.setType(ifStatementType);
+		
+		expression.setType(ifStatementType);
+		addBinding(expression, ifStatementType);*/
+	}
 
 	///////////////////////////////////////////////////////////////////////////
-	// expressions
+	// EXPRESSIONS
+	///////////////////////////////////////////////////////////////////////////
+	
+	/* BINARY OPERATOR NODE */
+	
 	@Override
 	public void visitLeave(BinaryOperatorNode node) {
 		assert node.nChildren() == 2;
@@ -143,6 +195,8 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		return token.getLextant();
 	}
 	
+	/* UNARY OPERATOR NODE */
+	
 	public void visitLeave(UnaryOperatorNode node) {
 		assert node.nChildren() == 1;
 		
@@ -156,8 +210,8 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		Type typeOfChildNode = FunctionSignatures.signature(signature.getKey(), childType).resultType();
 
-		debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childType).resultType());
-		debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildNode);
+		//debug.out("TOKEN VISIT LEAVE: \n" + FunctionSignatures.signature(signature.getKey(), childType).resultType());
+		//debug.out("TOKEN VISIT LEAVE: \n" + typeOfChildNode);
 
 		if (signature.accepts(childType)) {
 			node.setType(typeOfChildNode);
@@ -167,14 +221,16 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		}
 	}
 	
-
 	private Lextant operatorFor(UnaryOperatorNode node) {
 		LextantToken token = (LextantToken) node.getToken();
 		
 		return token.getLextant();
 	}
+	
 	///////////////////////////////////////////////////////////////////////////
-	// simple leaf nodes
+	// SIMPLE LEAF NODES
+	///////////////////////////////////////////////////////////////////////////
+	
 	@Override
 	public void visit(BooleanConstantNode node) {
 		node.setType(PrimitiveType.BOOLEAN);
@@ -216,7 +272,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// IdentifierNodes, with helper methods
+	// IDENTIFIER NODES, WITH HELPER METHODS
+	///////////////////////////////////////////////////////////////////////////
+	
 	@Override
 	public void visit(IdentifierNode node) {
 		if(!isBeingDeclared(node)) {		
@@ -240,7 +298,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// error logging/printing
+	// ERROR LOGGING/PRINTING
+	///////////////////////////////////////////////////////////////////////////
+	
 	private void typeCheckError(ParseNode node, List<Type> operandTypes) {
 		Token token = node.getToken();
 		

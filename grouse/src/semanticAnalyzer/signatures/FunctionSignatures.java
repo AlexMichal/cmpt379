@@ -64,15 +64,6 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		return signatures.acceptingSignature(types);
 	}
 
-	private class Greater {
-		
-		
-		public Greater(Object obj) {
-			
-		}
-	}
-	
-	
 	/////////////////////////////////////////////////////////////////////////////////
 	// Put the signatures for operators in the following static block.
 	static {

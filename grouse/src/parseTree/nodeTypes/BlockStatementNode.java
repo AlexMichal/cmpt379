@@ -4,12 +4,12 @@ import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
 import tokens.Token;
 
-public class BlockNode extends ParseNode {
-	public BlockNode(Token token) {
+public class BlockStatementNode extends ParseNode {
+	public BlockStatementNode(Token token) {
 		super(token);
 	}
 	
-	public BlockNode(ParseNode node) {
+	public BlockStatementNode(ParseNode node) {
 		super(node);
 	}
 	

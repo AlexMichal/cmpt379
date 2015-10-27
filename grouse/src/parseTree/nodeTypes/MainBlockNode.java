@@ -5,20 +5,22 @@ import parseTree.ParseNodeVisitor;
 import tokens.Token;
 
 public class MainBlockNode extends ParseNode {
-
 	public MainBlockNode(Token token) {
 		super(token);
 	}
+	
 	public MainBlockNode(ParseNode node) {
 		super(node);
 	}
 	
 	////////////////////////////////////////////////////////////
-	// no attributes
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
 
 	
 	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
+	// BOILERPLATE FOR VISITORS
+	///////////////////////////////////////////////////////////
 	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
