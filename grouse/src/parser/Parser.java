@@ -275,15 +275,17 @@ public class Parser {
 		
 		// OPTIONAL:
 		// ... else { block }
-		/*if (startsElseStatement(nowReading)) {
+		if (startsElseStatement(nowReading)) {
 			ParseNode elseStatementBlock;
 			
+			// ... else ...
 			expect(Keyword.ELSE);
 			
+			// ... { block }
 			elseStatementBlock = parseBlockStatement();
 			
 			return IfStatementNode.withChildren(ifStatementToken, expression, ifStatementBlock, elseStatementBlock);
-		}*/
+		}
 		
 		return IfStatementNode.withChildren(ifStatementToken, expression, ifStatementBlock);
 	}
@@ -460,7 +462,7 @@ public class Parser {
 		
 		ParseNode left = parseExpression5();
 	
-		if (nowReading.isLextant(Punctuator.COLON)) {
+		/*if (nowReading.isLextant(Punctuator.COLON)) {
 			// expr : ...
 			Token colonToken = nowReading;
 			expect(Punctuator.COLON);
@@ -475,7 +477,7 @@ public class Parser {
 			ParseNode right = new TypeNode(typeToken);
 			
 			return CastNode.withChildren(colonToken, left, right);
-		}
+		}*/
 			
 		return left;
 	}

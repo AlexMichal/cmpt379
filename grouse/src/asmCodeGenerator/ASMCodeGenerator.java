@@ -234,7 +234,9 @@ public class ASMCodeGenerator {
 			}
 		}
 
+		/********************/
 		/* DECLARATION NODE */
+		/********************/
 		
 		public void visitLeave(DeclarationNode node) {
 			newVoidCode(node);
@@ -249,9 +251,11 @@ public class ASMCodeGenerator {
 			code.add(opcodeForStore(type));
 		}
 		
+		/*****************/
 		/* LET STATEMENT */
+		/*****************/
 		
-		public void visitLeave(LetStatementNode node) { // TODO: let
+		public void visitLeave(LetStatementNode node) {
 			newVoidCode(node);
 			
 			ASMCodeFragment lvalue = removeAddressCode(node.child(0));	
@@ -264,49 +268,56 @@ public class ASMCodeGenerator {
 			code.add(opcodeForStore(type));
 		}
 		
+		/****************/
 		/* IF STATEMENT */
+		/****************/
 		
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			
-			/*debug.out("---If Statement \nchild 0: \n" + node.child(0) + "\nchild 1: \n" + node.child(1));
-			debug.out("NODE: \n" + node);
-			debug.out("SIZE OF CHILDREN: \n" + node.getChildren().size());*/
+			ASMCodeFragment expression 					= removeValueCode(node.child(0));
+			ParseNode blockStatementNodeIfStatement 	= node.child(1);
+			ParseNode blockStatementNodeElseStatement 	= null;
+			String startLabel 	= labeller.newLabel("-if-statement-", "");
+			String elseLabel  	= labeller.newLabelSameNumber("-if-else-", "");
+			String endLabel  	= labeller.newLabelSameNumber("-if-end-", "");
+			Boolean hasElseStatement = (node.getChildren().size() == 3);
 			
-			ASMCodeFragment expression = removeValueCode(node.child(0));
-			ParseNode blockStatementNode = node.child(1);
-			String startLabel = labeller.newLabel("-if-arg1-", "");
-			String falseLabel = labeller.newLabelSameNumber("-if-false-", "");
-			String endLabel  = labeller.newLabelSameNumber("-if-end-", "");
-			String strLeftChildValue = node.child(0).getToken().getLexeme();
-			String strRightChildValue = node.child(1).getToken().getLexeme();
-
 			// if (expr) ...
 			code.add(Label, startLabel);
 			code.append(expression);
 			
-			// ... If false, jump to falseLabel ...
-			code.add(JumpFalse, endLabel);
+			// ... if FALSE, jump to elseLabel ...
+			code.add(JumpFalse, elseLabel);
 			
-			// ... If true, do block statement ...
-			for (ParseNode child : blockStatementNode.getChildren()) {
+			// ... if TRUE, do block statement ...
+			for (ParseNode child : blockStatementNodeIfStatement.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
-			// ... Jump to End label
+			
+			// ... jump to End label
 			code.add(Jump, endLabel);
-			
-			// Expression was False, so perform Else Block
-			code.add(Label, falseLabel);
-			
-			code.add(Jump, endLabel);
-			
+
+			// ... expression was False, so check if there's an Else statement ...
+			code.add(Label, elseLabel);
+			if (hasElseStatement) {
+				blockStatementNodeElseStatement = node.child(2);
+				
+				// ... there is, so perform Else Block ...
+				for (ParseNode child : blockStatementNodeElseStatement.getChildren()) {
+					ASMCodeFragment childCode = removeVoidCode(child);
+					code.append(childCode);
+				}
+			}
 			
 			// .. after else { block }
 			code.add(Label, endLabel); 
 		}
 		
+		/************************/
 		/* BLOCK STATEMENT NODE */
+		/************************/
 		
 		public void visitLeave(BlockStatementNode node) {
 			newVoidCode(node);

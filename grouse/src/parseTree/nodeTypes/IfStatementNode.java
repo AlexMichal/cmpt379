@@ -34,6 +34,7 @@ public class IfStatementNode extends ParseNode {
 	// CONVENIENCE FACTORY
 	////////////////////////////////////////////////////////////
 	
+	// If statement without an Else statement
 	public static IfStatementNode withChildren(Token token, ParseNode expression, ParseNode ifStatementBlock) {
 		IfStatementNode node = new IfStatementNode(token);
 		
@@ -43,6 +44,7 @@ public class IfStatementNode extends ParseNode {
 		return node;
 	}
 	
+	// If statement with an Else statement
 	public static IfStatementNode withChildren(Token token, ParseNode expression, ParseNode ifStatementBlock, ParseNode elseStatementBlock) {
 		IfStatementNode node = new IfStatementNode(token);
 		
