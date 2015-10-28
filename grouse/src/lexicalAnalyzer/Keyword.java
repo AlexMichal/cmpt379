@@ -3,7 +3,6 @@ package lexicalAnalyzer;
 import tokens.LextantToken;
 import tokens.Token;
 
-
 public enum Keyword implements Lextant {
 	IMMUTABLE("imm"),
 	VARIABLE("var"),
@@ -15,16 +14,22 @@ public enum Keyword implements Lextant {
 	MAIN("main"),
 	IF("if"),
 	ELSE("else"),
-	NULL_KEYWORD("");
+	NULL_KEYWORD(""),
+	// Type:
+	BOOL("bool"),
+	CHAR("char"),
+	STRING("string"),
+	INT("int"),
+	FLOAT("float");
 
 	private String lexeme;
 	private Token prototype;
-	
 	
 	private Keyword(String lexeme) {
 		this.lexeme = lexeme;
 		this.prototype = LextantToken.make(null, lexeme, this);
 	}
+	
 	public String getLexeme() {
 		return lexeme;
 	}
@@ -34,11 +39,10 @@ public enum Keyword implements Lextant {
 	}
 	
 	public static Keyword forLexeme(String lexeme) {
-		for(Keyword keyword: values()) {
-			if(keyword.lexeme.equals(lexeme)) {
-				return keyword;
-			}
+		for (Keyword keyword: values()) {
+			if (keyword.lexeme.equals(lexeme)) return keyword;
 		}
+		
 		return NULL_KEYWORD;
 	}
 	

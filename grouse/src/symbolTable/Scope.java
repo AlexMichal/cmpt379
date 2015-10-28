@@ -2,8 +2,6 @@ package symbolTable;
 
 import inputHandler.TextLocation;
 import logging.GrouseLogger;
-import parseTree.ParseNode;
-import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import semanticAnalyzer.types.Type;
 import tokens.Token;
@@ -87,12 +85,13 @@ public class Scope {
 		String 	lexeme;
 		Binding binding;
 		
-		// TODO: DELETE
-		debug.out("------Type, Lexeme, IdentifierType:\n" + type + " " + typeOfIdentifier + " " + typeOfStatement);
-
-		if (typeOfStatement.contains("let")) { // let statement
-			if (typeOfIdentifier.contains("imm")) immutableIdentifierError(token);
-		} else { // var or imm declaration statement
+		if (typeOfStatement.contains("let")) {
+			if (typeOfIdentifier.contains("imm")) {
+				immutableIdentifierError(token);
+			} else {
+				// variable identifier and do do nothing
+			}
+		} else {
 			symbolTable.errorIfAlreadyDefined(token);
 		}
 		
@@ -103,23 +102,6 @@ public class Scope {
 
 		return binding;
 	}
-	
-	/*public Binding createBinding(IdentifierNode identifierNode, Type type) {
-		Token token = identifierNode.getToken();
-		String typeOfIdentifier = identifierNode.getParent().getToken().getLexeme();
-		String typeOfOriginalIdentifier = "" + identifierNode.getParent();
-		
-		debug.out("LET: TokenName:\n" + token.getLexeme()); // TODO: DEBUG CREATE BINDING
-		debug.out("LET: typeOfIdentifier:\n" + typeOfIdentifier);
-		debug.out("LET: TYPE OF ORIGINAL IDENTIFIER:\n" + typeOfOriginalIdentifier);
-
-		String lexeme = token.getLexeme();
-		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);
-		
-		symbolTable.install(lexeme, binding);
-
-		return binding;
-	}*/
 	
 	private Binding allocateNewBinding(Type type, TextLocation textLocation, String lexeme, Object extra) {
 		MemoryLocation memoryLocation = allocator.allocate(type.getSize());

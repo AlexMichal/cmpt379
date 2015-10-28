@@ -33,27 +33,12 @@ public class TypeNode extends ParseNode {
 	public LextantToken lextantToken() {
 		return (LextantToken)token;
 	}	
-	
-	////////////////////////////////////////////////////////////
-	// CONVENIENCE FACTORY
-	////////////////////////////////////////////////////////////
-	
-	public static TypeNode withChildren(Token token, ParseNode left, ParseNode right) {
-		TypeNode node = new TypeNode(token);
-		
-		node.appendChild(left);
-		node.appendChild(right);
-		
-		return node;
-	}
-	
+
 	////////////////////////////////////////////////////////////
 	// BOILERPLATE FOR VISITORS
 	////////////////////////////////////////////////////////////
 	
 	public void accept(ParseNodeVisitor visitor) {
-		visitor.visitEnter(this);
-		visitChildren(visitor);
-		visitor.visitLeave(this);
+		visitor.visit(this);
 	}
 }

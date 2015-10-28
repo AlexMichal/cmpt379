@@ -150,7 +150,7 @@ public class ASMCodeGenerator {
 		
 		private ASMCodeFragment removeVoidCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
-			//debug.out("REMOVE VOID NODE:\n" + node);
+			//debug.out("REMOVE VOID NODE:\n" + node); // TODO: Delete
 			
 			assert frag.isVoid();
 			return frag;
@@ -269,9 +269,9 @@ public class ASMCodeGenerator {
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			
-			debug.out("---If Statement \nchild 0: \n" + node.child(0) + "\nchild 1: \n" + node.child(1));
+			/*debug.out("---If Statement \nchild 0: \n" + node.child(0) + "\nchild 1: \n" + node.child(1));
 			debug.out("NODE: \n" + node);
-			debug.out("SIZE OF CHILDREN: \n" + node.getChildren().size());
+			debug.out("SIZE OF CHILDREN: \n" + node.getChildren().size());*/
 			
 			ASMCodeFragment expression = removeValueCode(node.child(0));
 			ParseNode blockStatementNode = node.child(1);

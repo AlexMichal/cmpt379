@@ -17,7 +17,9 @@ public class BinaryOperatorNode extends ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////
-	// attributes
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
+	
 	public Lextant getOperator() {
 		return lextantToken().getLextant();
 	}
@@ -27,7 +29,9 @@ public class BinaryOperatorNode extends ParseNode {
 	}	
 	
 	////////////////////////////////////////////////////////////
-	// convenience factory
+	// CONVENIENCE FACTORY
+	////////////////////////////////////////////////////////////
+	
 	public static BinaryOperatorNode withChildren(Token token, ParseNode left, ParseNode right) {
 		BinaryOperatorNode node = new BinaryOperatorNode(token);
 		node.appendChild(left);
@@ -35,8 +39,10 @@ public class BinaryOperatorNode extends ParseNode {
 		return node;
 	}
 	
-	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
+	////////////////////////////////////////////////////////////
+	// BOILERPLATE FOR VISITORS
+	////////////////////////////////////////////////////////////
+	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);

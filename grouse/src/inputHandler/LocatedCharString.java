@@ -31,8 +31,6 @@ public class LocatedCharString {
 		string += c.getCharacter();
 		
 		string = string.intern();
-		
-		//debug.out("Located String Stream: " + string); // TODO: DELETE
 	}		
 	
 	public LocatedChar chopTail() {

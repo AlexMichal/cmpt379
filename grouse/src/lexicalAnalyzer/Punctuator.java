@@ -51,7 +51,7 @@ public enum Punctuator implements Lextant {
 		return prototype;
 	}
 	
-	// disgusting code, I know // TODO: DELETE POTNETIAOANALLY?
+	// TODO: unused. Delete?
 	public boolean isComparisonOperator(String lexeme) {
 		if (lexeme.equals(Punctuator.GREATER) ||
 				lexeme.equals(Punctuator.GREATER_OR_EQUAL) ||
@@ -65,7 +65,6 @@ public enum Punctuator implements Lextant {
 		}
 	}
 	
-	// disgusting code, I know
 	public boolean isArithmeticOperator(String lexeme) {
 		if (lexeme.equals(Punctuator.ADD) ||
 				lexeme.equals(Punctuator.SUBTRACT) ||

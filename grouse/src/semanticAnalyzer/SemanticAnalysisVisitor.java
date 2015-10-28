@@ -26,6 +26,7 @@ import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
 import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
@@ -139,11 +140,6 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		node.setType(letStatementType);
 		nameOfIdentifier.setType(letStatementType);
-		
-		
-		debug.out("---------------------------");
-		debug.out(" BINDING EXTRA: \n TOKEN: " + typeOfIdentifier);
-		debug.out("---------------------------");
 		
 		addBinding(nameOfIdentifier, letStatementType, typeOfIdentifier);
 	}
@@ -281,6 +277,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 //		node.setType(PrimitiveType.INTEGER);
 	}
 	
+	/*@Override
+	public void visit(TypeNode node) {
+//		node.setType(PrimitiveType.INTEGER);
+	}*/
+	
 	///////////////////////////////////////////////////////////////////////////
 	// IDENTIFIER NODES, WITH HELPER METHODS
 	///////////////////////////////////////////////////////////////////////////
@@ -292,12 +293,9 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 
 			node.setType(binding.getType());
 			node.setBinding(binding);
-									
-			debug.out("---------------------------");
-			debug.out(" BINDING EXTRA: "  + binding + "\n TOKEN: " + node.getParent().getToken());
-			debug.out("---------------------------");
+		} else {
+			// Parent DeclarationNode does the processing
 		}
-		// else parent DeclarationNode does the processing.
 	}
 	
 	private boolean isBeingDeclared(IdentifierNode node) {

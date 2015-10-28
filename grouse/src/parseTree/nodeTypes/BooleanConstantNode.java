@@ -11,12 +11,14 @@ public class BooleanConstantNode extends ParseNode {
 		super(token);
 		assert(token.isLextant(Keyword.TRUE, Keyword.FALSE));
 	}
+	
 	public BooleanConstantNode(ParseNode node) {
 		super(node);
 	}
 
-////////////////////////////////////////////////////////////
-// attributes
+	////////////////////////////////////////////////////////////
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
 	
 	public boolean getValue() {
 		return token.isLextant(Keyword.TRUE);
@@ -26,11 +28,11 @@ public class BooleanConstantNode extends ParseNode {
 		return (LextantToken)token;
 	}	
 
-///////////////////////////////////////////////////////////
-// accept a visitor
+	////////////////////////////////////////////////////////////
+	// ACCEPT A VISITOR
+	////////////////////////////////////////////////////////////
 	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visit(this);
 	}
-
 }
