@@ -51,13 +51,14 @@ public class IdentifierNode extends ParseNode {
 		return binding;
 	}
 	
-	public String getTypeOfIdentifier() {
+	// TODO: delete
+	/*public String getTypeOfIdentifier() {
 		return typeOfIdentifier;
 	}
 	
 	public void setTypeOfIdentifier(String str) {
 		this.typeOfIdentifier = str;
-	}
+	}*/
 	
 	////////////////////////////////////////////////////////////
 	// SPECIALTY FUNCTIONS

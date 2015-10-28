@@ -128,6 +128,7 @@ public class ASMCodeGenerator {
 		
 		private ASMCodeFragment getAndRemoveCode(ParseNode node) {
 			ASMCodeFragment result = codeMap.get(node);
+			
 			codeMap.remove(result);
 			return result;
 		}
@@ -218,13 +219,15 @@ public class ASMCodeGenerator {
 		// STATEMENTS
 		///////////////////////////////////////////////////////////////////////////
 		
-		/* PRINT STATEMENT*/
+		/*******************/
+		/* PRINT STATEMENT */
+		/*******************/
 		
 		public void visitLeave(PrintStatementNode node) {
 			newVoidCode(node);
 
-			for(ParseNode child : node.getChildren()) {
-				if(child instanceof NewlineNode || child instanceof SeparatorNode) {
+			for (ParseNode child : node.getChildren()) {
+				if (child instanceof NewlineNode || child instanceof SeparatorNode) {
 					ASMCodeFragment childCode = removeVoidCode(child);
 					code.append(childCode);
 				}
@@ -351,15 +354,15 @@ public class ASMCodeGenerator {
 		private void appendPrintCode(ParseNode node) {
 			String format = printFormat(node.getType());
 
-			code.append(removeValueCode(node));
+   			code.append(removeValueCode(node));
 			convertToStringIfBoolean(node);
 			code.add(PushD, format);
 			code.add(Printf);
 		}
 		
 		private void convertToStringIfBoolean(ParseNode node) {
-			if(node.getType() != PrimitiveType.BOOLEAN) {
-				return;
+			if (node.getType() != PrimitiveType.BOOLEAN) {
+ 				return;
 			}
 			
 			String trueLabel = labeller.newLabel("-print-boolean-true", "");

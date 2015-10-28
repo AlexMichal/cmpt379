@@ -39,10 +39,10 @@ public class ASMCodeChunk {
 		instructions.add(instruction);
 	}
 	
-	static private String terminator = System.getProperty("line.separator");
+	static private String terminator = System.getProperty("line.separator"); // TODO: HINT here for If scope??
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for(ASMInstruction instruction: instructions) {
+		for (ASMInstruction instruction: instructions) {
 			buffer.append(instruction.toString());
 			buffer.append(terminator);
 		}

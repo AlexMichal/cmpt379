@@ -48,7 +48,7 @@ public class ASMCodeFragment {
 	 */
 	public void append(ASMCodeFragment fragment) {
 		chunks.addAll(fragment.chunks);
-	}
+ 	}
 	
 	public void add(ASMOpcode opcode, int operand, String comment) {
 		lastChunk().add(opcode, operand, comment);
@@ -73,9 +73,10 @@ public class ASMCodeFragment {
 	}
 
 	private ASMCodeChunk lastChunk() {
-		if(chunks.size() == 0) {
+		if (chunks.size() == 0) {
 			newChunk();
 		}
+		
 		return chunks.get(chunks.size() - 1);
 	}
 
@@ -86,7 +87,7 @@ public class ASMCodeFragment {
 	
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
-		for(ASMCodeChunk chunk: chunks) {
+		for (ASMCodeChunk chunk: chunks) {
 			buffer.append(chunk.toString());
 		}
 		return buffer.toString();

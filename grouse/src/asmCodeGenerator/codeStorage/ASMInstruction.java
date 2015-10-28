@@ -56,14 +56,19 @@ public class ASMInstruction {
 	//              the emulator doesn't handle.
 	static private String indentation = "        ";
 	public String toString() {
-		if(opcode == ASMOpcode.DataS) {
+		if (opcode == ASMOpcode.DataS) {
 			return DataStoString();
 		}
+		
 		String result = indentation;	// indentation(8);
+		
 		result += opcodeString();
 		result += argumentString();
-		if(comment != null)
+		
+		if (comment != null) {
 			result += " " + comment;
+		}
+		
 		return result;
 	}
 	
@@ -71,16 +76,17 @@ public class ASMInstruction {
 	private String DataStoString() {
 		String string = (String)this.argument;
 		
-		if(string.length() == 0) {
+		if (string.length() == 0) {
 			return NullDataStoString();
 		}
 		
-		if(comment == null || comment == "") {
+		if (comment == null || comment == "") {
 			comment = DataSComment();
 		}
+		
 		String result = dataCString((int)string.charAt(0), comment) + terminator;
 		
-		for(int i=1; i<string.length(); i++) {
+		for (int i=1; i<string.length(); i++) {
 			result += dataCString((int)string.charAt(i), "");
 			result += terminator;
 		}

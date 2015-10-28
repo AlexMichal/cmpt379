@@ -78,7 +78,7 @@ public class Scope {
 	// BINDINGS
 	///////////////////////////////////////////////////////////////////////
 	
-	public Binding createBinding(IdentifierNode identifierNode, Type type, Object extra) {
+	public Binding createBinding(IdentifierNode identifierNode, Type type, Object extra) { // TODO: CLEAN and clear up
 		Token 	token 				= identifierNode.getToken();
 		String 	typeOfStatement 	= identifierNode.getParent().getToken().getLexeme();
 		String 	typeOfIdentifier	= (String)extra;
@@ -89,17 +89,18 @@ public class Scope {
 			if (typeOfIdentifier.contains("imm")) {
 				immutableIdentifierError(token);
 			} else {
-				// variable identifier and do do nothing
+				// re-point variable to new memory location
+				return identifierNode.getBinding();
 			}
 		} else {
 			symbolTable.errorIfAlreadyDefined(token);
 		}
-		
+
 		lexeme = token.getLexeme();
 		binding = allocateNewBinding(type, token.getLocation(), lexeme, extra);
 		
 		symbolTable.install(lexeme, binding);
-
+		
 		return binding;
 	}
 	
