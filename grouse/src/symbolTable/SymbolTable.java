@@ -16,13 +16,13 @@ public class SymbolTable {
 		table = new HashMap<String, Binding>();
 	}
 	
-	
 	////////////////////////////////////////////////////////////////
 	// INSTALLATION AND LOOKUP OF IDENTIFIERS
 	////////////////////////////////////////////////////////////////
 	
 	public Binding install(String identifier, Binding binding) {
 		table.put(identifier, binding);
+		
 		return binding;
 	}
 	
@@ -58,6 +58,7 @@ public class SymbolTable {
 	
 	protected static void multipleDefinitionError(Token token) {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.symbolTable");
+		
 		log.severe("variable \"" + token.getLexeme() + 
 				          "\" multiply defined at " + token.getLocation());
 	}

@@ -2,7 +2,6 @@ package semanticAnalyzer;
 
 import parseTree.*;
 
-
 public class SemanticAnalyzer {
 	ParseNode ASTree;
 	
@@ -10,6 +9,7 @@ public class SemanticAnalyzer {
 		SemanticAnalyzer analyzer = new SemanticAnalyzer(ASTree);
 		return analyzer.analyze();
 	}
+	
 	public SemanticAnalyzer(ParseNode ASTree) {
 		this.ASTree = ASTree;
 	}

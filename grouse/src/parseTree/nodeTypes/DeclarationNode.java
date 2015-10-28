@@ -8,10 +8,17 @@ import tokens.LextantToken;
 import tokens.Token;
 
 public class DeclarationNode extends ParseNode {
-
+	enum validTypes {
+		IMMUTABLE,
+		VARIABLE,
+		NONE;
+	}
+	
+	private validTypes typeOfIdentifer;
+	
 	public DeclarationNode(Token token) {
 		super(token);
-		assert(token.isLextant(Keyword.IMMUTABLE) || token.isLextant(Keyword.VARIABLE));
+		assert(token.isLextant(Keyword.IMMUTABLE) || token.isLextant(Keyword.VARIABLE) || token.isLextant(Keyword.LET));
 	}
 
 	public DeclarationNode(ParseNode node) {
@@ -30,13 +37,31 @@ public class DeclarationNode extends ParseNode {
 		return (LextantToken)token;
 	}	
 	
+	// TODO: DELETE
+	/*public void setTypeOfIdentifier(String typeOfIdentifier) {
+		switch (typeOfIdentifier) {
+			case "var" : 
+				this.typeOfIdentifer = validTypes.VARIABLE;
+				break;
+			case "imm" :
+				this.typeOfIdentifer = validTypes.IMMUTABLE;
+				break;
+			default :
+				this.typeOfIdentifer = validTypes.NONE;
+				break;
+		}
+	}
+	
+	public validTypes getTypeOfIdentifier() {
+		return typeOfIdentifer;
+	}*/
+	
 	////////////////////////////////////////////////////////////
 	// CONVENIENCE FACTORY
 	////////////////////////////////////////////////////////////
 	
 	public static DeclarationNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
 		DeclarationNode node = new DeclarationNode(token);
-		//node.appendChild(typeOfIdentifier);
 		node.appendChild(declaredName);
 		node.appendChild(initializer);
 		return node;

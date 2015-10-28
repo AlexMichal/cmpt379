@@ -8,7 +8,6 @@ import tokens.LextantToken;
 import tokens.Token;
 
 public class LetStatementNode extends ParseNode {
-
 	public LetStatementNode(Token token) {
 		super(token);
 
@@ -20,7 +19,9 @@ public class LetStatementNode extends ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////
-	// attributes
+	// ATTRIBUTES
+	////////////////////////////////////////////////////////////
+	
 	public Lextant getLetStatementType() {
 		return lextantToken().getLextant();
 	}
@@ -30,16 +31,22 @@ public class LetStatementNode extends ParseNode {
 	}	
 	
 	////////////////////////////////////////////////////////////
-	// convenience factory
+	// CONVENIENCE FACTORY
+	////////////////////////////////////////////////////////////
+	
 	public static LetStatementNode withChildren(Token token, ParseNode declaredName, ParseNode initializer) {
 		LetStatementNode node = new LetStatementNode(token);
+		
 		node.appendChild(declaredName);
 		node.appendChild(initializer);
+		
 		return node;
 	}
 	
 	///////////////////////////////////////////////////////////
-	// boilerplate for visitors
+	// BOILERPLATE FOR VISITORS
+	////////////////////////////////////////////////////////////
+	
 	public void accept(ParseNodeVisitor visitor) {
 		visitor.visitEnter(this);
 		visitChildren(visitor);

@@ -7,15 +7,20 @@ import symbolTable.Binding;
 import symbolTable.Scope;
 import tokens.IdentifierToken;
 import tokens.Token;
+import utilities.Debug;
 
 public class IdentifierNode extends ParseNode {
+	private static Debug debug = new Debug();
+	
 	private Binding binding;
 	private Scope declarationScope;
+	private String typeOfIdentifier;
 
 	public IdentifierNode(Token token) {
 		super(token);
 		assert(token instanceof IdentifierToken);
 		this.binding = null;
+		this.typeOfIdentifier = "";
 	}
 	
 	public IdentifierNode(ParseNode node) {
@@ -26,6 +31,8 @@ public class IdentifierNode extends ParseNode {
 		} else {
 			this.binding = null;
 		}
+		
+		this.typeOfIdentifier = "";
 	}
 	
 	////////////////////////////////////////////////////////////
@@ -44,16 +51,25 @@ public class IdentifierNode extends ParseNode {
 		return binding;
 	}
 	
+	public String getTypeOfIdentifier() {
+		return typeOfIdentifier;
+	}
+	
+	public void setTypeOfIdentifier(String str) {
+		this.typeOfIdentifier = str;
+	}
+	
 	////////////////////////////////////////////////////////////
 	// SPECIALTY FUNCTIONS
 	////////////////////////////////////////////////////////////
 	
 	public Binding findVariableBinding() {
 		String identifier = token.getLexeme();
-
+		
 		for (ParseNode current : pathToRoot()) {
 			if (current.containsBindingOf(identifier)) {
 				declarationScope = current.getScope();
+				
 				return current.bindingOf(identifier);
 			}
 		}
@@ -70,7 +86,9 @@ public class IdentifierNode extends ParseNode {
 	
 	public void useBeforeDefineError() {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.semanticAnalyzer.identifierNode");
+		
 		Token token = getToken();
+		
 		log.severe("identifier " + token.getLexeme() + " used before defined at " + token.getLocation());
 	}
 	

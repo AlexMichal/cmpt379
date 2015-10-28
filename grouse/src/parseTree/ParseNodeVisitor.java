@@ -4,7 +4,6 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.ImmutableIdentifierNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -19,7 +18,6 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
-import parseTree.nodeTypes.VariableIdentifierNode;
 
 // Visitor pattern with pre- and post-order visits
 public interface ParseNodeVisitor {
@@ -64,8 +62,6 @@ public interface ParseNodeVisitor {
 	void visit(StringConstantNode node);
 	void visit(NewlineNode node);
 	void visit(SeparatorNode node);
-	void visit(VariableIdentifierNode node);
-	void visit(ImmutableIdentifierNode node);
 	
 	public static class Default implements ParseNodeVisitor
 	{
@@ -175,12 +171,6 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}	
 		public void visit(SeparatorNode node) {
-			defaultVisitForLeaf(node);
-		}
-		public void visit(VariableIdentifierNode node) {
-			defaultVisitForLeaf(node);
-		}	
-		public void visit(ImmutableIdentifierNode node) {
 			defaultVisitForLeaf(node);
 		}
 	}

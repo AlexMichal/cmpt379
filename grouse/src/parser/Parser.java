@@ -8,7 +8,6 @@ import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.CharacterConstantNode;
-import parseTree.nodeTypes.ImmutableIdentifierNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -23,7 +22,6 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
-import parseTree.nodeTypes.VariableIdentifierNode;
 import semanticAnalyzer.types.PrimitiveType;
 import tokens.*;
 import utilities.Debug;
@@ -73,7 +71,7 @@ public class Parser {
 		
 		// Parsing the main block of code
 		ParseNode mainBlock = parseMainBlock();
-		//debug.out("" + mainBlock); // TODO: zPARSE TREE PRINT
+		debug.out("" + mainBlock); // TODO: zPARSE TREE PRINT
 		program.appendChild(mainBlock);
 		
 		if (!(nowReading instanceof NullToken)) return syntaxErrorNode("end of program");
@@ -179,16 +177,18 @@ public class Parser {
 	// This adds the printExpression it parses to the children of the given parent
 	// printExpression -> expr? ,? nl? 
 	private void parsePrintExpression(PrintStatementNode parent) {
-		if(startsExpression(nowReading)) {
+		if (startsExpression(nowReading)) {
 			ParseNode child = parseExpression();
 			parent.appendChild(child);
 		}
-		if(nowReading.isLextant(Punctuator.SEPARATOR)) {
+		
+		if (nowReading.isLextant(Punctuator.SEPARATOR)) {
 			readToken();
 			ParseNode child = new SeparatorNode(previouslyRead);
 			parent.appendChild(child);
 		}
-		if(nowReading.isLextant(Keyword.NEWLINE)) {
+		
+		if (nowReading.isLextant(Keyword.NEWLINE)) {
 			readToken();
 			ParseNode child = new NewlineNode(previouslyRead);
 			parent.appendChild(child);
@@ -208,10 +208,9 @@ public class Parser {
 		if (!startsDeclaration(nowReading)) return syntaxErrorNode("declaration");
 		
 		Token declarationToken = nowReading;
-		//ParseNode typeOfIdentifier;
-		
 		readToken();
 		
+		// TODO: DELETE
 		//debug.out("---------------------------------: \n" + nowReading.getLexeme());
 		//debug.out(nowReading.getLexeme());
 		
@@ -226,6 +225,7 @@ public class Parser {
 		}*/
 
 		//debug.out(nowReading.getLexeme());
+		
 		ParseNode identifierName = parseIdentifier();
 		expect(Punctuator.ASSIGN);
 		
@@ -654,6 +654,7 @@ public class Parser {
 		if (!startsIdentifier(nowReading)) return syntaxErrorNode("identifier");
 		
 		readToken();
+		
 		return new IdentifierNode(previouslyRead);
 	}
 	
@@ -673,47 +674,22 @@ public class Parser {
 		return token.isLextant(Keyword.TRUE, Keyword.FALSE);
 	}
 	
-	/*****************************/
-	/* VARIABLE IDENTIFIER TOKEN */
-	/*****************************/
+	/*********/
+	/* OTHER */
+	/*********/
 	
-	private ParseNode parseVariableIdentifierNode() {
-		if(!startsVariableIdentifierNode(nowReading)) return syntaxErrorNode("variable identifier node");
-	
-		readToken();
-		
-		return new VariableIdentifierNode(previouslyRead);
-	}
-	
-	private boolean startsVariableIdentifierNode(Token token) {
-		return token.isLextant(Keyword.VARIABLE);
-	}
-	
-	/******************************/
-	/* IMMUTABLE IDENTIFIER TOKEN */
-	/******************************/
-	
-	private ParseNode parseImmutableIdentifierNode() {
-		if(!startsImmutableIdentifierNode(nowReading)) return syntaxErrorNode("immutable identifier node");
-	
-		readToken();
-		
-		return new ImmutableIdentifierNode(previouslyRead);
-	}
-	
-	private boolean startsImmutableIdentifierNode(Token token) {
-		return token.isLextant(Keyword.IMMUTABLE);
-	}
-
 	private void readToken() {
 		previouslyRead = nowReading;
 		
 		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
-	}	
+	}
 	
-	/** ERROR RELATED **/
+	/*****************/
+	/* ERROR RELATED */
+	/*****************/
+	
 	// if the current token is one of the given lextants, read the next token.
 	// otherwise, give a syntax error and read next token (to avoid endless looping).
 	private void expect(Lextant ...lextants ) { // ... means we can pass in 0 or more Lextants

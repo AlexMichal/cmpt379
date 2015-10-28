@@ -3,6 +3,7 @@ package symbolTable;
 import inputHandler.TextLocation;
 import logging.GrouseLogger;
 import parseTree.ParseNode;
+import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.IdentifierNode;
 import semanticAnalyzer.types.Type;
 import tokens.Token;
@@ -79,22 +80,24 @@ public class Scope {
 	// BINDINGS
 	///////////////////////////////////////////////////////////////////////
 	
-	public Binding createBinding(IdentifierNode identifierNode, Type type) {
-		Token token = identifierNode.getToken();
-		String typeOfIdentifier = identifierNode.getParent().getToken().getLexeme();
+	public Binding createBinding(IdentifierNode identifierNode, Type type, Object extra) {
+		Token 	token 				= identifierNode.getToken();
+		String 	typeOfStatement 	= identifierNode.getParent().getToken().getLexeme();
+		String 	typeOfIdentifier	= (String)extra;
+		String 	lexeme;
+		Binding binding;
 		
-		debug.out("MESSAGE: " + token.getLexeme()); // TODO: DEBUG CREATE BINDING
-		debug.out("typeOfIdentifier: " + typeOfIdentifier);
-		//debug.out("TYPE OF ORIGINAL IDENTIFIER: " + typeOfOriginalIdentifier);
-		
-		// Ensure that this identifier is not already defined
-		if (typeOfIdentifier.contains("let")) {
-					} else { // it's an immutable or a variable
+		// TODO: DELETE
+		debug.out("------Type, Lexeme, IdentifierType:\n" + type + " " + typeOfIdentifier + " " + typeOfStatement);
+
+		if (typeOfStatement.contains("let")) { // let statement
+			if (typeOfIdentifier.contains("imm")) immutableIdentifierError(token);
+		} else { // var or imm declaration statement
 			symbolTable.errorIfAlreadyDefined(token);
 		}
-
-		String lexeme = token.getLexeme();
-		Binding binding = allocateNewBinding(type, token.getLocation(), lexeme);
+		
+		lexeme = token.getLexeme();
+		binding = allocateNewBinding(type, token.getLocation(), lexeme, extra);
 		
 		symbolTable.install(lexeme, binding);
 
@@ -118,10 +121,10 @@ public class Scope {
 		return binding;
 	}*/
 	
-	private Binding allocateNewBinding(Type type, TextLocation textLocation, String lexeme) {
+	private Binding allocateNewBinding(Type type, TextLocation textLocation, String lexeme, Object extra) {
 		MemoryLocation memoryLocation = allocator.allocate(type.getSize());
 		
-		return new Binding(type, textLocation, memoryLocation, lexeme);
+		return new Binding(type, textLocation, memoryLocation, lexeme, extra);
 	}
 	
 	///////////////////////////////////////////////////////////////////////
@@ -130,8 +133,10 @@ public class Scope {
 	
 	public String toString() {
 		String result = "scope: ";
+		
 		result += " hash "+ hashCode() + "\n";
 		result += symbolTable;
+		
 		return result;
 	}
 
@@ -156,9 +161,10 @@ public class Scope {
 		}
 		
 		@Override
-		public Binding createBinding(IdentifierNode identifierNode, Type type) {
+		public Binding createBinding(IdentifierNode identifierNode, Type type, Object extra) {
 			unscopedIdentifierError(identifierNode.getToken());
-			return super.createBinding(identifierNode, type);
+			
+			return super.createBinding(identifierNode, type, extra);
 		}
 		
 		// subscopes of null scope need their own strategy.  Assumes global block is static.
@@ -166,7 +172,6 @@ public class Scope {
 			return new Scope(programScopeAllocator(), this);
 		}
 	}
-
 
 	///////////////////////////////////////////////////////////////////////
 	// ERROR REPORTING
@@ -176,5 +181,10 @@ public class Scope {
 		GrouseLogger log = GrouseLogger.getLogger("compiler.scope");
 		log.severe("variable " + token.getLexeme() + 
 				" used outside of any scope at " + token.getLocation());
+	}
+	
+	private static void immutableIdentifierError(Token token) {
+		GrouseLogger log = GrouseLogger.getLogger("compiler.scope");
+		log.severe("cannot re-assign a immutable variable  " + token.getLocation());
 	}
 }

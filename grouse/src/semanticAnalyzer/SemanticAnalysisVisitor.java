@@ -114,15 +114,16 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(DeclarationNode node) {
-		//ParseNode 		typeOfIdentifier 	= node.child(0);
-		IdentifierNode 	identifier 			= (IdentifierNode) node.child(0);
+		IdentifierNode 	nameOfIdentifier 	= (IdentifierNode) node.child(0);
 		ParseNode 		initializer 		= node.child(1);
+		Type 			declarationType 	= initializer.getType();
+		Object			extra				= node.getToken().getLexeme(); // var, imm, etc
 		
-		Type declarationType = initializer.getType();
 		node.setType(declarationType);
+
+		nameOfIdentifier.setType(declarationType);
 		
-		identifier.setType(declarationType);
-		addBinding(identifier, declarationType);
+		addBinding(nameOfIdentifier, declarationType, extra);
 	}
 	
 	/*****************/
@@ -131,15 +132,20 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(LetStatementNode node) {
-		//ParseNode 		typeOfIdentifier	= node.child(0);
-		IdentifierNode 	identifier 			= (IdentifierNode) node.child(0);
+		IdentifierNode 	nameOfIdentifier 	= (IdentifierNode) node.child(0);
+		Object			typeOfIdentifier	= nameOfIdentifier.getBinding().getExtra();
 		ParseNode 		initializer 		= node.child(1);
+		Type 			letStatementType 	= initializer.getType();
 		
-		Type letStatementType = initializer.getType();
 		node.setType(letStatementType);
+		nameOfIdentifier.setType(letStatementType);
 		
-		identifier.setType(letStatementType);
-		addBinding(identifier, letStatementType);
+		
+		debug.out("---------------------------");
+		debug.out(" BINDING EXTRA: \n TOKEN: " + typeOfIdentifier);
+		debug.out("---------------------------");
+		
+		addBinding(nameOfIdentifier, letStatementType, typeOfIdentifier);
 	}
 	
 	/****************/
@@ -281,33 +287,31 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visit(IdentifierNode node) {
-		if (!isBeingDeclared(node)) {		
+		if (!isBeingDeclared(node)) {
 			Binding binding = node.findVariableBinding();
-			
+
 			node.setType(binding.getType());
 			node.setBinding(binding);
+									
+			debug.out("---------------------------");
+			debug.out(" BINDING EXTRA: "  + binding + "\n TOKEN: " + node.getParent().getToken());
+			debug.out("---------------------------");
 		}
 		// else parent DeclarationNode does the processing.
 	}
 	
 	private boolean isBeingDeclared(IdentifierNode node) {
 		ParseNode parent = node.getParent();
+		
 		return (parent instanceof DeclarationNode) && (node == parent.child(0));
 	}
 	
-	private void addBinding(IdentifierNode identifierNode, Type type) {
+	private void addBinding(IdentifierNode identifierNode, Type type, Object extra) {
 		Scope scope = identifierNode.getLocalScope();
-		Binding binding = scope.createBinding(identifierNode, type);
+		Binding binding = scope.createBinding(identifierNode, type, extra);
 		
 		identifierNode.setBinding(binding);
 	}
-	
-	/*private void addBinding(IdentifierNode identifierNode, Type type) {
-		Scope scope = identifierNode.getLocalScope();
-		Binding binding = scope.createBinding(identifierNode, type);
-		
-		identifierNode.setBinding(binding);
-	}*/
 	
 	///////////////////////////////////////////////////////////////////////////
 	// ERROR LOGGING/PRINTING

@@ -10,19 +10,22 @@ public class Binding {
 	private TextLocation textLocation;
 	private MemoryLocation memoryLocation;
 	private String lexeme;
+	private Object extra;
 	
-	public Binding(Type type, TextLocation location, MemoryLocation memoryLocation, String lexeme) {
+	public Binding(Type type, TextLocation location, MemoryLocation memoryLocation, String lexeme, Object extra) {
 		super();
 		this.type = type;
 		this.textLocation = location;
 		this.memoryLocation = memoryLocation;
 		this.lexeme = lexeme;
+		this.extra = extra;
 	}
 	
 	public String toString() {
 		return "[" + lexeme +
 				" " + type +  // " " + textLocation +	
 				" " + memoryLocation +
+				" " + extra +
 				"]";
 	}	
 	
@@ -32,6 +35,10 @@ public class Binding {
 	
 	public Type getType() {
 		return type;
+	}
+	
+	public Object getExtra() {
+		return extra;
 	}
 	
 	public TextLocation getLocation() {
@@ -61,7 +68,8 @@ public class Binding {
 			super(PrimitiveType.ERROR,
 					TextLocation.nullInstance(),
 					MemoryLocation.nullInstance(),
-					"the-null-binding");
+					"the-null-binding",
+					null);
 		}
 		
 		public static NullBinding getInstance() {

@@ -77,21 +77,21 @@ public class ParseNode {
 	}
 	
 	public boolean containsBindingOf(String identifier) {
-		if (!hasScope()) {
-			return false;
-		}
+		if (!hasScope()) return false;
 		
-		SymbolTable symbolTable = scope.getSymbolTable();
+		SymbolTable symbolTable = scope.getSymbolTable(); // TODO: zSymbol Table Debug
+		
+		//debug.out("----SYMBOL TABLE:\n" + symbolTable);
 		
 		return symbolTable.containsKey(identifier);
 	}
 	
 	public Binding bindingOf(String identifier) {
-		if (!hasScope()) {
-			return Binding.nullInstance();
-		}
+		if (!hasScope()) return Binding.nullInstance();
 		
 		SymbolTable symbolTable = scope.getSymbolTable();
+		
+		//debug.out("----SYMBOL TABLE:\n" + symbolTable);
 		
 		return symbolTable.lookup(identifier);
 	}
@@ -136,8 +136,8 @@ public class ParseNode {
 	// do not do this in the middle of a visit; the children list traversal may be zapped if you do.
 	// (throws a ConcurrentModificationException.)
 	public void replaceChild(ParseNode oldChild, ParseNode newChild) {
-		for(int index = 0; index < nChildren(); index++) {
-			if(child(index) == oldChild) {
+		for (int index = 0; index < nChildren(); index++) {
+			if (child(index) == oldChild) {
 				children.remove(index);
 				children.add(index, newChild);
 				newChild.setParent(this);
@@ -171,7 +171,7 @@ public class ParseNode {
 	}
 	
 	protected void visitChildren(ParseNodeVisitor visitor) {
-		for(ParseNode child : children) {
+		for (ParseNode child : children) {
 			child.accept(visitor);
 		}
 	}
