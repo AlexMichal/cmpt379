@@ -28,6 +28,7 @@ import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
@@ -318,6 +319,38 @@ public class ASMCodeGenerator {
 			code.add(Label, endLabel); 
 		}
 		
+		/*******************/
+		/* WHILE STATEMENT */
+		/*******************/
+		
+		public void visitLeave(WhileStatementNode node) {
+			newVoidCode(node);
+			
+			ASMCodeFragment expression = removeValueCode(node.child(0));
+			ParseNode blockStatement = node.child(1);
+			String startLabel = labeller.newLabel("-while-statement-", "");
+			String endLabel = labeller.newLabelSameNumber("-while-end-", "");
+			
+			// while (expr) ...
+			code.add(Label, startLabel);
+			code.append(expression);
+			
+			// ... if FALSE, jump to END label ...
+			code.add(JumpFalse, endLabel);
+			
+			// ... if TRUE, do block statement ...
+			for (ParseNode child : blockStatement.getChildren()) {
+				ASMCodeFragment childCode = removeVoidCode(child);
+				code.append(childCode);
+			}
+			
+			// ... jump to START label
+			code.add(Jump, startLabel);
+
+			// END label
+			code.add(Label, endLabel); 
+		}
+		
 		/************************/
 		/* BLOCK STATEMENT NODE */
 		/************************/
@@ -480,14 +513,13 @@ public class ASMCodeGenerator {
 		/*******************/
 		
 		private void visitComparisonNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
-			ASMCodeFragment arg1;
-			ASMCodeFragment arg2;
+			ASMCodeFragment arg1 = removeValueCode(node.child(0));
+			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			String strLeftChildValue = node.child(0).getToken().getLexeme();
 			String strRightChildValue = node.child(1).getToken().getLexeme();
 			String typeOfLeftNode = "" + node.child(0).getType();
 			String typeOfRightNode = "" + node.child(1).getType();
 			Type typeOfChildren;
-			String typeOfChild;
 			// LABELS
 			String startLabel = labeller.newLabel("-compare-arg1-", "");
 			String arg2Label  = labeller.newLabelSameNumber("-compare-arg2-", "");
@@ -499,28 +531,7 @@ public class ASMCodeGenerator {
 			// If the two children are not the same type, throw an error
 			assert(typeOfLeftNode.contains(typeOfRightNode));
 			typeOfChildren = node.child(0).getType();;
-			
-			// child 0
-			typeOfChild = "" + node.child(0).getToken();
-			
-			if (typeOfChild.contains("identifier")) {
-				arg1 = removeAddressCode(node.child(0));
-			} else {
-				arg1 = removeValueCode(node.child(0));
-			}
-			
-			// child 1
-			typeOfChild = "" + node.child(1).getToken();
-			
-			if (typeOfChild.contains("identifier")) {
-				arg2 = removeAddressCode(node.child(1));
-			} else {
-				arg2 = removeValueCode(node.child(1));
-			}
-			
-			debug.out("ARG1: \n" + arg1);
-			debug.out("ARG2: \n" + arg2);
-			
+
 			newValueCode(node);
 			
 			// ARGUMENT 1 (LEFT CHILD)
