@@ -24,6 +24,7 @@ import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.types.PrimitiveType;
 import tokens.*;
 import utilities.Debug;
@@ -134,6 +135,8 @@ public class Parser {
 		
 		if (startsIfStatement(nowReading)) return parseIfStatement();
 
+		if (startsWhileStatement(nowReading)) return parseWhileStatement();
+		
 		if (startsBlockStatement(nowReading)) return parseBlockStatement();
 		
 		assert false : "bad token " + nowReading + " in parseStatement()";
@@ -145,6 +148,7 @@ public class Parser {
 				startsLetStatement(token) || 
 				startsPrintStatement(token) || 
 				startsIfStatement(token) ||
+				startsWhileStatement(token) ||
 				startsBlockStatement(token);
 	}
 	
@@ -257,11 +261,11 @@ public class Parser {
 	
 	// ifStatement -> if (expression) block (else block)?
 	private ParseNode parseIfStatement() {
+		if (!startsIfStatement(nowReading)) return syntaxErrorNode("if statement");
+		
 		ParseNode ifStatementBlock;
 		
 		// if ...
-		if (!startsIfStatement(nowReading)) return syntaxErrorNode("if statement");
-		
 		Token ifStatementToken = nowReading;
 		readToken();
 
@@ -296,6 +300,35 @@ public class Parser {
 	
 	private boolean startsElseStatement(Token token) {
 		return token.isLextant(Keyword.ELSE);
+	}
+	
+	/*******************/
+	/* WHILE STATEMENT */
+	/*******************/
+	
+	// whileStatement -> while (expression) block
+	private ParseNode parseWhileStatement() {
+		if (!startsWhileStatement(nowReading)) return syntaxErrorNode("while statement");
+		
+		ParseNode whileStatementBlock;
+		
+		// while ...
+		Token whileStatementToken = nowReading;
+		readToken();
+
+		// ... ( expr ) ...
+		expect(Punctuator.OPEN_ROUND_BRACKET);
+		ParseNode expression = parseExpression();
+		expect(Punctuator.CLOSE_ROUND_BRACKET);
+		
+		// ... { block } ...
+		whileStatementBlock = parseBlockStatement();
+		
+		return WhileStatementNode.withChildren(whileStatementToken, expression, whileStatementBlock);
+	}
+	
+	private boolean startsWhileStatement(Token token) {
+		return token.isLextant(Keyword.WHILE);
 	}
 	
 	/*******************/

@@ -20,6 +20,7 @@ import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
+import parseTree.nodeTypes.WhileStatementNode;
 
 // Visitor pattern with pre- and post-order visits
 public interface ParseNodeVisitor {
@@ -47,6 +48,9 @@ public interface ParseNodeVisitor {
 	
 	void visitEnter(IfStatementNode node);
 	void visitLeave(IfStatementNode node);
+	
+	void visitEnter(WhileStatementNode node);
+	void visitLeave(WhileStatementNode node);
 	
 	void visitEnter(BlockStatementNode node);
 	void visitLeave(BlockStatementNode node);
@@ -121,6 +125,12 @@ public interface ParseNodeVisitor {
 			defaultVisitEnter(node);
 		}
 		public void visitLeave(IfStatementNode node) {
+			defaultVisitLeave(node);
+		}	
+		public void visitEnter(WhileStatementNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(WhileStatementNode node) {
 			defaultVisitLeave(node);
 		}	
 		public void visitEnter(BlockStatementNode node) {

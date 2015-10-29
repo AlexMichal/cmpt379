@@ -14,13 +14,11 @@ public class IdentifierNode extends ParseNode {
 	
 	private Binding binding;
 	private Scope declarationScope;
-	private String typeOfIdentifier;
 
 	public IdentifierNode(Token token) {
 		super(token);
 		assert(token instanceof IdentifierToken);
 		this.binding = null;
-		this.typeOfIdentifier = "";
 	}
 	
 	public IdentifierNode(ParseNode node) {
@@ -31,8 +29,6 @@ public class IdentifierNode extends ParseNode {
 		} else {
 			this.binding = null;
 		}
-		
-		this.typeOfIdentifier = "";
 	}
 	
 	////////////////////////////////////////////////////////////

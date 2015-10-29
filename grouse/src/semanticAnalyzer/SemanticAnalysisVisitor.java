@@ -149,18 +149,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	/****************/
 	
 	@Override
-	public void visitLeave(IfStatementNode node) {
-		/*ParseNode expression = (ParseNode) node.child(0);
-		ParseNode block = node.child(1);
-
-		debug.out("VISIT LEAVE GET TYPE: " + expression.getType());
-		
-		Type ifStatementType = expression.getType();
-		node.setType(ifStatementType);
-		
-		expression.setType(ifStatementType);
-		addBinding(expression, ifStatementType);*/
-	}
+	public void visitLeave(IfStatementNode node) {}
 
 	///////////////////////////////////////////////////////////////////////////
 	// EXPRESSIONS
