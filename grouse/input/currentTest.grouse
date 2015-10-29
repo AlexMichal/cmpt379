@@ -1,35 +1,9 @@
 main {
-	imm bool1 := true;
-    	//imm quarters := (1 + 3) * 4;
-	imm xxxx := 3;
-	var bool2 := true;
-	var x := "1111111111111";
-	//print "1: " (1.0 : int) nl;
-	var xx := "2222222222222";
-	var i :=  0;
-	print "HERE: " (i > 10) nl;
-	
-	while (i < 10) {
-		print "i: " i nl;
-		let i := i + 1;
-	}
+	var str1 := "abc";
+	var str2 := "dfg";
+	imm strCombined := str1 + str2;
 
-	if (true) {
-		
-		let bool2 := false;
-		let x := "IN IF STATEMENT 1";
-		//print "x:" , x nl;
-	} else {
-		imm y := true;
-		let xx := "IN IF STATEMENT 2";
-		//print "xx:" , xx nl;
-	}
-
-	//print "xxxx:" , xxxx nl;
-	//print "quarters:" , quarters nl;
-	print "bool2 (false):" , bool2 nl;
-	print "bool1: " , bool1 nl;
-	print "x " , x nl;
-	print "xx " , xx nl;
-	print "LAST i: " i nl;
+	print "STR1: " str1 nl;
+	print "STR2: " str2 nl;	
+	print "STRCombined: " strCombined nl;
 }

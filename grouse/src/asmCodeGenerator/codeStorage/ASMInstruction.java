@@ -6,7 +6,9 @@ public class ASMInstruction {
 	private String comment;
 	
 	/////////////////////////////////////////////////////////////////////
-	// constructors
+	// CONSTRUCTORS
+	/////////////////////////////////////////////////////////////////////
+	
 	public ASMInstruction(ASMOpcode opcode, int argument) {
 		this(opcode, argument, "");
 	}
@@ -54,6 +56,8 @@ public class ASMInstruction {
 	/////////////////////////////////////////////////////////////////////////
 	// toString ... particular attention paid to the DataS instruction, which
 	//              the emulator doesn't handle.
+	/////////////////////////////////////////////////////////////////////////
+	
 	static private String indentation = "        ";
 	public String toString() {
 		if (opcode == ASMOpcode.DataS) {
@@ -86,7 +90,7 @@ public class ASMInstruction {
 		
 		String result = dataCString((int)string.charAt(0), comment) + terminator;
 		
-		for (int i=1; i<string.length(); i++) {
+		for (int i = 1; i < string.length(); i++) {
 			result += dataCString((int)string.charAt(i), "");
 			result += terminator;
 		}
@@ -102,7 +106,7 @@ public class ASMInstruction {
 	private String printable(String string) {
 		StringBuilder sb = new StringBuilder();
 		
-		for(int i=0 ; i<string.length(); i++) {
+		for (int i = 0 ; i < string.length(); i++) {
 			char c = string.charAt(i);
 			sb.append(printable(c));
 		}
@@ -112,17 +116,19 @@ public class ASMInstruction {
 	
 	private String printable(char c) {
 		switch(c) {
-		case '\n': return "\\n";
-		case '\r': return "\\r";
-		case '\t': return "\\t";
-		case '\b': return "\\b";
-		case '\f': return "\\f";
-		default:   return String.valueOf(c);
+			case '\n': return "\\n";
+			case '\r': return "\\r";
+			case '\t': return "\\t";
+			case '\b': return "\\b";
+			case '\f': return "\\f";
+			default:   return String.valueOf(c);
 		}
 	}
+	
 	private String NullDataStoString() {
 		return dataCString(0, this.comment);
 	}
+	
 	private String dataCString(int charAt, String comment) {
 		ASMInstruction instruction = new ASMInstruction(ASMOpcode.DataC, charAt, comment);
 		return instruction.toString();
@@ -133,17 +139,18 @@ public class ASMInstruction {
 	}
 	
 	private String argumentString() {
-		if(opcode.takesFloat()) {
+		if (opcode.takesFloat()) {
 			return String.format("%-25f", (Double)argument);
 		}
 		
-		if(opcode.takesInteger()) {
+		if (opcode.takesInteger()) {
 			return String.format("%-25d", (Integer)argument);
 		}
 		
-		if(opcode.takesString()) {
+		if (opcode.takesString()) {
 			return String.format("%-25s", (String)argument);
 		}
+		
 		return String.format("%-25s", "");		
 	}
 }

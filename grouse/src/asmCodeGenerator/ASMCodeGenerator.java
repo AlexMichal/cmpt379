@@ -7,6 +7,7 @@ import java.util.Map;
 import asmCodeGenerator.codeStorage.ASMCodeChunk;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
+import asmCodeGenerator.runtime.MemoryManager;
 import asmCodeGenerator.runtime.RunTime;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
@@ -60,11 +61,12 @@ public class ASMCodeGenerator {
 	
 	public ASMCodeFragment makeASM() {
 		ASMCodeFragment code = new ASMCodeFragment(GENERATES_VOID);
-		
+
+		code.append( MemoryManager.codeForInitialization() );
 		code.append( RunTime.getEnvironment() );
 		code.append( globalVariableBlockASM() );
 		code.append( programASM() );
-//		code.append( MemoryManager.codeForAfterApplication() );
+		code.append( MemoryManager.codeForAfterApplication() );
 		
 		return code;
 	}
@@ -105,7 +107,7 @@ public class ASMCodeGenerator {
 		}
 
 		////////////////////////////////////////////////////////////////////
-        // Make the field "code" refer to a new fragment of different sorts.
+        // MAKE THE FIELD "CODE" REFER TO A NEW FRAGMENT OF DIFFERENT SORTS
 		////////////////////////////////////////////////////////////////////
 		
 		private void newAddressCode(ParseNode node) {
@@ -152,8 +154,6 @@ public class ASMCodeGenerator {
 		
 		private ASMCodeFragment removeVoidCode(ParseNode node) {
 			ASMCodeFragment frag = getAndRemoveCode(node);
-			//debug.out("REMOVE VOID NODE:\n" + node); // TODO: Delete
-			
 			assert frag.isVoid();
 			return frag;
 		}
@@ -201,7 +201,7 @@ public class ASMCodeGenerator {
 		public void visitLeave(ProgramNode node) {
 			newVoidCode(node);
 			
-			for(ParseNode child : node.getChildren()) {
+			for (ParseNode child : node.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
@@ -231,8 +231,7 @@ public class ASMCodeGenerator {
 				if (child instanceof NewlineNode || child instanceof SeparatorNode) {
 					ASMCodeFragment childCode = removeVoidCode(child);
 					code.append(childCode);
-				}
-				else {
+				} else {
 					appendPrintCode(child);
 				}
 			}
@@ -448,7 +447,9 @@ public class ASMCodeGenerator {
 		// EXPRESSIONS
 		///////////////////////////////////////////////////////////////////////////
 		
+		/************************/
 		/* BINARY OPERATOR NODE */
+		/************************/
 		
 		public void visitLeave(BinaryOperatorNode node) {
 			Lextant operator = node.getOperator();
@@ -462,7 +463,9 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		/***********************/
 		/* UNARY OPERATOR NODE */
+		/***********************/
 		
 		public void visitLeave(UnaryOperatorNode node) {
 			Lextant operator = node.getOperator();
@@ -472,7 +475,9 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		/******************/
 		/* HELPER METHODS */
+		/******************/
 		
 		public boolean isComparisonOperator(Lextant lexeme) {
 			if (lexeme.equals(Punctuator.GREATER) ||
@@ -692,7 +697,9 @@ public class ASMCodeGenerator {
 			code.add(opcode);
 		}
 		
+		/*************************/
 		/* BOOLEAN OPERATOR NODE */
+		/*************************/
 		
 		private void visitBooleanOperatorNode(BinaryOperatorNode node) {
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
@@ -736,7 +743,9 @@ public class ASMCodeGenerator {
 			code.add(Label, joinLabel); 
 		}
 		
+		/***********************/
 		/* UNARY OPERATOR NODE */
+		/***********************/
 		
 		private void visitNormalUnaryOperatorNode(UnaryOperatorNode node) {
 			newValueCode(node);
@@ -770,7 +779,9 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		/********************/
 		/* HELPER FUNCTIONS */
+		/********************/
 		
 		private ASMOpcode opcodeForOperator(Lextant lextant, Type leftChildType, Type rightChildType) {
 			assert(lextant instanceof Punctuator);
@@ -847,11 +858,38 @@ public class ASMCodeGenerator {
 
 		public void visit(StringConstantNode node) {
 			String label = labeller.newLabel("-str-constant-", "");
+			String stringValue = node.getValue();
+			int lengthOfString = stringValue.length();
+			int lengthOfHeader = 13;
+			int numBytes = lengthOfHeader + lengthOfString + 1;
+			
+			debug.out("NUM BYTES: \n" + numBytes);
+			debug.out("String: \n" + stringValue);
 			
 			newValueCode(node);
-			
+
 			code.add(DLabel, label);
-			code.add(DataS, node.getValue());
+			
+			code.add(PushI, numBytes);
+			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+			code.add(Duplicate);
+
+			// Type Identifier (4)
+			code.add(PushI, 10);
+			code.add(StoreI);
+			// Status (4)
+			code.add(Duplicate);
+			code.add(PushI, 5);
+			code.add(StoreI);
+			// Refcount (1)
+			code.add(Duplicate);
+			code.add(PushI, 0);
+			code.add(StoreC);
+			// Length (4)
+			code.add(PushI, lengthOfString);
+			code.add(StoreI);
+			// Elements (numBytes - 1)
+			code.add(DataS, stringValue);
 			code.add(PushD, label);
 		}
 	}

@@ -92,7 +92,7 @@ public class MemoryManager {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
 		frag.add(Label, MEM_MANAGER_INITIALIZE);
 		
-		declareI(frag, MEM_MANAGER_HEAP_START_PTR);	// declare variables
+		declareI(frag, MEM_MANAGER_HEAP_START_PTR);		// declare variables
 		declareI(frag, MEM_MANAGER_HEAP_END_PTR);	
 		declareI(frag, MEM_MANAGER_FIRST_FREE_BLOCK);
 		
@@ -107,13 +107,12 @@ public class MemoryManager {
 		frag.add(PushI, 0);								// no blocks allocated.
 		storeITo(frag, MEM_MANAGER_FIRST_FREE_BLOCK);
 
-		if(DEBUGGING) {
+		if (DEBUGGING) {
 			insertDebugMain(frag);
 		}
 		
 		return frag;
 	}
-
 
 	// this goes after the main program, so that MEM_MANAGER_HEAP is after all other variable declarations.
 	public static ASMCodeFragment codeForAfterApplication() {
@@ -124,7 +123,8 @@ public class MemoryManager {
 		frag.append(subroutineAllocate());
 		frag.append(subroutineDeallocate());
 		frag.append(subroutineRemoveBlock());
-		if(DEBUGGING) {
+		
+		if (DEBUGGING) {
 			frag.append(subroutineDebugPrintBlock());
 			frag.append(subroutineDebugPrintFreeList());
 		}
@@ -133,9 +133,7 @@ public class MemoryManager {
 		
 		return frag;
 	}
-	
-	
-	
+
 	private static ASMCodeFragment subroutineMakeTags() {
 		ASMCodeFragment frag = new ASMCodeFragment(GENERATES_VOID);
 		frag.add(Label, MEM_MANAGER_MAKE_TAGS);		// [...prevPtr nextPtr isAvail start size (return)]
@@ -223,20 +221,20 @@ public class MemoryManager {
 		declareI(frag, MMGR_ALLOC_REMAINDER_SIZE);
 		
 
-		//store return addr
+		// store return addr
 		storeITo(frag, MMGR_ALLOC_RETURN_ADDRESS);	// [... usableSize]
 		
-		if(DEBUGGING2) {
+		if (DEBUGGING2) {
 			ptop(frag, "--allocate %d bytes\n");
 		}
 
-		//convert user size to mmgr size and store
+		// convert user size to mmgr size and store
 		frag.add(PushI, MMGR_TWICE_TAG_SIZE);			// [... usableSize 2*tagsize]
 		frag.add(Add);									// [... size]
 		storeITo(frag, MMGR_ALLOC_SIZE);				// [...]
 
 	
-		//initialize current block
+		// initialize current block
 			loadIFrom(frag, MEM_MANAGER_FIRST_FREE_BLOCK);
 			storeITo(frag, MMGR_ALLOC_CURRENT_BLOCK);
 
@@ -248,7 +246,7 @@ public class MemoryManager {
 		// if (curblock.size >= allocsize) goto FOUND_BLOCK		
 		frag.add(Label, MMGR_ALLOC_TEST_BLOCK);
 			loadIFrom(frag, MMGR_ALLOC_CURRENT_BLOCK);		// [... block]
-			if(DEBUGGING2) {
+			if (DEBUGGING2) {
 				ptop(frag, "--testing block %d\n");
 			}
 			readTagSize(frag);								// [... block.size]
@@ -331,7 +329,7 @@ public class MemoryManager {
 		
 		
 		frag.add(Label, MMGR_ALLOC_NO_BLOCK_WORKS);
-			if(DEBUGGING2) {
+			if (DEBUGGING2) {
 				pstring(frag, "--NO BLOCK WORKS\n");
 			}
 			loadIFrom(frag, MMGR_ALLOC_SIZE);			// [... size]
@@ -465,9 +463,9 @@ public class MemoryManager {
 		return frag;
 	}
 	
-////////////////////////////////////////////////////////////////////////////////////
-//Macros: these get inlined into the subroutines defined above.
-////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	// MACROS: these get inlined into the subroutines defined above.
+	////////////////////////////////////////////////////////////////////////////////////
 
 	// [... size] -> [... block]
 	// eats new heap space.  allocates a block of given size.
@@ -529,9 +527,10 @@ public class MemoryManager {
 	}
 
 	
-////////////////////////////////////////////////////////////////////////////////////
-//Testing/Debug code
-////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////
+	//Testing/Debug code
+	////////////////////////////////////////////////////////////////////////////////////
+	
 	private static Labeller labeller = new Labeller();
 
 	private static final String MMGRD_FORMAT = "$$debug-format";
@@ -551,7 +550,7 @@ public class MemoryManager {
 		declareI(frag, MMGRD_MAIN_BLOCK3);
 		declareI(frag, MMGRD_MAIN_BLOCK4);
 		
-		frag.add(PushI, 30);					// request block of size 30 => 30+18=48
+		frag.add(PushI, 30);						// request block of size 30 => 30 + 18 =48
 		debugSystemBlockAllocate(frag);
 		storeITo(frag, MMGRD_MAIN_BLOCK1);
 		debugPrintBlockFromPointer(frag, MMGRD_MAIN_BLOCK1);
@@ -629,6 +628,7 @@ public class MemoryManager {
 
 		frag.add(Call, MMGRD_PRINT_FREE_LIST);
 	}
+	
 	private static void debugPrintBlockFromPointer(ASMCodeFragment frag, String pointerName) {
 		loadIFrom(frag, pointerName);
 		frag.add(Call, MMGRD_PRINT_BLOCK);	
@@ -641,12 +641,12 @@ public class MemoryManager {
 		frag.add(PushI, MMGR_TAG_SIZE_IN_BYTES);
 		frag.add(Subtract);						// [... block]
 	}
+	
 	private static void debugSystemBlockDeallocate(ASMCodeFragment frag) {
 		frag.add(PushI, MMGR_TAG_SIZE_IN_BYTES);	// [... block1 tagsize]
 		frag.add(Add);								// [... userBlock1]
 		frag.add(Call, MEM_MANAGER_DEALLOCATE);		// [...]
 	}
-	
 
 	// prints top of stack 
 	// [... t] -> [... t]
@@ -661,6 +661,7 @@ public class MemoryManager {
 		frag.add(PushD, MMGRD_FORMAT);  
 		frag.add(Printf);
 	}	
+	
 	private static void debugPrint(ASMCodeFragment frag, String printString) {
 		String label = labeller.newLabel("$$debug-print-", "");
 		frag.add(DLabel, label);
@@ -669,6 +670,7 @@ public class MemoryManager {
 		frag.add(PushD, MMGRD_FORMAT_FOR_STRING);
 		frag.add(Printf);
 	}	
+	
 	@SuppressWarnings("unused")
 	private static void debugPrintI(ASMCodeFragment frag, String printString, String name) {
 		String label = labeller.newLabel("$$debug-print-", "");
@@ -780,7 +782,9 @@ public class MemoryManager {
 	}	
 	
 	////////////////////////////////////////////////////////////////////
-    // debugging aids
+    // DEBUGGING AIDS
+	////////////////////////////////////////////////////////////////////
+	
 	public static void pstack(ASMCodeFragment code, String string) {
 		String stringLabel = labeller.newLabel("mm-pstack-", "");
 		code.add(DLabel, stringLabel);

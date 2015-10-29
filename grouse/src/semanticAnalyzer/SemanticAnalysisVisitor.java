@@ -78,23 +78,17 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	///////////////////////////////////////////////////////////////////////////
 	
 	private void enterProgramScope(ParseNode node) {
-		debug.out("ENTERED PROGRAM SCOPE");
-		
 		Scope scope = Scope.createProgramScope();
 		node.setScope(scope);
 	}
 	
 	private void enterSubscope(ParseNode node) {
-		debug.out("ENTERED SUB - SCOPE");
-		
 		Scope baseScope = node.getLocalScope();
 		Scope scope = baseScope.createSubscope();
 		node.setScope(scope);
 	}
 	
 	private void leaveScope(ParseNode node) {
-		debug.out("LEFT SCOPE");
-		
 		node.getScope().leave();
 	}
 	
