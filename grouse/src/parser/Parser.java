@@ -235,20 +235,27 @@ public class Parser {
 	/* LET STATEMENT */
 	/*****************/
 	
-	// letStatement -> identifier (variable) := expression;
+	// letStatement -> target := expression;
 	private ParseNode parseLetStatement() {
 		if (!startsLetStatement(nowReading)) return syntaxErrorNode("let statement");
 		
+		// let ...
 		Token letStatementToken = nowReading;
 		readToken();
 		
-		ParseNode identifier = parseIdentifier();
+		// ... (identifier OR expr[expr]) ... 
+		ParseNode target = parseTarget(); // TODO: TARGET syntax
+		
+		// ... := ...
 		expect(Punctuator.ASSIGN);
 		
+		// ... expr ...
 		ParseNode initializer = parseExpression();
+		
+		// ... ;
 		expect(Punctuator.TERMINATOR);
 		
-		return LetStatementNode.withChildren(letStatementToken, identifier, initializer);
+		return LetStatementNode.withChildren(letStatementToken, target, initializer);
 	}
 	
 	private boolean startsLetStatement(Token token) {
@@ -730,6 +737,18 @@ public class Parser {
 	
 	private boolean startsBooleanConstant(Token token) {
 		return token.isLextant(Keyword.TRUE, Keyword.FALSE);
+	}
+	
+	/**********/
+	/* TARGET */
+	/**********/
+	
+	private ParseNode parseTarget() { // TODO: TARGET
+		if (startsIdentifier(nowReading)) {
+			return parseIdentifier();
+		}
+		
+		return null;
 	}
 	
 	/*********/
