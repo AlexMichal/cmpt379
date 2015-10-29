@@ -475,114 +475,93 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		/*******************/
 		/* COMPARISON NODE */
+		/*******************/
 		
 		private void visitComparisonNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
-			ASMCodeFragment arg1 = removeValueCode(node.child(0));
-			ASMCodeFragment arg2 = removeValueCode(node.child(1));
+			ASMCodeFragment arg1;
+			ASMCodeFragment arg2;
+			String strLeftChildValue = node.child(0).getToken().getLexeme();
+			String strRightChildValue = node.child(1).getToken().getLexeme();
+			String typeOfLeftNode = "" + node.child(0).getType();
+			String typeOfRightNode = "" + node.child(1).getType();
+			Type typeOfChildren;
+			String typeOfChild;
+			// LABELS
 			String startLabel = labeller.newLabel("-compare-arg1-", "");
 			String arg2Label  = labeller.newLabelSameNumber("-compare-arg2-", "");
 			String subLabel   = labeller.newLabelSameNumber("-compare-sub-", "");
 			String trueLabel  = labeller.newLabelSameNumber("-compare-true-", "");
 			String falseLabel = labeller.newLabelSameNumber("-compare-false-", "");
 			String joinLabel  = labeller.newLabelSameNumber("-compare-join-", "");
-			String strLeftChildValue = node.child(0).getToken().getLexeme();
-			String strRightChildValue = node.child(1).getToken().getLexeme();
-			Double dblLeftChildValue = 0.0;
-			Double dblRightChildValue = 0.0;
-			char chrLeftChildValue = ' ';
-			char chrRightChildValue = ' ';
 			
-			if ((node.child(0).getType() == PrimitiveType.INTEGER) ||
-				(node.child(0).getType() == PrimitiveType.FLOAT)) {
-				dblLeftChildValue = Double.parseDouble(strLeftChildValue);
-				dblRightChildValue = Double.parseDouble(strRightChildValue);
-			} else if (node.child(0).getType() == PrimitiveType.CHARACTER) {
-				chrLeftChildValue = strLeftChildValue.charAt(0);
-				chrRightChildValue = strRightChildValue.charAt(0);
+			// If the two children are not the same type, throw an error
+			assert(typeOfLeftNode.contains(typeOfRightNode));
+			typeOfChildren = node.child(0).getType();;
+			
+			// child 0
+			typeOfChild = "" + node.child(0).getToken();
+			
+			if (typeOfChild.contains("identifier")) {
+				arg1 = removeAddressCode(node.child(0));
+			} else {
+				arg1 = removeValueCode(node.child(0));
 			}
 			
+			// child 1
+			typeOfChild = "" + node.child(1).getToken();
+			
+			if (typeOfChild.contains("identifier")) {
+				arg2 = removeAddressCode(node.child(1));
+			} else {
+				arg2 = removeValueCode(node.child(1));
+			}
+			
+			debug.out("ARG1: \n" + arg1);
+			debug.out("ARG2: \n" + arg2);
+			
 			newValueCode(node);
-			// arg1
+			
+			// ARGUMENT 1 (LEFT CHILD)
 			code.add(Label, startLabel);
 			code.append(arg1);
-			// arg2
+			// ARGUMENT 2 (RIGHT CHILD)
 			code.add(Label, arg2Label);
 			code.append(arg2);
-			// comparison
+			// COMPARISON label
 			code.add(Label, subLabel);
 			
+			// GREATER (>)
 			if (operator == Punctuator.GREATER) {
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER) ||
-						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
-					code.add(Subtract);
-					// jump to trueLabel if it's positive (greater than)
-					code.add(JumpPos, trueLabel);
-					// jump to falseLabel if it's negative (lesser than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) {
 					code.add(FSubtract);
-					// jump to trueLabel if it's positive (greater than)
 					code.add(JumpFPos, trueLabel);
-					// jump to falseLabel if it's negative (lesser than)
+					code.add(Jump, falseLabel);
+				} else {
+					code.add(Subtract);
+					code.add(JumpPos, trueLabel);
 					code.add(Jump, falseLabel);
 				}
+			// GREATER OR EQUAL (>=)
 			} else if (operator == Punctuator.GREATER_OR_EQUAL) {
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER)) {
-					code.add(Subtract);
-					if ((dblLeftChildValue - dblRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFalse, trueLabel);
-					} else {
-						// jump to trueLabel if it's positive (greater than)
-						code.add(JumpPos, trueLabel);
-					}
-					// jump to falseLabel if it's negative (lesser than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) {			
 					code.add(FSubtract);
-					if ((dblLeftChildValue - dblRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFZero, trueLabel);
-					} else {
-						// jump to trueLabel if it's positive (greater than)
-						code.add(JumpFPos, trueLabel);
-					}
-					// jump to falseLabel if it's negative (lesser than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.CHARACTER) {
+					code.add(JumpFNeg, falseLabel);
+					code.add(Jump, trueLabel);
+				} else {
 					code.add(Subtract);
-					if ((chrLeftChildValue - chrRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFalse, trueLabel);
-					} else {
-						// jump to trueLabel if it's positive (greater than)
-						code.add(JumpPos, trueLabel);
-					}
-					// jump to falseLabel if it's negative (lesser than)
-					code.add(Jump, falseLabel);
+					code.add(JumpNeg, falseLabel);
+					code.add(Jump, trueLabel);
 				}
 			// EQUAL ( == )
 			} else if (operator == Punctuator.EQUAL) {
-				// INTEGER AND CHARACTER
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER) ||
-						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
-					code.add(Subtract);
-					// jump to trueLabel if it's 0
-					code.add(JumpFalse, trueLabel);
-					// jump to falseLabel if it's anything else
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) {
 					code.add(FSubtract);
-					// jump to trueLabel if it's 0
 					code.add(JumpFZero, trueLabel);
-					// jump to falseLabel if it's anything else
 					code.add(Jump, falseLabel);
 				// STRING
-				} else if (node.child(0).getType() == PrimitiveType.STRING) { // string // TODO: doesn't fully work. need to implement "xx" == variable
+				} else if (typeOfChildren == PrimitiveType.STRING) {
 					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
 						code.add(Subtract);
 						
@@ -600,120 +579,79 @@ public class ASMCodeGenerator {
 						}
 					}
 				// BOOLEAN
-				} else if (node.child(0).getType() == PrimitiveType.BOOLEAN) { // boolean
+				} else if (typeOfChildren == PrimitiveType.BOOLEAN) {
 					code.add(BEqual);
 					code.add(JumpTrue, trueLabel);
+					code.add(Jump, falseLabel);
+				} else { 
+					code.add(Subtract);
+					code.add(JumpFalse, trueLabel);
 					code.add(Jump, falseLabel);
 				}
 			// NOT EQUAL ( != )
 			} else if (operator == Punctuator.NOT_EQUAL) {
-				// INTEGER AND CHARACTER
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER) ||
-						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
-					code.add(Subtract);
-					// jump to falseLabel if it's 0)
-					code.add(JumpFalse, falseLabel);
-					// jump to trueLabel if it's anything else
-					code.add(Jump, trueLabel);
-				// FLOAT
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) {
 					code.add(FSubtract);
-					// jump to falseLabel if it's 0
 					code.add(JumpFZero, falseLabel);
-					// jump to trueLabel if it's anything else
 					code.add(Jump, trueLabel);
-				// STRING
-				} else if (node.child(0).getType() == PrimitiveType.STRING) { // string // TODO: doesn't fully work
-					debug.out("HERE");
-					
+				} else if (typeOfChildren == PrimitiveType.STRING) {
 					if ((strLeftChildValue.contains("\"")) || (strRightChildValue.contains("\""))) {
-						//debug.out("THERE: \"");
-						
-						code.add(Subtract); // TODO: doesn't work
+						code.add(Subtract);
 						code.add(JumpPos, falseLabel);
 						code.add(Jump, trueLabel);
 					} else {
-						//debug.out("THERE: NONE");
-						
 						code.add(Subtract);
 						code.add(JumpNeg, trueLabel);
 						code.add(Jump, falseLabel);
 					}
-				// BOOLEAN
-				} else if (node.child(0).getType() == PrimitiveType.BOOLEAN) { // boolean
+				} else if (typeOfChildren == PrimitiveType.BOOLEAN) {
 					code.add(BEqual);
 					code.add(JumpFalse, trueLabel);
 					code.add(Jump, falseLabel);
+				} else {
+					code.add(Subtract);
+					code.add(JumpFalse, falseLabel);
+					code.add(Jump, trueLabel);
 				}
 			// LESSER ( < )
 			} else if (operator == Punctuator.LESSER) {
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER) ||
-						(node.child(0).getType() == PrimitiveType.CHARACTER)) {
-					code.add(Subtract);
-					// jump to trueLabel if it's negative (lesser than)
-					code.add(JumpNeg, trueLabel);
-					// jump to falseLabel if it's positive (greater than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) {
 					code.add(FSubtract);
-					// jump to trueLabel if it's negative (lesser than)
 					code.add(JumpFNeg, trueLabel);
-					// jump to falseLabel if it's positive (greater than)
+					code.add(Jump, falseLabel);
+				} else {
+					code.add(Subtract);
+					code.add(JumpNeg, trueLabel);
 					code.add(Jump, falseLabel);
 				}
 			// LESSER OR EQUAL ( <= )
 			} else if (operator == Punctuator.LESSER_OR_EQUAL) {
-				if ((node.child(0).getType() == PrimitiveType.INTEGER &&
-						node.child(1).getType() == PrimitiveType.INTEGER)) {
-					code.add(Subtract);
-					if ((dblLeftChildValue - dblRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFalse, trueLabel);
-					} else {
-						// jump to trueLabel if it's negative (lesser than)
-						code.add(JumpNeg, trueLabel);
-					}
-					// jump to falseLabel if it's positive (greater than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.FLOAT) { // float
+				if (typeOfChildren == PrimitiveType.FLOAT) { // float
 					code.add(FSubtract);
-					if ((dblLeftChildValue - dblRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFZero, trueLabel);
-					} else {
-						// jump to trueLabel if it's negative (lesser than)
-						code.add(JumpFNeg, trueLabel);
-					}
-					// jump to falseLabel if it's positive (greater than)
-					code.add(Jump, falseLabel);
-				} else if (node.child(0).getType() == PrimitiveType.CHARACTER) {
+					code.add(JumpFPos, falseLabel);
+					code.add(Jump, trueLabel);
+				} else {
 					code.add(Subtract);
-					if ((chrLeftChildValue - chrRightChildValue) == 0) {
-						// jump to trueLabel if it's 0
-						code.add(JumpFalse, trueLabel);
-					} else {
-						// jump to trueLabel if it's negative (lesser than)
-						code.add(JumpNeg, trueLabel);
-					}
-					// jump to falseLabel if it's positive (greater than)
-					code.add(Jump, falseLabel);
+					code.add(JumpPos, falseLabel);
+					code.add(Jump, trueLabel);
 				}
 			}
-			// true
+			
+			// TRUE label
 			code.add(Label, trueLabel);
 			code.add(PushI, 1);
 			code.add(Jump, joinLabel);
-			// false
+			// FALSE label
 			code.add(Label, falseLabel);
 			code.add(PushI, 0);
 			code.add(Jump, joinLabel);
-			// end of statement
+			// END label
 			code.add(Label, joinLabel); 
 		}
 		
+		/************************/
 		/* BINARY OPERATOR NODE */
+		/************************/
 		
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
 			newValueCode(node);
