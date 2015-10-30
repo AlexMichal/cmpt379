@@ -389,7 +389,9 @@ public class ASMCodeGenerator {
    			code.append(removeValueCode(node));
 			convertToStringIfBoolean(node);
 			code.add(PushD, format);
-			code.add(Printf);
+			//if	(node.getType() == PrimitiveType.STRING) {
+				code.add(Printf);
+			//}
 		}
 		
 		private void convertToStringIfBoolean(ParseNode node) {
@@ -462,6 +464,96 @@ public class ASMCodeGenerator {
 				visitBooleanOperatorNode(node);
 			}
 		}
+
+		/************************/
+		/* BINARY OPERATOR NODE */
+		/************************/
+		
+		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) { // TODO: STRING concaternation
+			newValueCode(node);
+			
+			ASMCodeFragment arg1 = removeValueCode(node.child(0));
+			ASMCodeFragment arg2 = removeValueCode(node.child(1));
+			Type leftChildType = node.child(0).getType();
+			Type rightChildType = node.child(1).getType();
+
+			
+			if (leftChildType == PrimitiveType.STRING) {
+
+				debug.out("---ARG1: \n" + arg1);
+				debug.out("---ARG2: \n" + arg2);
+				
+				// first get length of each
+				// so pushI 5 on the address and get the item at that spot.
+				// that's the len of str1
+				//code.append(arg1);
+				//code.add(Printf);
+				
+				code.add(DLabel, "-str-concatenation-1");
+				
+				
+				code.add(PushI, 13 + 4 + 4 + 1); 
+				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+
+				// Type Identifier (4)
+				code.add(Duplicate);
+				code.add(PushI, 10);
+				code.add(StoreI);
+				
+				// Status (4)
+				code.add(Duplicate);
+				code.add(PushI, 5);
+				code.add(StoreI);
+				
+				// Refcount (1)
+				code.add(Duplicate);
+				code.add(PushI, 0);
+				code.add(StoreC);
+				
+				// Length (4)
+				code.add(Duplicate);
+				code.add(PushI, 8);
+				code.add(StoreI);
+				
+				// Elements (numBytes - 1)
+				code.add(PStack);
+				
+				code.add(Duplicate);
+				code.append(arg1);
+				code.add(StoreI);
+				
+				code.add(PStack);
+				
+				code.append(arg2);
+				code.add(StoreI);
+
+				code.add(PStack);
+				
+				code.add(PushD, "-str-concatenation-1");
+				
+				
+			} else {
+				double rightChildValue;
+				
+				try {  
+				    rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());  
+			    } catch(NumberFormatException nfe) {
+			    	rightChildValue = -1.0;
+				}  
+
+				code.append(arg1);
+				code.append(arg2);
+
+				// Divide by 0 error
+				if ((node.getToken().getLexeme() == Punctuator.DIVIDE.getLexeme()) && (rightChildValue == 0)) {
+					code.add(Jump, RunTime.NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
+				}
+
+				ASMOpcode opcode = opcodeForOperator(node.getOperator(), leftChildType, rightChildType);	
+				
+				code.add(opcode);
+			}					
+		}
 		
 		/***********************/
 		/* UNARY OPERATOR NODE */
@@ -517,7 +609,7 @@ public class ASMCodeGenerator {
 		/* COMPARISON NODE */
 		/*******************/
 		
-		private void visitComparisonNode(BinaryOperatorNode node, Lextant operator) { // TODO: USE A MAP INSTEAD
+		private void visitComparisonNode(BinaryOperatorNode node, Lextant operator) { 
 			ASMCodeFragment arg1 = removeValueCode(node.child(0));
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			String strLeftChildValue = node.child(0).getToken().getLexeme();
@@ -665,38 +757,6 @@ public class ASMCodeGenerator {
 			code.add(Label, joinLabel); 
 		}
 		
-		/************************/
-		/* BINARY OPERATOR NODE */
-		/************************/
-		
-		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
-			newValueCode(node);
-			
-			ASMCodeFragment arg1 = removeValueCode(node.child(0));
-			ASMCodeFragment arg2 = removeValueCode(node.child(1));
-			Type leftChildType = node.child(0).getType();
-			Type rightChildType = node.child(1).getType();
-			double rightChildValue;
-
-			try {  
-			    rightChildValue = Double.parseDouble(node.child(1).getToken().getLexeme());  
-		    } catch(NumberFormatException nfe) {
-		    	rightChildValue = -1.0;
-			}  
-			
-			code.append(arg1);
-			code.append(arg2);
-
-			// Divide by 0 error
-			if ((node.getToken().getLexeme() == Punctuator.DIVIDE.getLexeme()) && (rightChildValue == 0)) {
-				code.add(Jump, RunTime.NUMBER_DIVIDE_BY_ZERO_RUNTIME_ERROR);
-			}
-			
-			ASMOpcode opcode = opcodeForOperator(node.getOperator(), leftChildType, rightChildType);
-									
-			code.add(opcode);
-		}
-		
 		/*************************/
 		/* BOOLEAN OPERATOR NODE */
 		/*************************/
@@ -803,6 +863,11 @@ public class ASMCodeGenerator {
 					case DIVIDE: 	return FDivide;
 					default:		assert false : "float - unimplemented operator in opcodeForOperator";
 				}
+			} else if ((leftChildType == PrimitiveType.STRING) && (rightChildType == PrimitiveType.STRING)) { // TODO: DELETE?
+				switch(punctuator) {
+					case ADD: 	   	return Add;
+					default:		assert false : "string - unimplemented operator in opcodeForOperator";
+				}
 			}
 			
 			return null;
@@ -863,33 +928,43 @@ public class ASMCodeGenerator {
 			int lengthOfHeader = 13;
 			int numBytes = lengthOfHeader + lengthOfString + 1;
 			
-			debug.out("NUM BYTES: \n" + numBytes);
-			debug.out("String: \n" + stringValue);
+			//debug.out("NUM BYTES: \n" + numBytes);
+			//debug.out("String: \n" + stringValue);
 			
 			newValueCode(node);
 
 			code.add(DLabel, label);
 			
-			code.add(PushI, numBytes);
+			code.add(PushI, numBytes); 
 			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-			code.add(Duplicate);
 
 			// Type Identifier (4)
+			code.add(Duplicate);
+			//code.add(PStack);
 			code.add(PushI, 10);
 			code.add(StoreI);
+			
 			// Status (4)
 			code.add(Duplicate);
+			//code.add(PStack);
 			code.add(PushI, 5);
 			code.add(StoreI);
+			
 			// Refcount (1)
 			code.add(Duplicate);
+			//code.add(PStack);
 			code.add(PushI, 0);
 			code.add(StoreC);
+			
 			// Length (4)
+			//code.add(PStack);
 			code.add(PushI, lengthOfString);
 			code.add(StoreI);
+			//code.add(PStack);
+			
 			// Elements (numBytes - 1)
 			code.add(DataS, stringValue);
+			//code.add(PStack);
 			code.add(PushD, label);
 		}
 	}

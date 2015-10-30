@@ -114,7 +114,7 @@ public enum ASMOpcode {
 	
 	Return,			// another name for PopPC
 	Halt,			// stops the machine.
-	
+	 
 
 	// Data initialization directives (low memory; done once before program starts) 
 	DLabel,			// takes a string operand, and labels the location of the next encountered data
