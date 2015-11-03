@@ -388,10 +388,15 @@ public class ASMCodeGenerator {
 
    			code.append(removeValueCode(node));
 			convertToStringIfBoolean(node);
+			
+			if	(node.getType() == PrimitiveType.STRING) {
+				code.add(PushI, 13);
+				code.add(Add);
+			}
+			
 			code.add(PushD, format);
-			//if	(node.getType() == PrimitiveType.STRING) {
-				code.add(Printf);
-			//}
+		
+			code.add(Printf);
 		}
 		
 		private void convertToStringIfBoolean(ParseNode node) {
@@ -483,16 +488,18 @@ public class ASMCodeGenerator {
 				debug.out("---ARG1: \n" + arg1);
 				debug.out("---ARG2: \n" + arg2);
 				
-				// first get length of each
-				// so pushI 5 on the address and get the item at that spot.
-				// that's the len of str1
-				//code.append(arg1);
-				//code.add(Printf);
-				
 				code.add(DLabel, "-str-concatenation-1");
 				
+				/*code.append(arg1);
+				code.add(PushI, 9);
+				code.add(Add);
+				code.add(PStack);
 				
-				code.add(PushI, 13 + 4 + 4 + 1); 
+				code.append(arg2);
+				code.add(PStack);*/
+				
+				// Concatenate:
+				code.add(PushI, 13 + 3 + 1);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
 
 				// Type Identifier (4)
@@ -512,24 +519,53 @@ public class ASMCodeGenerator {
 				
 				// Length (4)
 				code.add(Duplicate);
-				code.add(PushI, 8);
+				code.add(PushI, 4);
 				code.add(StoreI);
 				
 				// Elements (numBytes - 1)
-				code.add(PStack);
-				
 				code.add(Duplicate);
 				code.append(arg1);
-				code.add(StoreI);
-				
-				code.add(PStack);
-				
-				code.append(arg2);
-				code.add(StoreI);
-
-				code.add(PStack);
+				//code.add(StoreI);
+				/*code.append(arg2);
+				code.add(StoreI);*/
 				
 				code.add(PushD, "-str-concatenation-1");
+				
+				/*
+				code.add(DLabel, label);
+				
+				code.add(PushI, numBytes); 
+				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
+
+				// Type Identifier (4)
+				code.add(Duplicate);
+				//code.add(PStack);
+				code.add(PushI, 10);
+				code.add(StoreI);
+				
+				// Status (4)
+				code.add(Duplicate);
+				//code.add(PStack);
+				code.add(PushI, 5);
+				code.add(StoreI);
+				
+				// Refcount (1)
+				code.add(Duplicate);
+				//code.add(PStack);
+				code.add(PushI, 0);
+				code.add(StoreC);
+				
+				// Length (4)
+				//code.add(PStack);
+				code.add(PushI, lengthOfString);
+				code.add(StoreI);
+				//code.add(PStack);
+				
+				// Elements (numBytes - 1)
+				code.add(DataS, stringValue);
+				//code.add(PStack);
+				code.add(PushD, label);
+				*/
 				
 				
 			} else {
@@ -924,47 +960,25 @@ public class ASMCodeGenerator {
 		public void visit(StringConstantNode node) {
 			String label = labeller.newLabel("-str-constant-", "");
 			String stringValue = node.getValue();
+			int typeID = 10;
+			int status = 5;
+			int refCount = 0;
 			int lengthOfString = stringValue.length();
-			int lengthOfHeader = 13;
-			int numBytes = lengthOfHeader + lengthOfString + 1;
-			
-			//debug.out("NUM BYTES: \n" + numBytes);
-			//debug.out("String: \n" + stringValue);
-			
-			newValueCode(node);
 
+			newValueCode(node);
+			
+			// Adding variable to pre-memory (?)
 			code.add(DLabel, label);
 			
-			code.add(PushI, numBytes); 
-			code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-
-			// Type Identifier (4)
-			code.add(Duplicate);
-			//code.add(PStack);
-			code.add(PushI, 10);
-			code.add(StoreI);
+			// Header
+			code.add(DataI, typeID);
+			code.add(DataI, status);
+			code.add(DataC, refCount);
+			code.add(DataI, lengthOfString);
 			
-			// Status (4)
-			code.add(Duplicate);
-			//code.add(PStack);
-			code.add(PushI, 5);
-			code.add(StoreI);
-			
-			// Refcount (1)
-			code.add(Duplicate);
-			//code.add(PStack);
-			code.add(PushI, 0);
-			code.add(StoreC);
-			
-			// Length (4)
-			//code.add(PStack);
-			code.add(PushI, lengthOfString);
-			code.add(StoreI);
-			//code.add(PStack);
-			
-			// Elements (numBytes - 1)
+			// Elements
 			code.add(DataS, stringValue);
-			//code.add(PStack);
+			
 			code.add(PushD, label);
 		}
 	}
