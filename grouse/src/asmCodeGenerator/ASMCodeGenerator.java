@@ -481,24 +481,45 @@ public class ASMCodeGenerator {
 			ASMCodeFragment arg2 = removeValueCode(node.child(1));
 			Type leftChildType = node.child(0).getType();
 			Type rightChildType = node.child(1).getType();
-
+			
 			
 			if (leftChildType == PrimitiveType.STRING) {
-
+				String labelConcatArg1 = labeller.newLabel("-str-concatenate-arg1-", "");
+				String labelConcatArg2 = labeller.newLabel("-str-concatenate-arg2-", "");
+				String label = labeller.newLabel("-str-concatenate-main-", "");
+				
 				debug.out("---ARG1: \n" + arg1);
 				debug.out("---ARG2: \n" + arg2);
 				
-				code.add(DLabel, "-str-concatenation-1");
+				// Elements (numBytes - 1)
+
+				// Concatenate 1
+				code.add(PStack);
+				code.add(DLabel, labelConcatArg1);
 				
-				/*code.append(arg1);
-				code.add(PushI, 9);
+				code.add(DataI, 0);
+				code.append(arg1);
+				code.add(PushI, 13);
 				code.add(Add);
+				
+				code.add(PushD, labelConcatArg1);
 				code.add(PStack);
 				
-				code.append(arg2);
-				code.add(PStack);*/
+				// Concatenate 2
+				code.add(DLabel, labelConcatArg2);
 				
-				// Concatenate:
+				code.add(DataI, 0);
+				code.append(arg2);
+				code.add(PushI, 13);
+				code.add(Add);
+				
+				code.add(PushD, labelConcatArg2);
+				code.add(PStack);
+				
+
+				// Concatenated String:
+				code.add(DLabel, label);
+				
 				code.add(PushI, 13 + 3 + 1);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
 
@@ -522,50 +543,14 @@ public class ASMCodeGenerator {
 				code.add(PushI, 4);
 				code.add(StoreI);
 				
-				// Elements (numBytes - 1)
-				code.add(Duplicate);
-				code.append(arg1);
-				//code.add(StoreI);
-				/*code.append(arg2);
-				code.add(StoreI);*/
+				// Elements
+				code.add(Jump, labelConcatArg1);
+				code.add(Jump, labelConcatArg2);
+				code.add(Add);
 				
-				code.add(PushD, "-str-concatenation-1");
-				
-				/*
-				code.add(DLabel, label);
-				
-				code.add(PushI, numBytes); 
-				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-
-				// Type Identifier (4)
-				code.add(Duplicate);
-				//code.add(PStack);
-				code.add(PushI, 10);
 				code.add(StoreI);
 				
-				// Status (4)
-				code.add(Duplicate);
-				//code.add(PStack);
-				code.add(PushI, 5);
-				code.add(StoreI);
-				
-				// Refcount (1)
-				code.add(Duplicate);
-				//code.add(PStack);
-				code.add(PushI, 0);
-				code.add(StoreC);
-				
-				// Length (4)
-				//code.add(PStack);
-				code.add(PushI, lengthOfString);
-				code.add(StoreI);
-				//code.add(PStack);
-				
-				// Elements (numBytes - 1)
-				code.add(DataS, stringValue);
-				//code.add(PStack);
 				code.add(PushD, label);
-				*/
 				
 				
 			} else {
