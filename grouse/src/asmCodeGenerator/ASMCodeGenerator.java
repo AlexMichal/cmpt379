@@ -491,18 +491,27 @@ public class ASMCodeGenerator {
 				debug.out("---ARG1: \n" + arg1);
 				debug.out("---ARG2: \n" + arg2);
 				
-				// Elements (numBytes - 1)
-
 				// Concatenate 1
-				code.add(PStack);
 				code.add(DLabel, labelConcatArg1);
-				
 				code.add(DataI, 0);
 				code.append(arg1);
 				code.add(PushI, 13);
 				code.add(Add);
-				
 				code.add(PushD, labelConcatArg1);
+				
+				// Concatenate 2
+				code.add(DLabel, labelConcatArg2);
+				code.add(DataI, 0);
+				code.append(arg2);
+				code.add(PushI, 13);
+				code.add(Add);
+				code.add(PushD, labelConcatArg2);
+				
+				//code.add(PushI, 13);
+				//code.add(Add);
+				//code.add(PushD, labelConcatArg1);
+				
+				/*code.add(PushD, labelConcatArg1);
 				code.add(PStack);
 				
 				// Concatenate 2
@@ -514,15 +523,15 @@ public class ASMCodeGenerator {
 				code.add(Add);
 				
 				code.add(PushD, labelConcatArg2);
-				code.add(PStack);
+				code.add(PStack);*/
 				
 
 				// Concatenated String:
-				code.add(DLabel, label);
-				
-				code.add(PushI, 13 + 3 + 1);
+				code.add(PushI, 13 + 6 + 1);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
-
+				
+				code.add(PStack); // PSTACK
+				
 				// Type Identifier (4)
 				code.add(Duplicate);
 				code.add(PushI, 10);
@@ -543,16 +552,24 @@ public class ASMCodeGenerator {
 				code.add(PushI, 4);
 				code.add(StoreI);
 				
-				// Elements
-				code.add(Jump, labelConcatArg1);
-				code.add(Jump, labelConcatArg2);
-				code.add(Add);
+				code.add(PStack); // PSTACK
+				
+				code.add(PushD, labelConcatArg1);
+				
+				code.add(PStack); // PSTACK
 				
 				code.add(StoreI);
 				
-				code.add(PushD, label);
+				code.add(PushD, labelConcatArg2);
+				//code.add(StoreC);
+				//code.add(Add);
 				
+				code.add(PStack); // PSTACK
 				
+				code.add(StoreI);
+
+				//code.add(DLabel, label);
+				//code.add(PushD, label);
 			} else {
 				double rightChildValue;
 				
