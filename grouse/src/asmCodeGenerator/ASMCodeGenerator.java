@@ -474,16 +474,21 @@ public class ASMCodeGenerator {
 		/* BINARY OPERATOR NODE */
 		/************************/
 		
-		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) { // TODO: STRING concaternation
-			newValueCode(node);
+		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) { // TODO: STRING concatenation
 			
-			ASMCodeFragment arg1 = removeValueCode(node.child(0));
-			ASMCodeFragment arg2 = removeValueCode(node.child(1));
+			
+			ASMCodeFragment arg1;
+			ASMCodeFragment arg2;
 			Type leftChildType = node.child(0).getType();
 			Type rightChildType = node.child(1).getType();
 			
 			
 			if (leftChildType == PrimitiveType.STRING) {
+				newValueCode(node);
+				
+				arg1 = removeValueCode(node.child(0));
+				arg2 = removeValueCode(node.child(1));
+				
 				String labelConcatArg1 = labeller.newLabel("-str-concatenate-arg1-", "");
 				String labelConcatArg2 = labeller.newLabel("-str-concatenate-arg2-", "");
 				String label = labeller.newLabel("-str-concatenate-main-", "");
@@ -492,42 +497,30 @@ public class ASMCodeGenerator {
 				debug.out("---ARG2: \n" + arg2);
 				
 				// Concatenate 1
+				
 				code.add(DLabel, labelConcatArg1);
 				code.add(DataI, 0);
 				code.append(arg1);
-				code.add(PushI, 13);
+				
+				/*code.add(PushI, 13);
 				code.add(Add);
-				code.add(PushD, labelConcatArg1);
 				
 				// Concatenate 2
 				code.add(DLabel, labelConcatArg2);
 				code.add(DataI, 0);
 				code.append(arg2);
 				code.add(PushI, 13);
-				code.add(Add);
-				code.add(PushD, labelConcatArg2);
-				
-				//code.add(PushI, 13);
-				//code.add(Add);
-				//code.add(PushD, labelConcatArg1);
-				
-				/*code.add(PushD, labelConcatArg1);
-				code.add(PStack);
-				
-				// Concatenate 2
-				code.add(DLabel, labelConcatArg2);
-				
-				code.add(DataI, 0);
-				code.append(arg2);
-				code.add(PushI, 13);
-				code.add(Add);
-				
-				code.add(PushD, labelConcatArg2);
-				code.add(PStack);*/
-				
+				code.add(Add);*/
 
+				//code.add(DLabel, label);
+
+				// Elements (2)
+				// arg1
+				//code.add(Duplicate);
+				
+				
 				// Concatenated String:
-				code.add(PushI, 13 + 6 + 1);
+				code.add(PushI, 14);
 				code.add(Call, MemoryManager.MEM_MANAGER_ALLOCATE);
 				
 				code.add(PStack); // PSTACK
@@ -552,25 +545,65 @@ public class ASMCodeGenerator {
 				code.add(PushI, 4);
 				code.add(StoreI);
 				
+				code.add(Duplicate);
+
 				code.add(PStack); // PSTACK
 				
 				code.add(PushD, labelConcatArg1);
 				
 				code.add(PStack); // PSTACK
 				
+				//code.add(PushI, 13);
+				//code.add(Add);
+				code.add(LoadI);
 				code.add(StoreI);
 				
-				code.add(PushD, labelConcatArg2);
-				//code.add(StoreC);
-				//code.add(Add);
+				code.add(PStack); // PSTACK*/
+				
+				/*code.append(arg1); // Get address of arg1
+			    code.add(PushI, 13);
+			    code.add(Add);
+			    
+				code.add(Duplicate); // Place backup of arg1 address on stack
+
+				code.add(PStack); // PSTACK
+				
+				code.add(LoadC); // <- First character
 				
 				code.add(PStack); // PSTACK
 				
-				code.add(StoreI);
-
-				//code.add(DLabel, label);
+				code.add(Duplicate);
+				
+				code.add(PushI, 1);
+				code.add(Add);
+				
+				code.add(LoadC);
+				
+				code.add(PStack); // PSTACK
+				
+				code.add(StoreC);
+				
+				code.add(Exchange);
+				
+				code.add(PStack); // PSTACK
+				
+				code.add(Pop);
+				
+				code.add(PStack); // PSTACK*/
+				//code.add(PushI, 1);     
+				//code.add(Add); // <- Add offset of size 1 to the original address
+				//code.add(LoadC); // <- Second character
+				
 				//code.add(PushD, label);
+				
+				/*Type type = node.getType();
+				code.add(opcodeForStore(type));*/
+				
 			} else {
+				newValueCode(node);
+				
+				arg1 = removeValueCode(node.child(0));
+				arg2 = removeValueCode(node.child(1));
 				double rightChildValue;
 				
 				try {  
@@ -962,14 +995,16 @@ public class ASMCodeGenerator {
 		public void visit(StringConstantNode node) {
 			String label = labeller.newLabel("-str-constant-", "");
 			String stringValue = node.getValue();
-			int typeID = 10;
-			int status = 5;
-			int refCount = 0;
-			int lengthOfString = stringValue.length();
+			final int typeID = 10;
+			final int status = 5;
+			final int refCount = 0;
+			final int lengthOfString = stringValue.length();
 
+			// debug.out("LENGTH OF " + stringValue + ": "+ lengthOfString);
+			
 			newValueCode(node);
 			
-			// Adding variable to pre-memory (?)
+			// Adding variable to low-memory
 			code.add(DLabel, label);
 			
 			// Header

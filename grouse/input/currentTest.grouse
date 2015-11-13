@@ -1,9 +1,10 @@
 main {
-	var str1 := "abc";
+	var str1 := "a";
 	var str2 := "dfg";
 	imm strCombined := str1 + str2;
 
 	print "STR1:   " str1 nl;
 	print  "STR2:   " str2 nl;	
 	print "STRCombined: " strCombined nl;
+	print "DONE";
 }
