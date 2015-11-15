@@ -17,6 +17,8 @@ public enum Keyword implements Lextant {
 	WHILE("while"),
 	FOR("for"),
 	NULL_KEYWORD(""),
+	TUPLE("tuple"),
+	FUNCTION("func"),
 	// Type:
 	BOOL("bool"),
 	CHAR("char"),
