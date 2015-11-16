@@ -1,5 +1,6 @@
 package parseTree;
 
+import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
@@ -14,6 +15,7 @@ import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.NewlineNode;
+import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
@@ -60,6 +62,12 @@ public interface ParseNodeVisitor {
 	
 	void visitEnter(ProgramNode node);
 	void visitLeave(ProgramNode node);
+
+	void visitEnter(ParameterListNode node);
+	void visitLeave(ParameterListNode node);
+
+	void visitEnter(ParameterNode node);
+	void visitLeave(ParameterNode node);
 
 	// LEAF NODES: visitLeaf only
 	void visit(BooleanConstantNode node);
@@ -163,7 +171,18 @@ public interface ParseNodeVisitor {
 		public void visitLeave(ProgramNode node) {
 			defaultVisitLeave(node);
 		}
-		
+		public void visitEnter(ParameterListNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(ParameterListNode node) {
+			defaultVisitLeave(node);
+		}
+		public void visitEnter(ParameterNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(ParameterNode node) {
+			defaultVisitLeave(node);
+		}
 		/******************************/
 		/* LEAF NODES: visitLeaf only */
 		/******************************/
