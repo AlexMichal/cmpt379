@@ -49,7 +49,7 @@ public class LexicalAnalyzer extends ScannerImp implements Scanner {
 		LocatedChar ch = nextNonWhitespaceChar();
 		
 		// beginning of each potential token
-		// debug.out("Potential Token spot: " + ch.toString());
+		//debug.out("Potential Token spot: " + ch.toString());
 		
 		if (isNumberStart(ch)) {
 			return scanNumber(ch);

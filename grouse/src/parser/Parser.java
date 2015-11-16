@@ -2,6 +2,8 @@ package parser;
 
 import java.util.Arrays;
 
+import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList;
+
 import logging.GrouseLogger;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
@@ -18,6 +20,7 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
+import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
@@ -65,38 +68,109 @@ public class Parser {
 	// "program" IS THE START SYMBOL 'S'
 	////////////////////////////////////////////////////////////
 	
-	// S -> main { block }
+	// S -> globalDefinition* main { block }
 	private ParseNode parseProgram() {
-		if (!startsProgram(nowReading)) return syntaxErrorNode("program");
+		if (!startsGlobalDefinition(nowReading) && !nowReading.isLextant(Keyword.MAIN)) return syntaxErrorNode("program node");
 		
+		// S -> ...
 		ParseNode program = new ProgramNode(nowReading);
+		
+		// ... globalDefinitions* ...
+		while (startsGlobalDefinition(nowReading)) { 
+			program.appendChild(parseGlobalDefinition());
+		}
+		debug.out("HJEEEEEEEEEERE");
+		 // ... main ...
 		expect(Keyword.MAIN);
 		
-		// Parsing the main block of code
-		ParseNode mainBlock = parseMainBlock();
-		
-		//debug.out("" + mainBlock); // TODO: zPARSE TREE PRINT
-		
-		program.appendChild(mainBlock);
+		 // ... { block }
+		program.appendChild(parseBlockStatement());
 		
 		if (!(nowReading instanceof NullToken)) return syntaxErrorNode("end of program");
 		
 		return program;
 	}
 	
-	private boolean startsProgram(Token token) {
-		return token.isLextant(Keyword.MAIN);
+	///////////////////////////////////////////////////////////
+	// GLOBAL DEFINITIONS
+	///////////////////////////////////////////////////////////
+
+	private ParseNode parseGlobalDefinition() {
+		if (!startsGlobalDefinition(nowReading))	return syntaxErrorNode("global definition");
+		
+		if (startsTupleDefinition(nowReading)) 		return parseTupleDefinition();
+		
+		//if (startsFunctionDefinition(nowReading)) 	return parseFunctionDefinition();
+		
+		assert false : "bad token " + nowReading + " in parseGlobalDefinition()";
+		return null;
 	}
 	
-	///////////////////////////////////////////////////////////
-	// MAIN BLOCK STATEMENT
-	///////////////////////////////////////////////////////////
+	private boolean startsGlobalDefinition(Token token) {
+		return (startsTupleDefinition(token) || startsFunctionDefinition(token));
+	}
 	
-	// block -> { statement* }
-	private ParseNode parseMainBlock() {
-		if (!startsMainBlockStatement(nowReading)) return syntaxErrorNode("main block statement");
+	/********************/
+	/* TUPLE DEFINITION */	
+	/********************/
+	
+	// tupleDefinition -> tuple identifier parameterTuple
+	private ParseNode parseTupleDefinition() {
+		if (!startsTupleDefinition(nowReading)) return syntaxErrorNode("parse Tuple Definition");
+				
+		ParseNode tupleDefinition = new ParameterListNode(nowReading);
 		
-		ParseNode mainBlock = new MainBlockNode(nowReading);
+		debug.out("IN PARSE TUPLE DEFINITION");
+		
+		// ... tuple ...
+		expect(Keyword.TUPLE);
+		
+		// ... identifier ...
+		ParseNode identifier = parseIdentifier();
+		tupleDefinition.appendChild(identifier);
+	
+		// parameterTuple
+		ParseNode parameterTuple = parseParameterTuple();
+		tupleDefinition.appendChild(parameterTuple);
+		
+		return tupleDefinition;
+	} 
+
+	private boolean startsTupleDefinition(Token token) {
+		return token.isLextant(Keyword.TUPLE);
+	}
+	
+	private ParseNode parseParameterTuple() {
+		
+		
+		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
+			// ( ...
+			
+			// ... parameterList ...
+			
+			// ... )
+			expect(Punctuator.CLOSE_ROUND_BRACKET);
+		} else {
+			// Identifier
+			ParseNode identifierNode
+			return ParseStatementNode.withChildren(letStatementToken, target, initializer);
+			
+		}
+	}
+	
+	private boolean startsParameterTuple(Token token) {
+		return token.isLextant(Punctuator.VOID);
+	}
+	
+	/***********************/
+	/* FUNCTION DEFINITION */	
+	/***********************/
+	
+	// functionDefinition  -> func identifier ( parameterList ) -> parameterTuple body
+	private ParseNode parseFunctionDefinition() {
+		/*if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
+		
+		ParseNode block = new BlockStatementNode(nowReading);
 		
 		// ... { ...
 		expect(Punctuator.OPEN_CURLY_BRACKET);
@@ -104,54 +178,83 @@ public class Parser {
 		// Parse each statement in between the opening and closing braces
 		while (startsStatement(nowReading)) {
 			ParseNode statement = parseStatement();
-			mainBlock.appendChild(statement);
+			block.appendChild(statement);
 		}
 		
 		// ... } ...
-		expect(Punctuator.CLOSE_CURLY_BRACKET);
+		expect(Punctuator.CLOSE_CURLY_BRACKET);*/
 		
-		return mainBlock;
+		return null;
 	}
-	
-	private boolean startsMainBlockStatement(Token token) {
-		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
+		
+	private boolean startsFunctionDefinition(Token token) {
+		return token.isLextant(Keyword.FUNCTION);
 	}
 	
 	///////////////////////////////////////////////////////////
 	// STATEMENTS
 	///////////////////////////////////////////////////////////
 	
-	// statement -> printStmt | declaration | letStmt | if statement
+	// statement -> blockStmt | printStmt | declaration | letStmt | if statement
 	
 	// Parses each statement of a block statement
 	private ParseNode parseStatement() {
-		if (!startsStatement(nowReading)) return syntaxErrorNode("statement");
-		
-		if (startsDeclaration(nowReading)) return parseDeclaration();
-		
-		if (startsLetStatement(nowReading)) return parseLetStatement();
-		
-		if (startsPrintStatement(nowReading)) return parsePrintStatement();
-		
-		if (startsIfStatement(nowReading)) return parseIfStatement();
+		if (!startsStatement(nowReading)) 		return syntaxErrorNode("statement");
 
-		if (startsWhileStatement(nowReading)) return parseWhileStatement();
+		if (startsBlockStatement(nowReading)) 	return parseBlockStatement();
 		
-		if (startsBlockStatement(nowReading)) return parseBlockStatement();
+		if (startsDeclaration(nowReading)) 		return parseDeclaration();
+		
+		if (startsLetStatement(nowReading)) 	return parseLetStatement();
+		
+		if (startsPrintStatement(nowReading)) 	return parsePrintStatement();
+		
+		if (startsIfStatement(nowReading)) 		return parseIfStatement();
+
+		if (startsWhileStatement(nowReading))	return parseWhileStatement();
 		
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
 	
 	private boolean startsStatement(Token token) {
-		return startsDeclaration(token) ||
+		return startsBlockStatement(token) ||
+				startsDeclaration(token) ||
 				startsLetStatement(token) || 
 				startsPrintStatement(token) || 
 				startsIfStatement(token) ||
-				startsWhileStatement(token) ||
-				startsBlockStatement(token);
+				startsWhileStatement(token);
+	}
+
+	/*******************/
+	/* BLOCK STATEMENT */	
+	/*******************/
+	
+	// block -> { statement* }
+	private ParseNode parseBlockStatement() {
+		if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
+		
+		ParseNode block = new BlockStatementNode(nowReading);
+		
+		// ... { ...
+		expect(Punctuator.OPEN_CURLY_BRACKET);
+		
+		// Parse each statement in between the opening and closing braces
+		while (startsStatement(nowReading)) {
+			ParseNode statement = parseStatement();
+			block.appendChild(statement);
+		}
+		
+		// ... } ...
+		expect(Punctuator.CLOSE_CURLY_BRACKET);
+		
+		return block;
 	}
 	
+	private boolean startsBlockStatement(Token token) {
+		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
+	}
+		
 	/*******************/
 	/* PRINT STATEMENT */
 	/*******************/
@@ -338,35 +441,6 @@ public class Parser {
 		return token.isLextant(Keyword.WHILE);
 	}
 	
-	/*******************/
-	/* BLOCK STATEMENT */	
-	/*******************/
-	
-	// block -> { statement* }
-	private ParseNode parseBlockStatement() {
-		if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
-		
-		ParseNode block = new BlockStatementNode(nowReading);
-		
-		// ... { ...
-		expect(Punctuator.OPEN_CURLY_BRACKET);
-		
-		// Parse each statement in between the opening and closing braces
-		while (startsStatement(nowReading)) {
-			ParseNode statement = parseStatement();
-			block.appendChild(statement);
-		}
-		
-		// ... } ...
-		expect(Punctuator.CLOSE_CURLY_BRACKET);
-		
-		return block;
-	}
-	
-	private boolean startsBlockStatement(Token token) {
-		return token.isLextant(Punctuator.OPEN_CURLY_BRACKET);
-	}
-		
 	///////////////////////////////////////////////////////////
 	// EXPRESSIONS
 	// expr  -> exprBooleanComparison_Or
@@ -758,7 +832,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
+		debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
 	}

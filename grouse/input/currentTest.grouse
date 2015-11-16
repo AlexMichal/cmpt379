@@ -1,10 +1,9 @@
-main {
-	var str1 := "a";
-	var str2 := "dfg";
-	imm strCombined := str1 + str2;
+tuple fred ();
 
-	print "STR1:   " str1 nl;
-	print  "STR2:   " str2 nl;	
-	print "STRCombined: " strCombined nl;
-	print "DONE";
+main {
+	var str1 := 1 + 3;
+	if (str1 == 4) {
+		print "asdasd" nl;
+	}
+	print "VALUE: " str1;
 }

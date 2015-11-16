@@ -1,28 +1,36 @@
 package semanticAnalyzer.types;
 
 public class TupleType implements Type {
-	private int sizeInBytes;
-	private String infoString;
+	private Type[] paramTypes;
 	
-	private TupleType(int size) {
-		this.sizeInBytes = size;
-		this.infoString = toString();
+	// Trivial Tuple Types
+	private TupleType(Type... type) {
+		if (type.length == 0) {
+			paramTypes[0] = PrimitiveType.VOID;
+		} else {
+			storeParamTypes(type);
+		}
 	}
 	
-	private TupleType(int size, String infoString) {
-		this.sizeInBytes = size;
-		this.infoString = infoString;
-	}
-	
-	public int getSize() {
-		return sizeInBytes;
-	}
-	
-	public String infoString() {
-		return infoString;
+	private void storeParamTypes(Type[] types) {
+		paramTypes = new Type[types.length - 1];
+		
+		for (int i = 0; i < types.length - 1; i++) {
+			paramTypes[i] = types[i];
+		}
 	}
 	
 	public boolean equals(TupleType tuple) { // TODO: equals
 		return false;
+	}
+
+	@Override
+	public int getSize() {
+		return 0;
+	}
+
+	@Override
+	public String infoString() { // TODO: string
+		return "TupleType[" + "]";
 	}
 }
