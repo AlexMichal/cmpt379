@@ -2,8 +2,6 @@ package parser;
 
 import java.util.Arrays;
 
-import com.sun.xml.internal.messaging.saaj.packaging.mime.internet.ParameterList;
-
 import logging.GrouseLogger;
 import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
@@ -21,10 +19,12 @@ import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.ParameterListNode;
+import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
 import parseTree.nodeTypes.WhileStatementNode;
@@ -79,7 +79,7 @@ public class Parser {
 		while (startsGlobalDefinition(nowReading)) { 
 			program.appendChild(parseGlobalDefinition());
 		}
-		debug.out("HJEEEEEEEEEERE");
+		
 		 // ... main ...
 		expect(Keyword.MAIN);
 		
@@ -115,12 +115,10 @@ public class Parser {
 	/********************/
 	
 	// tupleDefinition -> tuple identifier parameterTuple
-	private ParseNode parseTupleDefinition() {
+	private ParseNode parseTupleDefinition() { // TODO: tuple def
 		if (!startsTupleDefinition(nowReading)) return syntaxErrorNode("parse Tuple Definition");
 				
-		ParseNode tupleDefinition = new ParameterListNode(nowReading);
-		
-		debug.out("IN PARSE TUPLE DEFINITION");
+		ParseNode tupleDefinition = new TupleDefinitionNode(nowReading);
 		
 		// ... tuple ...
 		expect(Keyword.TUPLE);
@@ -129,9 +127,12 @@ public class Parser {
 		ParseNode identifier = parseIdentifier();
 		tupleDefinition.appendChild(identifier);
 	
-		// parameterTuple
+		// ... parameterTuple ...
 		ParseNode parameterTuple = parseParameterTuple();
 		tupleDefinition.appendChild(parameterTuple);
+
+		// ... ;
+		expect(Punctuator.TERMINATOR);
 		
 		return tupleDefinition;
 	} 
@@ -140,27 +141,98 @@ public class Parser {
 		return token.isLextant(Keyword.TUPLE);
 	}
 	
+	// parameterTuple - > ( parameterList ) | identifier
 	private ParseNode parseParameterTuple() {
+		if (!startsParameterTuple(nowReading)) return syntaxErrorNode("parse parameter tuple: not an identifier or parameter list");
 		
+		ParseNode parseNode;
 		
-		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET)) {
+		if (nowReading instanceof IdentifierToken) {// TODO: identifier tuple
+			// Identifier
+			// must be a tuple's name
+			
+			//ParseNode identifierNode;
+			
+			//return ParseStatementNode.withChildren(letStatementToken, target, initializer);
+			
+			return null;
+		} else {
 			// ( ...
+			expect(Punctuator.OPEN_ROUND_BRACKET);
 			
 			// ... parameterList ...
+			parseNode = parseParameterList();
 			
 			// ... )
 			expect(Punctuator.CLOSE_ROUND_BRACKET);
-		} else {
-			// Identifier
-			ParseNode identifierNode
-			return ParseStatementNode.withChildren(letStatementToken, target, initializer);
-			
 		}
+		
+		return parseNode;
 	}
 	
 	private boolean startsParameterTuple(Token token) {
-		return token.isLextant(Punctuator.VOID);
+		return token.isLextant(Punctuator.OPEN_ROUND_BRACKET) ||
+				token instanceof IdentifierToken;
 	}
+	
+	
+	// parameterList -> parameterSpecification*
+	private ParseNode parseParameterList() {
+		if (!startsParameterList(nowReading)) return syntaxErrorNode("parse parameter list - invalid type");
+		
+		ParseNode parseNode;
+		
+		if (nowReading.isLextant(Punctuator.CLOSE_ROUND_BRACKET)) {
+			// ... ();
+			VoidToken token = VoidToken.make(nowReading.getLocation());
+			
+			parseNode = new ParameterNode(token);
+		} else {
+			// ... [(type identifier)* , ...]
+			parseNode = new ParameterListNode(nowReading);
+			
+			while (!nowReading.isLextant(Punctuator.CLOSE_ROUND_BRACKET)) {
+				parseNode.appendChild(parseParameter());
+				
+				if (nowReading.isLextant(Punctuator.SEPARATOR)) readToken();
+			}
+		}
+		
+		return parseNode;
+	}
+	
+	private boolean startsParameterList(Token token) {
+		return isTypeToken(token) || token.isLextant(Punctuator.CLOSE_ROUND_BRACKET);
+	}
+	
+	// parameterSpecification -> type identifier
+	private ParseNode parseParameter() {
+		Token token = nowReading;
+		
+		// type ...
+		ParseNode type = parseType();
+		
+		// ... identifier
+		ParseNode identifierName = parseIdentifier();
+		
+		return ParameterNode.withChildren(token, type, identifierName);
+	}
+	
+	// type -> identifier | primitiveType | arrayType // TODO: add eventually arrays to this list 
+	private ParseNode parseType() {
+		if (!isTypeToken(nowReading)) return syntaxErrorNode("parse type - invalid type");
+		
+		readToken();
+		
+		return new TypeNode(previouslyRead);
+	}
+	
+	// parseType Helper Functions
+	private boolean isTypeToken(Token token) { 
+		return token.isLextant(Keyword.INT, Keyword.FLOAT, Keyword.BOOL, Keyword.CHAR, Keyword.STRING) ||
+				token instanceof IdentifierToken;
+	}
+	
 	
 	/***********************/
 	/* FUNCTION DEFINITION */	
@@ -234,7 +306,7 @@ public class Parser {
 	private ParseNode parseBlockStatement() {
 		if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
 		
-		ParseNode block = new BlockStatementNode(nowReading);
+		ParseNode block = new BlockStatementNode(previouslyRead);
 		
 		// ... { ...
 		expect(Punctuator.OPEN_CURLY_BRACKET);
@@ -321,10 +393,16 @@ public class Parser {
 		Token declarationToken = nowReading;
 		readToken();
 		
+		// ... identifier ...
 		ParseNode identifierName = parseIdentifier();
+		
+		// ... := ...
 		expect(Punctuator.ASSIGN);
 		
+		// ... expression ...
 		ParseNode initializer = parseExpression();
+		
+		// ... ;
 		expect(Punctuator.TERMINATOR);
 		
 		return DeclarationNode.withChildren(declarationToken, identifierName, initializer);
@@ -803,7 +881,7 @@ public class Parser {
 
 	// boolean constant (terminal)
 	private ParseNode parseBooleanConstant() {
-		if(!startsBooleanConstant(nowReading)) return syntaxErrorNode("boolean constant");
+		if (!startsBooleanConstant(nowReading)) return syntaxErrorNode("boolean constant");
 	
 		readToken();
 		return new BooleanConstantNode(previouslyRead);
@@ -832,7 +910,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
+		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
 	}

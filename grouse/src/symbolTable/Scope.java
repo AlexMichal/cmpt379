@@ -40,7 +40,6 @@ public class Scope {
 		super();
 		this.baseScope = (baseScope == null) ? this : baseScope;
 		this.symbolTable = new SymbolTable();
-		
 		this.allocator = allocator;
 		allocator.saveState();
 	}

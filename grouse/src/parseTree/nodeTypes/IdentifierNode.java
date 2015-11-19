@@ -53,11 +53,11 @@ public class IdentifierNode extends ParseNode {
 	
 	public Binding findVariableBinding() {
 		String identifier = token.getLexeme();
-		
+
 		for (ParseNode current : pathToRoot()) {
 			if (current.containsBindingOf(identifier)) {
 				declarationScope = current.getScope();
-				
+
 				return current.bindingOf(identifier);
 			}
 		}
@@ -69,6 +69,7 @@ public class IdentifierNode extends ParseNode {
 
 	public Scope getDeclarationScope() {
 		findVariableBinding();
+		
 		return declarationScope;
 	}
 	

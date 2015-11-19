@@ -1,23 +1,16 @@
 package semanticAnalyzer.types;
 
+import java.util.ArrayList;
+
 public class TupleType implements Type {
-	private Type[] paramTypes;
+	private ArrayList<Type> paramTypes = new ArrayList<Type>();
 	
-	// Trivial Tuple Types
-	private TupleType(Type... type) {
-		if (type.length == 0) {
-			paramTypes[0] = PrimitiveType.VOID;
-		} else {
-			storeParamTypes(type);
-		}
+	public void addParameter(Type paramType){
+		paramTypes.add(paramType);
 	}
 	
-	private void storeParamTypes(Type[] types) {
-		paramTypes = new Type[types.length - 1];
-		
-		for (int i = 0; i < types.length - 1; i++) {
-			paramTypes[i] = types[i];
-		}
+	public int getNumberOfParameters(){
+		return paramTypes.size();
 	}
 	
 	public boolean equals(TupleType tuple) { // TODO: equals

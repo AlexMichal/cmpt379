@@ -3,8 +3,6 @@ package semanticAnalyzer;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sun.org.apache.xpath.internal.ExpressionNode;
-
 import lexicalAnalyzer.Lextant;
 import logging.GrouseLogger;
 import parseTree.ParseNode;
@@ -22,15 +20,18 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
+import parseTree.nodeTypes.ParameterListNode;
+import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
-import semanticAnalyzer.signatures.FunctionSignature;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
+import semanticAnalyzer.types.TupleType;
 import semanticAnalyzer.types.Type;
 import symbolTable.Binding;
 import symbolTable.Scope;
@@ -47,7 +48,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
-	// CONSTRUCTS THAT ARE  LARGER THAN STATEMENTS
+	// CONSTRUCTS THAT ARE LARGER THAN STATEMENTS
 	///////////////////////////////////////////////////////////////////////////
 	
 	@Override
@@ -70,6 +71,23 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	}
 	
 	public void visitLeave(BlockStatementNode node) {
+		leaveScope(node);
+	}
+	
+	public void visitEnter(TupleDefinitionNode node) {
+		debug.out("IN visitEnter - TupleDefinitionNode");
+		
+		enterSubscope(node);
+	}
+	
+	public void visitLeave(TupleDefinitionNode node) { // TODO: tuple def'n 
+		debug.out("IN visitLeave - TupleDefinitionNode");
+		// so now we have a scope for tuple
+		// now we need to add a binding of this tuple to the parent node (which is program node)
+		//addBindingToProgramNode(node);
+		
+		// also set this type to TUPLE
+		
 		leaveScope(node);
 	}
 	
@@ -144,6 +162,41 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(IfStatementNode node) {}
+	
+	///////////////////////////////////////////////////////////////////////////
+	// PARAMETERS
+	///////////////////////////////////////////////////////////////////////////
+	
+	/******************/
+	/* PARAMETER LIST */
+	/******************/
+	
+	@Override
+	public void visitEnter(ParameterListNode node) {
+	}
+	
+	@Override
+	public void visitLeave(ParameterListNode node) {
+	}
+	
+	/*************/
+	/* PARAMETER */
+	/*************/
+	
+	@Override
+	public void visitLeave(ParameterNode node) {
+		TypeNode 		typeNode 		= (TypeNode)node.child(0);
+		IdentifierNode 	identifierNode 	= (IdentifierNode)node.child(1);
+		Type			type 			= typeNode.getType();
+		Object			extra			= "";
+		
+		//debug.out("K--------visitLeave - Parameter Node--------\n" + identifierNode + "\n " + type + " \n" + extra + "\nK----------------------------------------");
+		
+		node.setType(type);
+		identifierNode.setType(type);
+		
+		addBindingToAboveTupleDefinition(type, identifierNode, extra);
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// EXPRESSIONS
@@ -260,18 +313,54 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 //		node.setType(PrimitiveType.INTEGER);
 	}
 	
-	/*@Override
+	@Override
 	public void visit(TypeNode node) {
-//		node.setType(PrimitiveType.INTEGER);
-	}*/
-	
+		String type = "" + node.getToken();
+		
+		switch (type) {
+			case "(INT)": 
+				node.setType(PrimitiveType.INTEGER); 
+				break;
+			case "(FLOAT)": 
+				node.setType(PrimitiveType.FLOAT); 
+				break;
+			case "(CHAR)": 
+				node.setType(PrimitiveType.CHARACTER); 
+				break;
+			case "(STRING)": 
+				node.setType(PrimitiveType.STRING); 
+				break;
+			case "(BOOL)": 
+				node.setType(PrimitiveType.BOOLEAN); 
+				break;
+			default:  
+				node.setType(PrimitiveType.ERROR); 
+				break;				
+		}
+	}
+
 	///////////////////////////////////////////////////////////////////////////
 	// IDENTIFIER NODES, WITH HELPER METHODS
 	///////////////////////////////////////////////////////////////////////////
 	
 	@Override
 	public void visit(IdentifierNode node) {
-		if (!isBeingDeclared(node)) {
+		if (isChildOfTupleDefinitionNode(node)) {
+			TupleType tupleType = new TupleType();
+
+			node.setType(tupleType);
+
+			addBindingToParentsParentNode(node, node.getType(),"tuple");
+		} else if (isChildOfParameterNode(node)) {
+			/*IdentifierNode 	identifier 			= node;
+			Type 			type 				= node.getType();
+			Object 			typeOfIdentifier 	= "imm";
+
+			debug.out("IN visit - IdentifierNode - isParameterNode - type: " + node.getParent());*/
+			
+			
+			//addBindingToAboveTupleDefinition(identifier, type, typeOfIdentifier);
+		} else if (!isBeingDeclared(node)) {
 			Binding binding = node.findVariableBinding();
 
 			node.setType(binding.getType());
@@ -279,6 +368,18 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		} else {
 			// Parent DeclarationNode does the processing
 		}
+	}
+	
+	private boolean isChildOfTupleDefinitionNode(IdentifierNode node){
+		ParseNode parent = node.getParent();
+		
+		return parent instanceof TupleDefinitionNode;
+	}
+	
+	private boolean isChildOfParameterNode(IdentifierNode node){
+		ParseNode parent = node.getParent();
+		
+		return parent instanceof ParameterNode;
 	}
 	
 	private boolean isBeingDeclared(IdentifierNode node) {
@@ -289,9 +390,43 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	private void addBinding(IdentifierNode identifierNode, Type type, Object extra) {
 		Scope scope = identifierNode.getLocalScope();
+		
+		//debug.out("\naddBinding:\n---SCOPE---------\n" + scope.toString() + "\nNAME: " + identifierNode.getToken() + "\n-----------------");
+		
 		Binding binding = scope.createBinding(identifierNode, type, extra);
 		
 		identifierNode.setBinding(binding);
+	}
+	
+	private void addBindingToParentsParentNode(IdentifierNode node, Type type, Object extra) {
+		ParseNode 	parseNode 	= node.getParent().getParent(); // change to traverse to root instead of this ghetto way
+		Scope 		scope 		= parseNode.getScope();
+		
+		//debug.out("\naddBindingToProgramNode:\n---SCOPE---------\n" + scope.toString() + "\nNAME: " + node.getToken() + "\n-----------------");
+
+		Binding binding = scope.createBinding(node, type, extra);
+		
+		node.setBinding(binding);
+	}
+	
+	private void addBindingToAboveTupleDefinition(Type type, IdentifierNode node, Object extra) {
+		Scope scope = findParentTupleDefinitionNodesScope(node);
+
+		debug.out("\nY-addBindingToAboveTupleDefinition:\n---SCOPE---------\n" + scope.toString() + "\nNAME: " + node.getToken() + "\nY-----------------------------------------------------");
+
+		Binding binding = scope.createBinding(node, type, extra);
+		
+		node.setBinding(binding);
+	}
+	
+	private Scope findParentTupleDefinitionNodesScope(ParseNode node) {
+		for (ParseNode current : node.pathToRoot()) {
+			if (current.getToken().getLexeme().contains("tuple")) {
+				return current.getScope();
+			}
+		}
+		
+		return null;
 	}
 	
 	///////////////////////////////////////////////////////////////////////////

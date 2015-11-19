@@ -42,7 +42,7 @@ public class ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////
-	// attributes
+	// ATTRIBUTES
 	////////////////////////////////////////////////////////////////////////////////////
 	
 	public void setType(Type type) {
@@ -54,7 +54,7 @@ public class ParseNode {
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////
-	// scopes and bindings
+	// SCOPES AND BINDINGS
 	////////////////////////////////////////////////////////////////////////////////////
 	
 	public Scope getScope() {
@@ -71,9 +71,7 @@ public class ParseNode {
 	
 	public Scope getLocalScope() {
 		for (ParseNode current : pathToRoot()) {
-			if (current.hasScope()) {
-				return current.getScope();
-			}
+			if (current.hasScope()) return current.getScope();
 		}
 		
 		return Scope.nullInstance();
@@ -82,9 +80,9 @@ public class ParseNode {
 	public boolean containsBindingOf(String identifier) {
 		if (!hasScope()) return false;
 		
-		SymbolTable symbolTable = scope.getSymbolTable(); // TODO: zSymbol Table Debug
+		SymbolTable symbolTable = scope.getSymbolTable(); // TODO: zSYMBOL TABLE
 		
-		//debug.out("----SYMBOL TABLE:\n" + symbolTable);
+		//debug.out("\n----SYMBOL TABLE-----\nHash: " + symbolTable.hashCode() + "\n" + symbolTable + "\n---------------------");
 		
 		return symbolTable.containsKey(identifier);
 	}
@@ -94,7 +92,7 @@ public class ParseNode {
 		
 		SymbolTable symbolTable = scope.getSymbolTable();
 		
-		//debug.out("----SYMBOL TABLE:\n" + symbolTable);
+		debug.out("\n----SYMBOL TABLE-----\nHash: " + symbolTable.hashCode() + "\n" + symbolTable + "\n---------------------");
 		
 		return symbolTable.lookup(identifier);
 	}

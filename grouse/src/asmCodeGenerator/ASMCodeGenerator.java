@@ -475,8 +475,6 @@ public class ASMCodeGenerator {
 		/************************/
 		
 		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) { // TODO: STRING concatenation
-			
-			
 			ASMCodeFragment arg1;
 			ASMCodeFragment arg2;
 			Type leftChildType = node.child(0).getType();

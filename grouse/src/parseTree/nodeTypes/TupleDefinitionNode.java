@@ -1,7 +1,9 @@
 package parseTree.nodeTypes;
 
+import lexicalAnalyzer.Keyword;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import tokens.IdentifierToken;
 import tokens.Token;
 import utilities.Debug;
 
@@ -11,7 +13,7 @@ public class TupleDefinitionNode extends ParseNode {
 	public TupleDefinitionNode(Token token) {
 		super(token);
 		
-		debug.out("In TupleDefnNode: " + token);
+		assert(token.isLextant(Keyword.TUPLE));
 	}
 	
 	public TupleDefinitionNode(ParseNode node) {
@@ -26,11 +28,11 @@ public class TupleDefinitionNode extends ParseNode {
 	// CONVENIENCE FACTORY
 	////////////////////////////////////////////////////////////
 	
-	public static TupleDefinitionNode withChildren(Token token, ParseNode declaredName, ParseNode identifierToCopy) {
+	public static TupleDefinitionNode withChildren(Token token, ParseNode declaredName, ParseNode parameterList) {
 		TupleDefinitionNode node = new TupleDefinitionNode(token);
 
 		node.appendChild(declaredName);
-		node.appendChild(identifierToCopy);
+		node.appendChild(parameterList);
 		
 		return node;
 	}
