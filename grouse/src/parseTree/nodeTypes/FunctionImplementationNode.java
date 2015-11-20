@@ -1,20 +1,22 @@
 package parseTree.nodeTypes;
 
+import lexicalAnalyzer.Keyword;
 import parseTree.ParseNode;
 import parseTree.ParseNodeVisitor;
+import tokens.IdentifierToken;
 import tokens.Token;
 import utilities.Debug;
 
-public class FunctionDefinitionNode extends ParseNode {
+public class FunctionImplementationNode extends ParseNode {
 	Debug debug = new Debug();
 	
-	public FunctionDefinitionNode(Token token) {
+	public FunctionImplementationNode(Token token) {
 		super(token);
 		
-		debug.out("In FunctionDefnNode: " + token);
+		debug.out("In FunctionDeclNode: " + token);
 	}
 	
-	public FunctionDefinitionNode(ParseNode node) {
+	public FunctionImplementationNode(ParseNode node) {
 		super(node);
 	}
 	
@@ -26,18 +28,11 @@ public class FunctionDefinitionNode extends ParseNode {
 	// CONVENIENCE FACTORY
 	////////////////////////////////////////////////////////////
 	
-	public static FunctionDefinitionNode withChildren(
-			Token token, 
-			ParseNode declaredName, 
-			ParseNode parameterList, 
-			ParseNode parameterTuple,
-			ParseNode block) {
-		FunctionDefinitionNode node = new FunctionDefinitionNode(token);
-		
+	public static FunctionImplementationNode withChildren(Token token, ParseNode declaredName, ParseNode parameterList) {
+		FunctionImplementationNode node = new FunctionImplementationNode(token);
+
 		node.appendChild(declaredName);
 		node.appendChild(parameterList);
-		node.appendChild(parameterTuple);
-		node.appendChild(block);
 		
 		return node;
 	}

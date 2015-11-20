@@ -32,7 +32,7 @@ public enum Punctuator implements Lextant {
 	AMPERSAND("&"),
 	COLON(":"),
 	ASSIGN(":="),
-	//VOID("()"),
+	ARROW("->"),
 	// Other:
 	NULL_PUNCTUATOR("");
 

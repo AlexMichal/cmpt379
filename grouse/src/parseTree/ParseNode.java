@@ -92,7 +92,7 @@ public class ParseNode {
 		
 		SymbolTable symbolTable = scope.getSymbolTable();
 		
-		debug.out("\n----SYMBOL TABLE-----\nHash: " + symbolTable.hashCode() + "\n" + symbolTable + "\n---------------------");
+		//debug.out("\n----SYMBOL TABLE-----\nHash: " + symbolTable.hashCode() + "\n" + symbolTable + "\n---------------------");
 		
 		return symbolTable.lookup(identifier);
 	}

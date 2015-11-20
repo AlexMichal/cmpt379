@@ -4,8 +4,10 @@ import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.BreakNode;
 import parseTree.nodeTypes.CastNode;
 import parseTree.nodeTypes.CharacterConstantNode;
+import parseTree.nodeTypes.ContinueNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
@@ -14,6 +16,8 @@ import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.FloatConstantNode;
+import parseTree.nodeTypes.ForEverNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.NewlineNode;
 import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
@@ -72,6 +76,9 @@ public interface ParseNodeVisitor {
 	
 	void visitEnter(TupleDefinitionNode node);
 	void visitLeave(TupleDefinitionNode node);
+	
+	void visitEnter(ForStatementNode node);
+	void visitLeave(ForStatementNode node);
 
 	// LEAF NODES: visitLeaf only
 	void visit(BooleanConstantNode node);
@@ -84,6 +91,9 @@ public interface ParseNodeVisitor {
 	void visit(NewlineNode node);
 	void visit(SeparatorNode node);
 	void visit(TypeNode node);
+	void visit(BreakNode node);
+	void visit(ContinueNode node);
+	void visit(ForEverNode node);
 	
 	public static class Default implements ParseNodeVisitor
 	{
@@ -193,6 +203,13 @@ public interface ParseNodeVisitor {
 		public void visitLeave(TupleDefinitionNode node) {
 			defaultVisitLeave(node);
 		}
+		public void visitEnter(ForStatementNode node) {
+			defaultVisitEnter(node);
+		}
+		public void visitLeave(ForStatementNode node) {
+			defaultVisitLeave(node);
+		}
+		
 		/******************************/
 		/* LEAF NODES: visitLeaf only */
 		/******************************/
@@ -225,6 +242,15 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}
 		public void visit(TypeNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(BreakNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(ContinueNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(ForEverNode node) {
 			defaultVisitForLeaf(node);
 		}
 	}

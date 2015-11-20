@@ -7,12 +7,16 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.BreakNode;
 import parseTree.nodeTypes.CastNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
+import parseTree.nodeTypes.ForEverNode;
+import parseTree.nodeTypes.ForStatementNode;
+import parseTree.nodeTypes.FunctionDefinitionNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
@@ -100,7 +104,7 @@ public class Parser {
 		
 		if (startsTupleDefinition(nowReading)) 		return parseTupleDefinition();
 		
-		//if (startsFunctionDefinition(nowReading)) 	return parseFunctionDefinition();
+		if (startsFunctionDefinition(nowReading)) 	return parseFunctionDefinition();
 		
 		assert false : "bad token " + nowReading + " in parseGlobalDefinition()";
 		return null;
@@ -239,24 +243,31 @@ public class Parser {
 	/***********************/
 	
 	// functionDefinition  -> func identifier ( parameterList ) -> parameterTuple body
-	private ParseNode parseFunctionDefinition() {
-		/*if (!startsBlockStatement(nowReading)) return syntaxErrorNode("block statement");
+	private ParseNode parseFunctionDefinition() { // TODO: function def'n
+		if (!startsFunctionDefinition(nowReading)) return syntaxErrorNode("function definition");
 		
-		ParseNode block = new BlockStatementNode(nowReading);
+		// func ...
+		expect(Keyword.FUNCTION);
+		Token token = previouslyRead;
 		
-		// ... { ...
-		expect(Punctuator.OPEN_CURLY_BRACKET);
+		// ... identifier ...
+		ParseNode identifierNode = parseIdentifier();
 		
-		// Parse each statement in between the opening and closing braces
-		while (startsStatement(nowReading)) {
-			ParseNode statement = parseStatement();
-			block.appendChild(statement);
-		}
+		// ... ( parameterList ) ...
+		expect(Punctuator.OPEN_ROUND_BRACKET);
+		ParseNode parameterListNode = parseParameterList();
+		expect(Punctuator.CLOSE_ROUND_BRACKET);
 		
-		// ... } ...
-		expect(Punctuator.CLOSE_CURLY_BRACKET);*/
+		// ... -> .. 
+		expect(Punctuator.ARROW);
 		
-		return null;
+		// ... parameterTuple ...
+		ParseNode parameterTupleNode = parseParameterTuple();		
+		
+		// ... block
+		ParseNode blockStatementNode = parseBlockStatement();
+		
+		return FunctionDefinitionNode.withChildren(token, identifierNode, parameterListNode, parameterTupleNode, blockStatementNode);
 	}
 		
 	private boolean startsFunctionDefinition(Token token) {
@@ -267,7 +278,7 @@ public class Parser {
 	// STATEMENTS
 	///////////////////////////////////////////////////////////
 	
-	// statement -> blockStmt | printStmt | declaration | letStmt | if statement
+	// statement -> blockStmt | printStmt | declaration | letStmt | if statement | while statement | for statement
 	
 	// Parses each statement of a block statement
 	private ParseNode parseStatement() {
@@ -284,6 +295,10 @@ public class Parser {
 		if (startsIfStatement(nowReading)) 		return parseIfStatement();
 
 		if (startsWhileStatement(nowReading))	return parseWhileStatement();
+
+		if (startsForStatement(nowReading))		return parseForStatement();
+		
+		if (startsBreakStatement(nowReading))	return parseBreakStatement();
 		
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
@@ -295,7 +310,9 @@ public class Parser {
 				startsLetStatement(token) || 
 				startsPrintStatement(token) || 
 				startsIfStatement(token) ||
-				startsWhileStatement(token);
+				startsWhileStatement(token) ||
+				startsForStatement(token) ||
+				startsBreakStatement(token);
 	}
 
 	/*******************/
@@ -425,7 +442,7 @@ public class Parser {
 		readToken();
 		
 		// ... (identifier OR expr[expr]) ... 
-		ParseNode target = parseTarget(); // TODO: TARGET syntax
+		ParseNode target = parseTarget();
 		
 		// ... := ...
 		expect(Punctuator.ASSIGN);
@@ -517,6 +534,98 @@ public class Parser {
 	
 	private boolean startsWhileStatement(Token token) {
 		return token.isLextant(Keyword.WHILE);
+	}
+	
+	/*****************/
+	/* FOR STATEMENT */
+	/*****************/
+	
+	// forStatement -> for ( forControlPhase ) block
+	private ParseNode parseForStatement() {
+		if (!startsForStatement(nowReading)) return syntaxErrorNode("for statement");
+		
+		ParseNode forStatementBlock;
+
+		// for ...
+		Token forStatementToken = nowReading;
+		readToken();
+
+		// ... ( forControlPhase ) ...
+		expect(Punctuator.OPEN_ROUND_BRACKET);
+		ParseNode forControlPhase = parseForControlPhrase();
+		expect(Punctuator.CLOSE_ROUND_BRACKET);
+		
+		// ... { block } ...
+		forStatementBlock = parseBlockStatement();
+		
+		return ForStatementNode.withChildren(forStatementToken, forControlPhase, forStatementBlock);
+	}
+	
+	private boolean startsForStatement(Token token) {
+		return token.isLextant(Keyword.FOR);
+	}
+	
+	// forControlPhase -> ever | count ( expression lessOp )? identifier lessOp expression
+	
+	// Parses each For Control Phrase of a For Statement
+	private ParseNode parseForControlPhrase() {
+		if (!startsForControlPhrase(nowReading))		return syntaxErrorNode("for control phrase");
+
+		if (startsForEverControlPhrase(nowReading)) 	return parseForEverControlPhrase();
+		
+		if (startsForCountControlPhrase(nowReading)) 	return parseForCountControlPhrase();
+		
+		
+		assert false : "bad token " + nowReading + " in parseForControlPhrase()";
+		return null;
+	}
+	
+	private boolean startsForControlPhrase(Token token) {
+		return startsForEverControlPhrase(token) ||
+				startsForCountControlPhrase(token);
+	}
+	
+	// forControlPhrase -> ever
+	private ParseNode parseForEverControlPhrase() {
+		if (!startsForEverControlPhrase(nowReading)) return syntaxErrorNode("parse for ever control phrase");
+		
+		readToken();
+		
+		return new ForEverNode(previouslyRead);
+	}
+	
+	private boolean startsForEverControlPhrase(Token token) {
+		return token.isLextant(Keyword.EVER);
+	}
+	
+	// forControlPhrase -> count ( expression lessOp )? identifier lessOp expression
+	private ParseNode parseForCountControlPhrase() {
+		
+		return null;
+	}
+	
+	private boolean startsForCountControlPhrase(Token token) {
+		return token.isLextant(Keyword.COUNT);
+	}
+	
+	/*******************/
+	/* BREAK STATEMENT */
+	/*******************/
+	
+	// breakStatement -> break ;
+	private ParseNode parseBreakStatement(){
+		if (!startsBreakStatement(nowReading)) return syntaxErrorNode("break statement");
+		
+		Token breakToken = nowReading;
+		readToken();
+		
+		expect(Punctuator.TERMINATOR);
+		
+		return new BreakNode(breakToken);
+	}
+	
+	private boolean startsBreakStatement(Token token){
+		   return token.isLextant(Keyword.BREAK);
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -884,6 +993,7 @@ public class Parser {
 		if (!startsBooleanConstant(nowReading)) return syntaxErrorNode("boolean constant");
 	
 		readToken();
+		
 		return new BooleanConstantNode(previouslyRead);
 	}
 	
@@ -910,7 +1020,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
+		debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
 	}

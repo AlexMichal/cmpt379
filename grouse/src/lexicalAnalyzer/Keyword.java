@@ -19,6 +19,10 @@ public enum Keyword implements Lextant {
 	NULL_KEYWORD(""),
 	TUPLE("tuple"),
 	FUNCTION("func"),
+	BREAK("break"),
+	CONTINUE("continue"),
+	EVER("ever"),
+	COUNT("count"),
 	// Type:
 	BOOL("bool"),
 	CHAR("char"),

@@ -10,11 +10,14 @@ import parseTree.ParseNodeVisitor;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.BreakNode;
 import parseTree.nodeTypes.CharacterConstantNode;
+import parseTree.nodeTypes.ContinueNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
@@ -338,6 +341,24 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				break;				
 		}
 	}
+	
+	@Override
+	public void visit(BreakNode node) {
+		ParseNode forStatementNode = node.getParent().getParent();
+		
+		if (forStatementNode instanceof ForStatementNode) {
+			node.setForStatementNodeLocation((ForStatementNode) forStatementNode);
+		}
+	}
+	
+	@Override
+	public void visit(ContinueNode node) {
+		ParseNode forStatementNode = node.getParent().getParent();
+		
+		if (forStatementNode instanceof ForStatementNode) {
+			node.setForStatementNodeLocation((ForStatementNode) forStatementNode);
+		}
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// IDENTIFIER NODES, WITH HELPER METHODS
@@ -412,7 +433,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	private void addBindingToAboveTupleDefinition(Type type, IdentifierNode node, Object extra) {
 		Scope scope = findParentTupleDefinitionNodesScope(node);
 
-		debug.out("\nY-addBindingToAboveTupleDefinition:\n---SCOPE---------\n" + scope.toString() + "\nNAME: " + node.getToken() + "\nY-----------------------------------------------------");
+		//debug.out("\nY-addBindingToAboveTupleDefinition:\n---SCOPE---------\n" + scope.toString() + "\nNAME: " + node.getToken() + "\nY-----------------------------------------------------");
 
 		Binding binding = scope.createBinding(node, type, extra);
 		

@@ -15,19 +15,24 @@ import parseTree.*;
 import parseTree.nodeTypes.BinaryOperatorNode;
 import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
+import parseTree.nodeTypes.BreakNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatConstantNode;
+import parseTree.nodeTypes.ForEverNode;
+import parseTree.nodeTypes.ForStatementNode;
 import parseTree.nodeTypes.IdentifierNode;
 import parseTree.nodeTypes.IfStatementNode;
 import parseTree.nodeTypes.IntegerConstantNode;
 import parseTree.nodeTypes.LetStatementNode;
 import parseTree.nodeTypes.NewlineNode;
+import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
 import parseTree.nodeTypes.StringConstantNode;
+import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
 import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.types.PrimitiveType;
@@ -349,6 +354,51 @@ public class ASMCodeGenerator {
 			// END label
 			code.add(Label, endLabel); 
 		}
+
+		/*****************/
+		/* FOR STATEMENT */
+		/*****************/
+		
+		public void visitEnter(ForStatementNode node){
+			String startLabel 		= labeller.newLabel("-for-statement-start-loop-", "");
+			String endLabel  		= labeller.newLabelSameNumber("-for-statement-end-loop-", "");
+			String continueLabel 	= labeller.newLabelSameNumber("-for-statement-continue-loop-", "");
+			
+			node.setStartLabel(startLabel);
+			node.setStartLabel(endLabel);
+			node.setStartLabel(continueLabel);
+		}
+		
+		public void visitLeave(ForStatementNode node) { // TODO: for statement node
+			newVoidCode(node);
+			
+			ParseNode 		forControlPhraseNode	= node.child(0);
+			ParseNode 		blockStatementNode		= node.child(1);
+			String			forControlPhraseLexeme 	= forControlPhraseNode.getToken().getLexeme();
+			String 			startLabel				= node.getStartLabel();
+			String 			endLabel  				= node.getEndLabel();
+			String 			continueLabel 			= node.getContinueLabel();
+			
+			debug.out("HERE FUCK: " + forControlPhraseNode.getToken().getLexeme());
+			
+			if (forControlPhraseLexeme.contains("ever")) {
+				// for (ever) ...
+				code.add(Label, startLabel);
+				
+				// block statement code
+				for (ParseNode child : blockStatementNode.getChildren()) {
+					ASMCodeFragment childCode = removeVoidCode(child);
+					code.append(childCode);
+				}
+
+				// ... jump to START label
+				code.add(Jump, startLabel);
+			} else if (forControlPhraseLexeme.contains("count")) {
+				
+			}
+			
+			code.add(Label, endLabel);
+		}
 		
 		/************************/
 		/* BLOCK STATEMENT NODE */
@@ -361,6 +411,35 @@ public class ASMCodeGenerator {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
 			}
+		}
+		
+		/************************/
+		/* TUPLE DEFINITION NODE */
+		/************************/
+		
+		public void visitLeave(TupleDefinitionNode node) {
+			newVoidCode(node);
+			
+			for (ParseNode child : node.getChildren()) {
+				ASMCodeFragment childCode = removeVoidCode(child);
+				code.append(childCode);
+			}
+		}
+		
+		public void visitLeave(ParameterNode node) {
+			newVoidCode(node);
+			
+			/*if ((node.getType() == PrimitiveType.BOOLEAN) || 
+					(node.getType() == PrimitiveType.CHARACTER)) {
+				code.add(DataC, 1);
+			} else if ((node.getType() == PrimitiveType.STRING) || 
+					(node.getType() == PrimitiveType.INTEGER)) {
+				code.add(DataI, 4);
+			} else if (node.getType() == PrimitiveType.FLOAT) {
+				code.add(DataF, node.getType().getSize());
+			} else {
+				assert false : "Error in visitLeave(ParameterNode) - invalid type";
+			}*/
 		}
 		
 		/*********/
@@ -474,7 +553,7 @@ public class ASMCodeGenerator {
 		/* BINARY OPERATOR NODE */
 		/************************/
 		
-		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) { // TODO: STRING concatenation
+		private void visitNormalBinaryOperatorNode(BinaryOperatorNode node) {
 			ASMCodeFragment arg1;
 			ASMCodeFragment arg2;
 			Type leftChildType = node.child(0).getType();
@@ -932,26 +1011,7 @@ public class ASMCodeGenerator {
 					case DIVIDE: 	return FDivide;
 					default:		assert false : "float - unimplemented operator in opcodeForOperator";
 				}
-			} else if ((leftChildType == PrimitiveType.STRING) && (rightChildType == PrimitiveType.STRING)) { // TODO: DELETE?
-				switch(punctuator) {
-					case ADD: 	   	return Add;
-					default:		assert false : "string - unimplemented operator in opcodeForOperator";
-				}
-			}
-			
-			return null;
-		}
-
-		private ASMOpcode opcodeForOperator(Lextant lextant, Type childType) {
-			assert(lextant instanceof Punctuator);
-			Punctuator punctuator = (Punctuator)lextant;
-			
-			if (childType == PrimitiveType.BOOLEAN)  {
-				switch(punctuator) {
-					case NOT: 		return Negate;
-					default:		assert false : "boolean - unimplemented operator in opcodeForOperator";
-				}
-			}
+			} 
 			
 			return null;
 		}
@@ -1015,6 +1075,14 @@ public class ASMCodeGenerator {
 			code.add(DataS, stringValue);
 			
 			code.add(PushD, label);
+		}
+		
+		public void visit(BreakNode node) {
+			newVoidCode(node);
+			
+			ForStatementNode forStatementNodeLocation = node.getForStatementNodeLocation();
+			
+			code.add(Jump, forStatementNodeLocation.getEndLabel());
 		}
 	}
 }
