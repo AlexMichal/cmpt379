@@ -200,9 +200,67 @@
         LoadI                                  
         PushD        $print-format-integer     
         Printf                                 
-        Label        -for-statement-continue-loop-5 
+        PushD        $print-format-newline     
+        Printf                                 
+        Label        -while-statement-7        
+        Label        -compare-arg1-6           
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% str2
+        LoadI                                  
+        Label        -compare-arg2-6           
+        PushI        7                         
+        Label        -compare-sub-6            
+        Subtract                               
+        JumpNeg      -compare-true-6           
+        Jump         -compare-false-6          
+        Label        -compare-true-6           
+        PushI        1                         
+        Jump         -compare-join-6           
+        Label        -compare-false-6          
+        PushI        0                         
+        Jump         -compare-join-6           
+        Label        -compare-join-6           
+        JumpFalse    -while-end-7              
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% str2
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% str2
+        LoadI                                  
+        PushI        1                         
+        Add                                    
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% str2
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        Jump         -while-statement-7        
+        Label        -while-end-7              
+        Label        -for-statement-continue-loop-8 
+        DLabel       -str-constant-9           
+        DataI        10                        
+        DataI        5                         
+        DataC        0                         
+        DataI        5                         
+        DataC        72                        %% "HELLO"
+        DataC        69                        
+        DataC        76                        
+        DataC        76                        
+        DataC        79                        
+        DataC        0                         
+        PushD        -str-constant-9           
+        PushI        13                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
         Jump         null                      
-        Jump         -for-statement-continue-loop-5 
+        Jump         -for-statement-continue-loop-8 
         Label        null                      
         Halt                                   
         Label        -mem-manager-make-tags    

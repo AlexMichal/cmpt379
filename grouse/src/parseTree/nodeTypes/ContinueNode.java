@@ -9,6 +9,7 @@ import tokens.Token;
 
 public class ContinueNode extends ParseNode {
 	private ForStatementNode forStatementNodeLocation;
+	private WhileStatementNode whileStatementNodeLocation;
 	
 	public ContinueNode(Token token) {
 		super(token);
@@ -39,7 +40,14 @@ public class ContinueNode extends ParseNode {
 	public ForStatementNode getForStatementNodeLocation() {
 		return forStatementNodeLocation;
 	}
+
+	public void setWhileStatementNodeLocation(WhileStatementNode node) {
+		this.whileStatementNodeLocation = node;
+	}
 	
+	public WhileStatementNode getWhileStatementNodeLocation() {
+		return whileStatementNodeLocation;
+	}
 	////////////////////////////////////////////////////////////
 	// ACCEPT A VISITOR
 	////////////////////////////////////////////////////////////

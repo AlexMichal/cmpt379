@@ -17,6 +17,7 @@ import parseTree.nodeTypes.BlockStatementNode;
 import parseTree.nodeTypes.BooleanConstantNode;
 import parseTree.nodeTypes.BreakNode;
 import parseTree.nodeTypes.CharacterConstantNode;
+import parseTree.nodeTypes.ContinueNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
 import parseTree.nodeTypes.FloatConstantNode;
@@ -326,15 +327,26 @@ public class ASMCodeGenerator {
 		/*******************/
 		/* WHILE STATEMENT */
 		/*******************/
+
+		public void visitEnter(WhileStatementNode node){
+			String startLabel 		= labeller.newLabel("-while-statement-start-loop-", "");
+			String endLabel  		= labeller.newLabelSameNumber("-while-statement-end-loop-", "");
+			String continueLabel 	= labeller.newLabelSameNumber("-while-statement-continue-loop-", "");
+			
+			node.setStartLabel(startLabel);
+			node.setStartLabel(endLabel);
+			node.setStartLabel(continueLabel);
+		}
 		
 		public void visitLeave(WhileStatementNode node) {
 			newVoidCode(node);
 			
-			ASMCodeFragment expression = removeValueCode(node.child(0));
-			ParseNode blockStatement = node.child(1);
+			ASMCodeFragment expression 	= removeValueCode(node.child(0));
+			ParseNode blockStatement 	= node.child(1);
+			/*String startLabel 			= node.getStartLabel();
+			String endLabel 			= node.getEndLabel();*/
 			String startLabel = labeller.newLabel("-while-statement-", "");
 			String endLabel = labeller.newLabelSameNumber("-while-end-", "");
-			
 			// while (expr) ...
 			code.add(Label, startLabel);
 			code.append(expression);
@@ -1080,9 +1092,27 @@ public class ASMCodeGenerator {
 		public void visit(BreakNode node) {
 			newVoidCode(node);
 			
+			
+			
+			if (node.getParent().getParent() instanceof ForStatementNode) {
+				//debug.out("ASDASDSA:"+ (node.getParent().getParent()));
+				ForStatementNode forStatementNodeLocation = node.getForStatementNodeLocation();
+				
+				code.add(Jump, forStatementNodeLocation.getEndLabel());
+			} else if (node.getParent().getParent() instanceof WhileStatementNode) {
+				debug.out("ASDASDSA:"+ (node.getParent().getParent()));
+				WhileStatementNode whileStatementNodeLocation = node.getWhileStatementNodeLocation();
+				
+				code.add(Jump, whileStatementNodeLocation.getEndLabel());
+			}
+		}
+		
+		public void visit(ContinueNode node) {
+			newVoidCode(node);
+			
 			ForStatementNode forStatementNodeLocation = node.getForStatementNodeLocation();
 			
-			code.add(Jump, forStatementNodeLocation.getEndLabel());
+			code.add(Jump, forStatementNodeLocation.getStartLabel());
 		}
 	}
 }

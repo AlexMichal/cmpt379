@@ -32,6 +32,7 @@ import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
 import parseTree.nodeTypes.UnaryOperatorNode;
+import parseTree.nodeTypes.WhileStatementNode;
 import semanticAnalyzer.signatures.FunctionSignatures;
 import semanticAnalyzer.types.PrimitiveType;
 import semanticAnalyzer.types.TupleType;
@@ -344,19 +345,23 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visit(BreakNode node) {
-		ParseNode forStatementNode = node.getParent().getParent();
+		ParseNode loopStatementNode = node.getParent().getParent();
 		
-		if (forStatementNode instanceof ForStatementNode) {
-			node.setForStatementNodeLocation((ForStatementNode) forStatementNode);
+		if (loopStatementNode instanceof ForStatementNode) {
+			node.setForStatementNodeLocation((ForStatementNode) loopStatementNode);
+		} else if (loopStatementNode instanceof WhileStatementNode) {
+			node.setWhileStatementNodeLocation((WhileStatementNode) loopStatementNode);
 		}
 	}
 	
 	@Override
 	public void visit(ContinueNode node) {
-		ParseNode forStatementNode = node.getParent().getParent();
+		ParseNode loopStatementNode = node.getParent().getParent();
 		
-		if (forStatementNode instanceof ForStatementNode) {
-			node.setForStatementNodeLocation((ForStatementNode) forStatementNode);
+		if (loopStatementNode instanceof ForStatementNode) {
+			node.setForStatementNodeLocation((ForStatementNode) loopStatementNode);
+		} else if (loopStatementNode instanceof WhileStatementNode) {
+			node.setWhileStatementNodeLocation((WhileStatementNode) loopStatementNode);
 		}
 	}
 

@@ -8,6 +8,10 @@ import tokens.LextantToken;
 import tokens.Token;
 
 public class WhileStatementNode extends ParseNode {
+	private String startLabel;
+	private String endLabel;
+	private String continueLabel;
+	
 	public WhileStatementNode(Token token) {
 		super(token);
 		
@@ -30,6 +34,29 @@ public class WhileStatementNode extends ParseNode {
 		return (LextantToken)token;
 	}
 	
+	public void setStartLabel(String label){
+		this.startLabel = label;
+	}
+
+	public void setEndLabel(String label){
+		this.endLabel = label;
+	}
+	
+	public void setContinueLabel(String label){
+		this.continueLabel = label;
+	}
+
+	public String getStartLabel(){
+		return startLabel;
+	}
+
+	public String getEndLabel(){
+		return endLabel;
+	}
+	
+	public String getContinueLabel(){
+		return continueLabel;
+	}
 	////////////////////////////////////////////////////////////
 	// CONVENIENCE FACTORY
 	////////////////////////////////////////////////////////////

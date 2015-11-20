@@ -7,7 +7,13 @@ main {
 		print "asdasd" nl;
 		let str1 := 6;
 	}
-	print "VALUE: " str1;
+	print "VALUE: " str1 nl;
+
+	while (str2 < 7) {
+		let str2 := str2 + 1;
+		print str2 nl;
+
+	}	
 
 	for (ever) {
 		print "HELLO";
