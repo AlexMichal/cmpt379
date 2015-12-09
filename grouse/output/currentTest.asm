@@ -115,18 +115,35 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        25                        
+        DataZ        32                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
-        Add                                    %% x
-        DLabel       -integer-constant-1       
-        DataI        0                         
-        PushD        -integer-constant-1       
-        LoadC                                  
-        StoreC                                 
-        PushD        $global-memory-block      
+        Add                                    %% strOut
         PushI        1                         
+        PushI        4                         
+        Add                                    
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% x
+        DLabel       -str-constant-1           
+        DataI        10                        
+        DataI        5                         
+        DataC        0                         
+        DataI        7                         
+        DataC        100                       %% "ddasdsa"
+        DataC        100                       
+        DataC        97                        
+        DataC        115                       
+        DataC        100                       
+        DataC        115                       
+        DataC        97                        
+        DataC        0                         
+        PushD        -str-constant-1           
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        8                         
         Add                                    %% str1
         DLabel       -str-constant-2           
         DataI        10                        
@@ -142,7 +159,7 @@
         PushD        -str-constant-2           
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        5                         
+        PushI        12                        
         Add                                    %% str2
         DLabel       -str-constant-3           
         DataI        10                        
@@ -158,7 +175,7 @@
         PushD        -str-constant-3           
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        9                         
+        PushI        16                        
         Add                                    %% str3
         DLabel       -str-constant-4           
         DataI        10                        
@@ -174,43 +191,140 @@
         PushD        -str-constant-4           
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        13                        
+        PushI        20                        
         Add                                    %% x1
         PushI        2                         
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        17                        
+        PushI        24                        
         Add                                    %% x2
         PushI        3                         
         StoreI                                 
         PushD        $global-memory-block      
-        PushI        21                        
+        PushI        28                        
         Add                                    %% x3
         PushI        2                         
         StoreI                                 
-        Label        -if-statement-5           
+        Label        -if-statement-7           
         PushI        1                         
-        JumpFalse    -if-else-5                
-        Jump         -if-end-5                 
-        Label        -if-else-5                
-        Label        -if-end-5                 
+        JumpFalse    -if-else-7                
+        DLabel       -str-constant-5           
+        DataI        10                        
+        DataI        5                         
+        DataC        0                         
+        DataI        19                        
+        DataC        73                        %% "INSIDE IF STATEMENT"
+        DataC        78                        
+        DataC        83                        
+        DataC        73                        
+        DataC        68                        
+        DataC        69                        
+        DataC        32                        
+        DataC        73                        
+        DataC        70                        
+        DataC        32                        
+        DataC        83                        
+        DataC        84                        
+        DataC        65                        
+        DataC        84                        
+        DataC        69                        
+        DataC        77                        
+        DataC        69                        
+        DataC        78                        
+        DataC        84                        
+        DataC        0                         
+        PushD        -str-constant-5           
+        PushI        13                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% str1
+        PushD        $global-memory-block      
+        PushI        12                        
+        Add                                    %% str2
+        LoadI                                  
+        StoreI                                 
+        DLabel       -str-constant-6           
+        DataI        10                        
+        DataI        5                         
+        DataC        0                         
+        DataI        14                        
+        DataC        82                        %% "RECORD NUMBER "
+        DataC        69                        
+        DataC        67                        
+        DataC        79                        
+        DataC        82                        
+        DataC        68                        
+        DataC        32                        
+        DataC        78                        
+        DataC        85                        
+        DataC        77                        
+        DataC        66                        
+        DataC        69                        
+        DataC        82                        
+        DataC        32                        
+        DataC        0                         
+        PushD        -str-constant-6           
+        PushI        13                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        8                         
+        Add                                    %% str1
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        Jump         -if-end-7                 
+        Label        -if-else-7                
+        Label        -if-end-7                 
         PushI        2                         
         PushD        $global-memory-block      
-        PushI        13                        
+        PushI        20                        
         Add                                    %% x1
         LoadI                                  
         Exchange                               
         PushD        $global-memory-block      
-        PushI        17                        
+        PushI        24                        
         Add                                    %% x2
         LoadI                                  
         Exchange                               
         PushD        $global-memory-block      
-        PushI        13                        
+        PushI        20                        
         Add                                    %% x1
         LoadI                                  
         Exchange                               
         Call         -mem-manager-diagnostics  
+        DLabel       -str-constant-8           
+        DataI        10                        
+        DataI        5                         
+        DataC        0                         
+        DataI        3                         
+        DataC        88                        %% "X: "
+        DataC        58                        
+        DataC        32                        
+        DataC        0                         
+        PushD        -str-constant-8           
+        PushI        13                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $global-memory-block      
+        PushI        4                         
+        Add                                    %% x
+        LoadI                                  
+        PushI        13                        
+        Add                                    
+        PushD        $print-format-string      
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
         Halt                                   
         Label        -mem-manager-make-tags    
         DLabel       $mmgr-tags-size           

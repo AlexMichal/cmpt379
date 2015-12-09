@@ -1,10 +1,10 @@
-//var strOut := 1 + 4;
+var strOut := 1 + 4;
 
 //tuple cat (int y, int yy);
 
 main {
 	//let strOut := 6;
-	static imm x := false;
+	static imm x := "ddasdsa";
 	var str1 := "true2";
 	var str2 := "1 + 3";
 	var str3 := "1 + 3";
@@ -13,9 +13,9 @@ main {
 	var x3 := 2;
 	
 	if (true) {
-		//print "INSIDE IF STATEMENT" nl;
-		//let str1 := "23232";
-		//print "RECORD NUMBER " str1 nl;
+		print "INSIDE IF STATEMENT" nl;
+		let str1 := str2;
+		print "RECORD NUMBER " @str1 nl;
 	}
 
 	diag  2 :: x1, x2, x1;
@@ -34,5 +34,5 @@ main {
 	//}
 
 	//print "OUT: " strOut nl;
-	//print "X: " x nl;
+	print "X: " x nl;
 }

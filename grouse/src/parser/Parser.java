@@ -606,6 +606,7 @@ public class Parser {
 		
 		if (startsForCountControlPhrase(nowReading)) 	return parseForCountControlPhrase();
 		
+		if (startsForPairControlPhrase(nowReading)) 	return parseForPairControlPhrase();
 		
 		assert false : "bad token " + nowReading + " in parseForControlPhrase()";
 		return null;
@@ -636,6 +637,19 @@ public class Parser {
 	
 	private boolean startsForCountControlPhrase(Token token) {
 		return token.isLextant(Keyword.COUNT);
+	}
+	
+	// forControlPhrase -> pair identifier, identifier of expression
+	private ParseNode parseForPairControlPhrase() {
+		if (!startsForEverControlPhrase(nowReading)) return syntaxErrorNode("parse for pair");
+		
+		readToken();
+		
+		return new ForEverNode(previouslyRead);
+	}
+	
+	private boolean startsForPairControlPhrase(Token token) {
+		return token.isLextant(Keyword.PAIR);
 	}
 	
 	/*******************/

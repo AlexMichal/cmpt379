@@ -25,6 +25,7 @@ public enum Keyword implements Lextant {
 	COUNT("count"),
 	STATIC("static"),
 	DIAG("diag"),
+	PAIR("pair"),
 	// Type:
 	BOOL("bool"),
 	CHAR("char"),
