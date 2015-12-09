@@ -1,23 +1,34 @@
+//var strOut := 1 + 4;
 
+//tuple cat (int y, int yy);
 
 main {
-	var str1 := 1 + 3;
+	//let strOut := 6;
+	static imm x := false;
+	var str1 := "true2";
 	var str2 := 1 + 3;
-	if (str1 == 4) {
-		print "asdasd" nl;
-		let str1 := 6;
+
+	if (true) {
+		print "INSIDE IF STATEMENT" nl;
+		//let str1 := "23232";
+		print "REFCOUNT " #str1 nl;
 	}
+
+
 	print "VALUE: " str1 nl;
 
-	while (str2 < 7) {
-		let str2 := str2 + 1;
-		print str2 nl;
+	//while (str2 < 7) {
+	//	let str2 := str2 + 1;
+	//	print str2 nl;
 
-	}	
+	//}	
 
-	for (ever) {
-		print "HELLO";
+	//for (ever) {
+	//	print "HELLO" nl;
 
-		break;
-	}
+	//	break;
+	//}
+
+	//print "OUT: " strOut nl;
+	//print "X: " x nl;
 }

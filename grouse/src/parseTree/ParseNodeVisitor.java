@@ -23,6 +23,7 @@ import parseTree.nodeTypes.ParameterListNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StaticVariableNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
@@ -94,6 +95,7 @@ public interface ParseNodeVisitor {
 	void visit(BreakNode node);
 	void visit(ContinueNode node);
 	void visit(ForEverNode node);
+	void visit(StaticVariableNode node);
 	
 	public static class Default implements ParseNodeVisitor
 	{
@@ -251,6 +253,9 @@ public interface ParseNodeVisitor {
 			defaultVisitForLeaf(node);
 		}
 		public void visit(ForEverNode node) {
+			defaultVisitForLeaf(node);
+		}
+		public void visit(StaticVariableNode node) {
 			defaultVisitForLeaf(node);
 		}
 	}

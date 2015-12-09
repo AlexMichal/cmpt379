@@ -3,6 +3,7 @@ package semanticAnalyzer;
 import java.util.Arrays;
 import java.util.List;
 
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import logging.GrouseLogger;
 import parseTree.ParseNode;
@@ -28,6 +29,7 @@ import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StaticVariableNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
@@ -131,10 +133,13 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(DeclarationNode node) {
-		IdentifierNode 	nameOfIdentifier 	= (IdentifierNode) node.child(0);
-		ParseNode 		initializer 		= node.child(1);
-		Type 			declarationType 	= initializer.getType();
+		IdentifierNode 	nameOfIdentifier 	= (IdentifierNode) node.child(0);;
+		ParseNode 		initializer 		= node.child(1);;
+		ParseNode		staticNode			= null;
+		Type 			declarationType 	= initializer.getType();;
 		Object			extra				= node.getToken().getLexeme(); // var, imm, etc
+		
+		if (node.nChildren() == 3) staticNode = node.child(2);
 		
 		node.setType(declarationType);
 
@@ -155,6 +160,7 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		Type 			letStatementType 	= initializer.getType();
 		
 		node.setType(letStatementType);
+		
 		nameOfIdentifier.setType(letStatementType);
 		
 		addBinding(nameOfIdentifier, letStatementType, typeOfIdentifier);
@@ -189,17 +195,29 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	
 	@Override
 	public void visitLeave(ParameterNode node) {
-		TypeNode 		typeNode 		= (TypeNode)node.child(0);
-		IdentifierNode 	identifierNode 	= (IdentifierNode)node.child(1);
-		Type			type 			= typeNode.getType();
+		TypeNode 		typeNode 		= null;
+		IdentifierNode 	identifierNode 	= null;
+		Type			type 			= null;
 		Object			extra			= "";
 		
 		//debug.out("K--------visitLeave - Parameter Node--------\n" + identifierNode + "\n " + type + " \n" + extra + "\nK----------------------------------------");
+		debug.out("" + node.getToken().toString().contains("(void token)"));
+		 
+		if (node.getToken().toString().contains("(void token)")) {
+			//identifierNode = (IdentifierNode)node.child(1);
+			
+		} else {
+			typeNode = (TypeNode)node.child(0);
+			identifierNode = (IdentifierNode)node.child(1);
+			type = typeNode.getType();
+			
+			node.setType(type);
+			identifierNode.setType(type);
+			
+			addBindingToAboveTupleDefinition(type, identifierNode, extra);
+		}
 		
-		node.setType(type);
-		identifierNode.setType(type);
-		
-		addBindingToAboveTupleDefinition(type, identifierNode, extra);
+		//addBindingToAboveTupleDefinition(type, identifierNode, extra);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
@@ -305,6 +323,11 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 	@Override
 	public void visit(StringConstantNode node) {
 		node.setType(PrimitiveType.STRING);
+	}
+	
+	@Override
+	public void visit(StaticVariableNode node) {
+		//node.setType(Keyword.STATIC);
 	}
 	
 	@Override
@@ -464,6 +487,12 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		
 		logError("operator " + token.getLexeme() + " not defined for types " 
 				 + operandTypes  + " at " + token.getLocation());	
+	}
+	
+	private void unknownDeclarationTypeError(ParseNode node) {
+		Token token = node.getToken();
+		
+		logError("unknown declaration node type - " + token.getLexeme() + " at " + token.getLocation());
 	}
 	
 	private void logError(String message) {

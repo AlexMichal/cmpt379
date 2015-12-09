@@ -9,6 +9,7 @@ import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
 import asmCodeGenerator.runtime.MemoryManager;
 import asmCodeGenerator.runtime.RunTime;
+import lexicalAnalyzer.Keyword;
 import lexicalAnalyzer.Lextant;
 import lexicalAnalyzer.Punctuator;
 import parseTree.*;
@@ -284,6 +285,8 @@ public class ASMCodeGenerator {
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			
+			debug.out("ASDASD: " + node.nChildren());
+			
 			ASMCodeFragment expression 					= removeValueCode(node.child(0));
 			ParseNode blockStatementNodeIfStatement 	= node.child(1);
 			ParseNode blockStatementNodeElseStatement 	= null;
@@ -391,7 +394,7 @@ public class ASMCodeGenerator {
 			String 			endLabel  				= node.getEndLabel();
 			String 			continueLabel 			= node.getContinueLabel();
 			
-			debug.out("HERE FUCK: " + forControlPhraseNode.getToken().getLexeme());
+			//debug.out("HERE FUCK: " + forControlPhraseNode.getToken().getLexeme());
 			
 			if (forControlPhraseLexeme.contains("ever")) {
 				// for (ever) ...
@@ -435,6 +438,7 @@ public class ASMCodeGenerator {
 			for (ParseNode child : node.getChildren()) {
 				ASMCodeFragment childCode = removeVoidCode(child);
 				code.append(childCode);
+				
 			}
 		}
 		
@@ -715,18 +719,6 @@ public class ASMCodeGenerator {
 			}					
 		}
 		
-		/***********************/
-		/* UNARY OPERATOR NODE */
-		/***********************/
-		
-		public void visitLeave(UnaryOperatorNode node) {
-			Lextant operator = node.getOperator();
-			
-			if (isBooleanOperator(operator)) {
-				visitNormalUnaryOperatorNode(node);
-			}
-		}
-		
 		/******************/
 		/* HELPER METHODS */
 		/******************/
@@ -759,6 +751,14 @@ public class ASMCodeGenerator {
 			if (lexeme.equals(Punctuator.AND) ||
 					lexeme.equals(Punctuator.OR) ||
 					lexeme.equals(Punctuator.NOT)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		public boolean isRefcountOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.REFCOUNT)) {
 				return true;
 			} else {
 				return false;
@@ -967,7 +967,17 @@ public class ASMCodeGenerator {
 		/* UNARY OPERATOR NODE */
 		/***********************/
 		
-		private void visitNormalUnaryOperatorNode(UnaryOperatorNode node) {
+		public void visitLeave(UnaryOperatorNode node) {
+			Lextant operator = node.getOperator();
+			
+			if (isBooleanOperator(operator)) {
+				booleanUnaryOperatorNode(node);
+			} else if (isRefcountOperator(operator)) {
+				refcountUnaryOperatorNode(node);
+			}
+		}
+		
+		private void booleanUnaryOperatorNode(UnaryOperatorNode node) {
 			newValueCode(node);
 			
 			ASMCodeFragment arg = removeValueCode(node.child(0));
@@ -997,6 +1007,53 @@ public class ASMCodeGenerator {
 				code.add(Add);
 				code.add(LoadC);
 			}
+		}
+		
+		private void refcountUnaryOperatorNode(UnaryOperatorNode node) {
+			newValueCode(node);
+
+			ASMCodeFragment arg = removeValueCode(node.child(0));
+			String lexeme = node.child(0).getToken().getLexeme();
+			String str = arg.toString();
+			String labelNull = labeller.newLabel("label-refcount-null-", "");
+			String labelINF = labeller.newLabel("label-refcount-do-not-set-", "");
+			String labelEnd = labeller.newLabel("label-refcount-end-", "");
+			
+			debug.out("CODE: \n" + arg);
+			
+			// Load address
+			code.append(arg);
+			code.add(Duplicate);
+			code.add(Duplicate);
+			
+			// Add offset to address
+			code.add(PushI, 6);
+			code.add(Add);
+			
+			// Get value at address+offset
+			code.add(LoadI);
+			
+			// If do-not-delete bit is set, jump to labelINF
+			code.add(JumpTrue, labelINF); 
+			code.add(Jump, labelNull);
+			
+			// If  (Do-no-delete is set) {
+			code.add(Label, labelINF); 
+			code.add(PushI, 2147483646);
+			code.add(StoreI);
+			
+			//code.add(StoreI);
+			code.add(Jump, labelEnd);
+			
+			// } else if (NULL) {
+			code.add(Label, labelNull);
+			code.add(PushI, -1);
+			code.add(StoreI);
+			code.add(Jump, labelEnd);
+			
+			// } END
+			code.add(Label, labelEnd);
+			code.add(LoadI);
 		}
 		
 		/********************/
@@ -1033,8 +1090,23 @@ public class ASMCodeGenerator {
 		///////////////////////////////////////////////////////////////////////////
 		
 		public void visit(BooleanConstantNode node) {
-			newValueCode(node);
-			code.add(PushI, node.getValue() ? 1 : 0);
+			if (parentHasThreeChildren(node)) {
+				if (node.getParent().child(2).getToken().isLextant(Keyword.STATIC)) {
+					String label = labeller.newLabel("-integer-constant-", "");
+					
+					newAddressCode(node);
+					
+					code.add(DLabel, label);
+					code.add(DataI, node.getValue() ? 1 : 0);
+					code.add(PushD, label);
+				} else {
+					newValueCode(node);
+					code.add(PushI, node.getValue() ? 1 : 0);
+				}
+			} else {
+				newValueCode(node);
+				code.add(PushI, node.getValue() ? 1 : 0);
+			}
 		}
 		
 		public void visit(IdentifierNode node) {
@@ -1045,21 +1117,63 @@ public class ASMCodeGenerator {
 		}
 		
 		public void visit(IntegerConstantNode node) {
-			newValueCode(node);
-			
-			code.add(PushI, node.getValue());
+			if (parentHasThreeChildren(node)) {
+				if (node.getParent().child(2).getToken().isLextant(Keyword.STATIC)) {
+					String label = labeller.newLabel("-integer-constant-", "");
+					
+					newAddressCode(node);
+					
+					code.add(DLabel, label);
+					code.add(DataI, node.getValue());
+					code.add(PushD, label);
+				} else {
+					newValueCode(node);
+					code.add(PushI, node.getValue());
+				}
+			} else {
+				newValueCode(node);
+				code.add(PushI, node.getValue());
+			}
 		}
 		
 		public void visit(FloatConstantNode node) {
-			newValueCode(node);
-			
-			code.add(PushF, node.getValue());
+			if (parentHasThreeChildren(node)) {
+				if (node.getParent().child(2).getToken().isLextant(Keyword.STATIC)) {
+					String label = labeller.newLabel("-float-constant-", "");
+					
+					newAddressCode(node);
+					
+					code.add(DLabel, label);
+					code.add(DataF, node.getValue());
+					code.add(PushD, label);
+				} else {
+					newValueCode(node);
+					code.add(PushF, node.getValue());
+				}
+			} else {
+				newValueCode(node);
+				code.add(PushF, node.getValue());
+			}
 		}
 		
 		public void visit(CharacterConstantNode node) {
-			newValueCode(node);
-			
-			code.add(PushI, node.getValue());
+			if (parentHasThreeChildren(node)) {
+				if (node.getParent().child(2).getToken().isLextant(Keyword.STATIC)) {
+					String label = labeller.newLabel("-char-constant-", "");
+					
+					newAddressCode(node);
+					
+					code.add(DLabel, label);
+					code.add(DataC, node.getValue());
+					code.add(PushD, label);
+				} else {
+					newValueCode(node);
+					code.add(PushI, node.getValue());
+				}
+			} else {
+				newValueCode(node);
+				code.add(PushI, node.getValue());
+			}
 		}
 
 		public void visit(StringConstantNode node) {
@@ -1091,16 +1205,12 @@ public class ASMCodeGenerator {
 		
 		public void visit(BreakNode node) {
 			newVoidCode(node);
-			
-			
-			
+
 			if (node.getParent().getParent() instanceof ForStatementNode) {
-				//debug.out("ASDASDSA:"+ (node.getParent().getParent()));
 				ForStatementNode forStatementNodeLocation = node.getForStatementNodeLocation();
 				
 				code.add(Jump, forStatementNodeLocation.getEndLabel());
-			} else if (node.getParent().getParent() instanceof WhileStatementNode) {
-				debug.out("ASDASDSA:"+ (node.getParent().getParent()));
+			} else if (node.getParent().getParent() instanceof WhileStatementNode) {;
 				WhileStatementNode whileStatementNodeLocation = node.getWhileStatementNodeLocation();
 				
 				code.add(Jump, whileStatementNodeLocation.getEndLabel());
@@ -1113,6 +1223,15 @@ public class ASMCodeGenerator {
 			ForStatementNode forStatementNodeLocation = node.getForStatementNodeLocation();
 			
 			code.add(Jump, forStatementNodeLocation.getStartLabel());
+		}
+		
+		// Helper functions
+		private boolean parentHasThreeChildren(ParseNode node) {
+			if (node.getParent().nChildren() == 3) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 	}
 }

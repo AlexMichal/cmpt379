@@ -93,6 +93,7 @@ public class Scope {
 			}
 		} else {
 			symbolTable.errorIfAlreadyDefined(token);
+			baseScope.symbolTable.errorIfAlreadyDefined(token);
 		}
 
 		lexeme = token.getLexeme();

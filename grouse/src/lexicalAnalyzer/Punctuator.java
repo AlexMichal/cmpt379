@@ -33,6 +33,9 @@ public enum Punctuator implements Lextant {
 	COLON(":"),
 	ASSIGN(":="),
 	ARROW("->"),
+	REFCOUNT("#"),
+	ADDRESS_OF("@"),
+	RECORD_NUMBER("$"),
 	// Other:
 	NULL_PUNCTUATOR("");
 

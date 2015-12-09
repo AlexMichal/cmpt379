@@ -27,6 +27,7 @@ import parseTree.nodeTypes.ParameterNode;
 import parseTree.nodeTypes.PrintStatementNode;
 import parseTree.nodeTypes.ProgramNode;
 import parseTree.nodeTypes.SeparatorNode;
+import parseTree.nodeTypes.StaticVariableNode;
 import parseTree.nodeTypes.StringConstantNode;
 import parseTree.nodeTypes.TupleDefinitionNode;
 import parseTree.nodeTypes.TypeNode;
@@ -106,12 +107,16 @@ public class Parser {
 		
 		if (startsFunctionDefinition(nowReading)) 	return parseFunctionDefinition();
 		
+		if (startsDeclaration(nowReading)) 			return parseDeclaration();
+		
 		assert false : "bad token " + nowReading + " in parseGlobalDefinition()";
 		return null;
 	}
 	
 	private boolean startsGlobalDefinition(Token token) {
-		return (startsTupleDefinition(token) || startsFunctionDefinition(token));
+		return (startsTupleDefinition(token) || 
+				startsFunctionDefinition(token) || 
+				startsDeclaration(token));
 	}
 	
 	/********************/
@@ -403,13 +408,28 @@ public class Parser {
 	/* DECLARATION STATEMENT */
 	/*************************/
 	
-	// declaration -> [IMMUTABLE|VARIABLE] identifier := expression ;
+	// declaration -> static? [IMMUTABLE|VARIABLE] identifier := expression ;
 	private ParseNode parseDeclaration() {
 		if (!startsDeclaration(nowReading)) return syntaxErrorNode("declaration");
+
+		ParseNode staticNode = null;
+		Token declarationToken;
 		
-		Token declarationToken = nowReading;
+		Token token = nowReading;
 		readToken();
 		
+		// static ...
+		if (token.isLextant(Keyword.STATIC)) {
+			staticNode = new StaticVariableNode(token);
+			
+			// ... (var | imm) ...
+			declarationToken = nowReading;
+			readToken();
+		// (var | imm) ...
+		} else {
+			declarationToken = token;
+		}
+	
 		// ... identifier ...
 		ParseNode identifierName = parseIdentifier();
 		
@@ -422,11 +442,16 @@ public class Parser {
 		// ... ;
 		expect(Punctuator.TERMINATOR);
 		
-		return DeclarationNode.withChildren(declarationToken, identifierName, initializer);
+		if (token.isLextant(Keyword.STATIC)) {
+			return DeclarationNode.withChildren(declarationToken, identifierName, initializer, staticNode);
+		} else {
+			return DeclarationNode.withChildren(declarationToken, identifierName, initializer);
+		}
+		
 	}
 	
 	private boolean startsDeclaration(Token token) {
-		return token.isLextant(Keyword.IMMUTABLE, Keyword.VARIABLE);
+		return token.isLextant(Keyword.STATIC, Keyword.IMMUTABLE, Keyword.VARIABLE);
 	}
 	
 	/*****************/
@@ -783,7 +808,7 @@ public class Parser {
 		return left;
 	}
 	
-	// expr4 -> ! expr (TODO: OR copy)
+	// expr4 -> (!|#) expr 
 	private ParseNode parseExpression5() {
 		if (!startsExpressionWithHighestPrecendence(nowReading)) return syntaxErrorNode("expression<5>");
 		
@@ -794,6 +819,13 @@ public class Parser {
 			ParseNode node = parseExpression6();
 			
 			return UnaryOperatorNode.withChild(negateToken, node);
+		} else if (nowReading.isLextant(Punctuator.REFCOUNT)) {
+			Token refcountToken = nowReading;
+			readToken();
+			
+			ParseNode node = parseExpression6();
+			
+			return UnaryOperatorNode.withChild(refcountToken, node);
 		}
 		
 		return parseExpression6();
@@ -917,7 +949,8 @@ public class Parser {
 	
 	private boolean isValidExpression() {
 		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET) ||
-				nowReading.isLextant(Punctuator.NOT)) {
+				nowReading.isLextant(Punctuator.NOT) ||
+				nowReading.isLextant(Punctuator.REFCOUNT)) {
 			return true;
 		} else {
 			return false;
@@ -1020,7 +1053,7 @@ public class Parser {
 	private void readToken() {
 		previouslyRead = nowReading;
 		
-		debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
+		//debug.out("LAST READ TOKEN: " + nowReading); // TODO: zTOKEN PRINT
 		
 		nowReading = scanner.next();
 	}

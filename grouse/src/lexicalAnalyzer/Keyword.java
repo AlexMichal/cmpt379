@@ -23,6 +23,7 @@ public enum Keyword implements Lextant {
 	CONTINUE("continue"),
 	EVER("ever"),
 	COUNT("count"),
+	STATIC("static"),
 	// Type:
 	BOOL("bool"),
 	CHAR("char"),

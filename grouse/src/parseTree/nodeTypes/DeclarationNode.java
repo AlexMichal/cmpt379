@@ -40,6 +40,14 @@ public class DeclarationNode extends ParseNode {
 		return node;
 	}
 	
+	public static DeclarationNode withChildren(Token token, ParseNode declaredName, ParseNode initializer, ParseNode staticNode) {
+		DeclarationNode node = new DeclarationNode(token);
+		node.appendChild(declaredName);
+		node.appendChild(initializer);
+		node.appendChild(staticNode);
+		return node;
+	}
+	
 	///////////////////////////////////////////////////////////
 	// BOILERPLATE FOR VISITORS
 	///////////////////////////////////////////////////////////
