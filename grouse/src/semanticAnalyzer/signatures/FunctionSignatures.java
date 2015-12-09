@@ -148,6 +148,14 @@ public class FunctionSignatures extends ArrayList<FunctionSignature> {
 		    new FunctionSignature(1, PrimitiveType.STRING, PrimitiveType.INTEGER)
 		); 
 		
+		new FunctionSignatures(Punctuator.RECORD_NUMBER, // !
+		    new FunctionSignature(1, PrimitiveType.STRING, PrimitiveType.INTEGER)
+		); 
+		
+		new FunctionSignatures(Punctuator.ADDRESS_OF, // !
+		    new FunctionSignature(1, PrimitiveType.STRING, PrimitiveType.INTEGER)
+		); 
+		
 		// First, we use the operator itself (in this case the Punctuator ADD) as the key.
 		// Then, we give that key two signatures: one an (INT x INT -> INT) and the other
 		// a (FLOAT x FLOAT -> FLOAT).  Each signature has a "whichVariant" parameter where

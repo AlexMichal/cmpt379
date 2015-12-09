@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.xerces.internal.dom.ChildNode;
+
 import asmCodeGenerator.codeStorage.ASMCodeChunk;
 import asmCodeGenerator.codeStorage.ASMCodeFragment;
 import asmCodeGenerator.codeStorage.ASMOpcode;
@@ -21,6 +23,7 @@ import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.ContinueNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
+import parseTree.nodeTypes.DiagStatementNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.ForEverNode;
 import parseTree.nodeTypes.ForStatementNode;
@@ -285,8 +288,6 @@ public class ASMCodeGenerator {
 		public void visitLeave(IfStatementNode node) {
 			newVoidCode(node);
 			
-			debug.out("ASDASD: " + node.nChildren());
-			
 			ASMCodeFragment expression 					= removeValueCode(node.child(0));
 			ParseNode blockStatementNodeIfStatement 	= node.child(1);
 			ParseNode blockStatementNodeElseStatement 	= null;
@@ -413,6 +414,28 @@ public class ASMCodeGenerator {
 			}
 			
 			code.add(Label, endLabel);
+		}
+
+		/******************/
+		/* DIAG STATEMENT */
+		/******************/
+		
+		public void visitLeave(DiagStatementNode node) {
+			int amountOfChildren = node.nChildren();
+			ParseNode diagRoutineNumberNode = node.child(0);
+			ASMCodeFragment diagRoutineNumber = removeValueCode(diagRoutineNumberNode);
+			
+			newVoidCode(node);
+			
+			code.append(diagRoutineNumber);
+			
+			for (int i = amountOfChildren - 1; 0 < i; i--) {
+				code.append(removeValueCode(node.child(i)));
+				
+				code.add(Exchange);
+			}
+			
+			code.add(Call, MemoryManager.MEM_MANAGER_DIAGNOSTICS);
 		}
 		
 		/************************/
@@ -765,6 +788,22 @@ public class ASMCodeGenerator {
 			}
 		}
 		
+		public boolean isRecordNumberOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.RECORD_NUMBER)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		public boolean isAddressOfOperator(Lextant lexeme) {
+			if (lexeme.equals(Punctuator.ADDRESS_OF)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
 		/*******************/
 		/* COMPARISON NODE */
 		/*******************/
@@ -974,6 +1013,10 @@ public class ASMCodeGenerator {
 				booleanUnaryOperatorNode(node);
 			} else if (isRefcountOperator(operator)) {
 				refcountUnaryOperatorNode(node);
+			} else if (isRecordNumberOperator(operator)) {
+				recordNumberUnaryOperatorNode(node);
+			} else if (isAddressOfOperator(operator)) {
+				addressOfUnaryOperatorNode(node);
 			}
 		}
 		
@@ -1013,13 +1056,9 @@ public class ASMCodeGenerator {
 			newValueCode(node);
 
 			ASMCodeFragment arg = removeValueCode(node.child(0));
-			String lexeme = node.child(0).getToken().getLexeme();
-			String str = arg.toString();
-			String labelNull = labeller.newLabel("label-refcount-null-", "");
-			String labelINF = labeller.newLabel("label-refcount-do-not-set-", "");
-			String labelEnd = labeller.newLabel("label-refcount-end-", "");
-			
-			debug.out("CODE: \n" + arg);
+			String labelNull 	= labeller.newLabel("label-refcount-null-", "");
+			String labelINF 	= labeller.newLabel("label-refcount-do-not-set-", "");
+			String labelEnd 	= labeller.newLabel("label-refcount-end-", "");
 			
 			// Load address
 			code.append(arg);
@@ -1053,6 +1092,55 @@ public class ASMCodeGenerator {
 			
 			// } END
 			code.add(Label, labelEnd);
+			code.add(LoadI);
+		}
+		
+		private void recordNumberUnaryOperatorNode(UnaryOperatorNode node) {
+			newValueCode(node);
+
+			ASMCodeFragment arg = removeValueCode(node.child(0));
+			String labelNull 	= labeller.newLabel("label-recordNumber-null-", "");
+			String labelINF 	= labeller.newLabel("label-recordNumber-do-not-set-", "");
+			String labelEnd 	= labeller.newLabel("label-recordNumber-end-", "");
+			
+			// Load address
+			code.append(arg);
+			code.add(Duplicate);
+			code.add(Duplicate);
+			
+			// Add offset to address
+			code.add(PushI, 13);
+			code.add(Add);
+			
+			// Get value at address+offset
+			code.add(LoadI);
+			
+			code.add(JumpTrue, labelINF); 
+			code.add(Jump, labelNull);
+			
+			code.add(Label, labelINF); 
+			code.add(Call, MemoryManager.MEM_MANAGER_GET_ID);
+			code.add(PushI);
+			code.add(StoreI);
+			
+			code.add(Jump, labelEnd);
+			
+			code.add(Label, labelNull);
+			code.add(PushI, -1);
+			code.add(StoreI);
+			code.add(Jump, labelEnd);
+			
+			// END
+			code.add(Label, labelEnd);
+			code.add(LoadI);
+		}
+		
+		private void addressOfUnaryOperatorNode(UnaryOperatorNode node) {
+			newValueCode(node);
+
+			ASMCodeFragment arg = removeAddressCode(node.child(0));
+			
+			code.append(arg);
 			code.add(LoadI);
 		}
 		

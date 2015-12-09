@@ -16,6 +16,7 @@ import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.ContinueNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
+import parseTree.nodeTypes.DiagStatementNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.ForStatementNode;
@@ -146,6 +147,17 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 		nameOfIdentifier.setType(declarationType);
 		
 		addBinding(nameOfIdentifier, declarationType, extra);
+	}
+	
+	/******************/
+	/* DIAG STATEMENT */
+	/******************/
+	
+	@Override
+	public void visitLeave(DiagStatementNode node) {
+		Type expressionOneType = node.child(0).getType();
+		
+		if (expressionOneType != PrimitiveType.INTEGER) incorrectNodeTypeError(node);
 	}
 	
 	/*****************/
@@ -489,10 +501,10 @@ class SemanticAnalysisVisitor extends ParseNodeVisitor.Default {
 				 + operandTypes  + " at " + token.getLocation());	
 	}
 	
-	private void unknownDeclarationTypeError(ParseNode node) {
+	private void incorrectNodeTypeError(ParseNode node) {
 		Token token = node.getToken();
 		
-		logError("unknown declaration node type - " + token.getLexeme() + " at " + token.getLocation());
+		logError("incorrect node type - " + token.getLexeme() + " at " + token.getLocation());
 	}
 	
 	private void logError(String message) {

@@ -39,7 +39,7 @@ public class GrouseCompiler extends GrouseApplication {
 		debug.out("~~Semantic Analyzer starting~~");
 		ParseNode decoratedTree = SemanticAnalyzer.analyze(syntaxTree);
 
-		debug.out(decoratedTree.toString()); // TODO: zPARSE TREE
+		//debug.out(decoratedTree.toString()); // TODO: zPARSE TREE
 		
 		debug.out("~~Generate code starting~~");
 		generateCodeIfNoErrors(filename, decoratedTree);

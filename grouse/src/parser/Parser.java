@@ -1,6 +1,8 @@
 package parser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import logging.GrouseLogger;
 import parseTree.*;
@@ -12,6 +14,7 @@ import parseTree.nodeTypes.CastNode;
 import parseTree.nodeTypes.CharacterConstantNode;
 import parseTree.nodeTypes.MainBlockNode;
 import parseTree.nodeTypes.DeclarationNode;
+import parseTree.nodeTypes.DiagStatementNode;
 import parseTree.nodeTypes.ErrorNode;
 import parseTree.nodeTypes.FloatConstantNode;
 import parseTree.nodeTypes.ForEverNode;
@@ -124,7 +127,7 @@ public class Parser {
 	/********************/
 	
 	// tupleDefinition -> tuple identifier parameterTuple
-	private ParseNode parseTupleDefinition() { // TODO: tuple def
+	private ParseNode parseTupleDefinition() { // UNFINISHED
 		if (!startsTupleDefinition(nowReading)) return syntaxErrorNode("parse Tuple Definition");
 				
 		ParseNode tupleDefinition = new TupleDefinitionNode(nowReading);
@@ -156,7 +159,7 @@ public class Parser {
 		
 		ParseNode parseNode;
 		
-		if (nowReading instanceof IdentifierToken) {// TODO: identifier tuple
+		if (nowReading instanceof IdentifierToken) {
 			// Identifier
 			// must be a tuple's name
 			
@@ -227,7 +230,7 @@ public class Parser {
 		return ParameterNode.withChildren(token, type, identifierName);
 	}
 	
-	// type -> identifier | primitiveType | arrayType // TODO: add eventually arrays to this list 
+	// type -> identifier | primitiveType | arrayType 
 	private ParseNode parseType() {
 		if (!isTypeToken(nowReading)) return syntaxErrorNode("parse type - invalid type");
 		
@@ -248,7 +251,7 @@ public class Parser {
 	/***********************/
 	
 	// functionDefinition  -> func identifier ( parameterList ) -> parameterTuple body
-	private ParseNode parseFunctionDefinition() { // TODO: function def'n
+	private ParseNode parseFunctionDefinition() {
 		if (!startsFunctionDefinition(nowReading)) return syntaxErrorNode("function definition");
 		
 		// func ...
@@ -305,6 +308,8 @@ public class Parser {
 		
 		if (startsBreakStatement(nowReading))	return parseBreakStatement();
 		
+		if (startsDiagStatement(nowReading))	return parseDiagStatement();
+		
 		assert false : "bad token " + nowReading + " in parseStatement()";
 		return null;
 	}
@@ -317,7 +322,8 @@ public class Parser {
 				startsIfStatement(token) ||
 				startsWhileStatement(token) ||
 				startsForStatement(token) ||
-				startsBreakStatement(token);
+				startsBreakStatement(token)||
+				startsDiagStatement(token);
 	}
 
 	/*******************/
@@ -625,7 +631,6 @@ public class Parser {
 	
 	// forControlPhrase -> count ( expression lessOp )? identifier lessOp expression
 	private ParseNode parseForCountControlPhrase() {
-		
 		return null;
 	}
 	
@@ -651,6 +656,48 @@ public class Parser {
 	
 	private boolean startsBreakStatement(Token token){
 		   return token.isLextant(Keyword.BREAK);
+	}
+	
+	/******************/
+	/* DIAG STATEMENT */
+	/******************/
+	
+	// diagStatement -> expression (:: expression (, expression)*)? ;
+	private ParseNode parseDiagStatement(){
+		if (!startsDiagStatement(nowReading)) return syntaxErrorNode("diag statement");
+		
+		ArrayList<ParseNode> expressionList = new ArrayList<ParseNode>();
+		
+		// diag ...
+		Token diagToken = nowReading;
+		readToken();
+		
+		// ... expression ... 
+		ParseNode diagExpression = parseExpression();
+		expressionList.add(diagExpression);
+		
+		if (nowReading.isLextant(Punctuator.DOUBLE_COLON)) {
+			readToken();
+			
+			diagExpression = parseExpression();
+			expressionList.add(diagExpression);
+			
+			while (!nowReading.isLextant(Punctuator.TERMINATOR)) {
+				expect(Punctuator.SEPARATOR);
+				
+				diagExpression = parseExpression();
+				expressionList.add(diagExpression);
+			}
+		}
+		
+		// ... ;
+		expect(Punctuator.TERMINATOR);
+		
+		return DiagStatementNode.withChildren(diagToken, expressionList);
+	}
+	
+	private boolean startsDiagStatement(Token token){
+		   return token.isLextant(Keyword.DIAG);
 	}
 	
 	///////////////////////////////////////////////////////////
@@ -782,7 +829,6 @@ public class Parser {
 	 * -No other casts are allowed
 	 */
 	
-	// TODO: CAST parser
 	private ParseNode parseCastExpression() {
 		if (!startsCastExpression(nowReading)) return syntaxErrorNode("expression<cast>");
 		
@@ -826,6 +872,20 @@ public class Parser {
 			ParseNode node = parseExpression6();
 			
 			return UnaryOperatorNode.withChild(refcountToken, node);
+		} else if (nowReading.isLextant(Punctuator.RECORD_NUMBER)) {
+			Token recordNumberToken = nowReading;
+			readToken();
+			
+			ParseNode node = parseExpression6();
+			
+			return UnaryOperatorNode.withChild(recordNumberToken, node);
+		} else if (nowReading.isLextant(Punctuator.ADDRESS_OF)) {
+			Token addressOfToken = nowReading;
+			readToken();
+			
+			ParseNode node = parseExpression6();
+			
+			return UnaryOperatorNode.withChild(addressOfToken, node);
 		}
 		
 		return parseExpression6();
@@ -950,7 +1010,9 @@ public class Parser {
 	private boolean isValidExpression() {
 		if (nowReading.isLextant(Punctuator.OPEN_ROUND_BRACKET) ||
 				nowReading.isLextant(Punctuator.NOT) ||
-				nowReading.isLextant(Punctuator.REFCOUNT)) {
+				nowReading.isLextant(Punctuator.REFCOUNT) ||
+				nowReading.isLextant(Punctuator.RECORD_NUMBER)||
+				nowReading.isLextant(Punctuator.ADDRESS_OF)) {
 			return true;
 		} else {
 			return false;
@@ -1038,7 +1100,7 @@ public class Parser {
 	/* TARGET */
 	/**********/
 	
-	private ParseNode parseTarget() { // TODO: TARGET
+	private ParseNode parseTarget() {
 		if (startsIdentifier(nowReading)) {
 			return parseIdentifier();
 		}

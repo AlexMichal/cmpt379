@@ -5,6 +5,8 @@
         DataZ        4                         
         DLabel       $heap-first-free          
         DataZ        4                         
+        DLabel       $heap-next-record-num     
+        DataZ        4                         
         DLabel       $mmgr-newblock-block      
         DataZ        4                         
         DLabel       $mmgr-newblock-size       
@@ -113,7 +115,7 @@
         Jump         $$general-runtime-error   
         DLabel       $usable-memory-start      
         DLabel       $global-memory-block      
-        DataZ        9                         
+        DataZ        25                        
         Label        $$main                    
         PushD        $global-memory-block      
         PushI        0                         
@@ -142,121 +144,73 @@
         PushD        $global-memory-block      
         PushI        5                         
         Add                                    %% str2
-        PushI        1                         
-        PushI        3                         
-        Add                                    
-        StoreI                                 
-        Label        -if-statement-8           
-        PushI        1                         
-        JumpFalse    -if-else-8                
         DLabel       -str-constant-3           
         DataI        10                        
         DataI        5                         
         DataC        0                         
-        DataI        19                        
-        DataC        73                        %% "INSIDE IF STATEMENT"
-        DataC        78                        
-        DataC        83                        
-        DataC        73                        
-        DataC        68                        
-        DataC        69                        
+        DataI        5                         
+        DataC        49                        %% "1 + 3"
         DataC        32                        
-        DataC        73                        
-        DataC        70                        
+        DataC        43                        
         DataC        32                        
-        DataC        83                        
-        DataC        84                        
-        DataC        65                        
-        DataC        84                        
-        DataC        69                        
-        DataC        77                        
-        DataC        69                        
-        DataC        78                        
-        DataC        84                        
+        DataC        51                        
         DataC        0                         
         PushD        -str-constant-3           
-        PushI        13                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        9                         
+        Add                                    %% str3
         DLabel       -str-constant-4           
         DataI        10                        
         DataI        5                         
         DataC        0                         
-        DataI        9                         
-        DataC        82                        %% "REFCOUNT "
-        DataC        69                        
-        DataC        70                        
-        DataC        67                        
-        DataC        79                        
-        DataC        85                        
-        DataC        78                        
-        DataC        84                        
+        DataI        5                         
+        DataC        49                        %% "1 + 3"
         DataC        32                        
+        DataC        43                        
+        DataC        32                        
+        DataC        51                        
         DataC        0                         
         PushD        -str-constant-4           
-        PushI        13                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% str1
-        LoadI                                  
-        Duplicate                              
-        Duplicate                              
-        PushI        6                         
-        Add                                    
-        LoadI                                  
-        JumpTrue     label-refcount-do-not-set-6 
-        Jump         label-refcount-null-5     
-        Label        label-refcount-do-not-set-6 
-        PushI        2147483646                
         StoreI                                 
-        Jump         label-refcount-end-7      
-        Label        label-refcount-null-5     
-        PushI        -1                        
-        StoreI                                 
-        Jump         label-refcount-end-7      
-        Label        label-refcount-end-7      
-        LoadI                                  
-        PushD        $print-format-integer     
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
-        Jump         -if-end-8                 
-        Label        -if-else-8                
-        Label        -if-end-8                 
-        DLabel       -str-constant-9           
-        DataI        10                        
-        DataI        5                         
-        DataC        0                         
-        DataI        7                         
-        DataC        86                        %% "VALUE: "
-        DataC        65                        
-        DataC        76                        
-        DataC        85                        
-        DataC        69                        
-        DataC        58                        
-        DataC        32                        
-        DataC        0                         
-        PushD        -str-constant-9           
-        PushI        13                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
         PushD        $global-memory-block      
-        PushI        1                         
-        Add                                    %% str1
-        LoadI                                  
         PushI        13                        
-        Add                                    
-        PushD        $print-format-string      
-        Printf                                 
-        PushD        $print-format-newline     
-        Printf                                 
+        Add                                    %% x1
+        PushI        2                         
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        17                        
+        Add                                    %% x2
+        PushI        3                         
+        StoreI                                 
+        PushD        $global-memory-block      
+        PushI        21                        
+        Add                                    %% x3
+        PushI        2                         
+        StoreI                                 
+        Label        -if-statement-5           
+        PushI        1                         
+        JumpFalse    -if-else-5                
+        Jump         -if-end-5                 
+        Label        -if-else-5                
+        Label        -if-end-5                 
+        PushI        2                         
+        PushD        $global-memory-block      
+        PushI        13                        
+        Add                                    %% x1
+        LoadI                                  
+        Exchange                               
+        PushD        $global-memory-block      
+        PushI        17                        
+        Add                                    %% x2
+        LoadI                                  
+        Exchange                               
+        PushD        $global-memory-block      
+        PushI        13                        
+        Add                                    %% x1
+        LoadI                                  
+        Exchange                               
+        Call         -mem-manager-diagnostics  
         Halt                                   
         Label        -mem-manager-make-tags    
         DLabel       $mmgr-tags-size           
@@ -380,6 +334,8 @@
         Exchange                               
         StoreI                                 
         PushI        18                        
+        Add                                    
+        PushI        4                         
         Add                                    
         PushD        $mmgr-alloc-size          
         Exchange                               
@@ -515,6 +471,19 @@
         LoadI                                  
         PushI        9                         
         Add                                    
+        Duplicate                              
+        PushD        $heap-next-record-num     
+        LoadI                                  
+        StoreI                                 
+        PushI        1                         
+        PushD        $heap-next-record-num     
+        LoadI                                  
+        Add                                    
+        PushD        $heap-next-record-num     
+        Exchange                               
+        StoreI                                 
+        PushI        4                         
+        Add                                    
         PushD        $mmgr-alloc-return        
         LoadI                                  
         Return                                 
@@ -526,6 +495,8 @@
         PushD        $mmgr-dealloc-return      
         Exchange                               
         StoreI                                 
+        PushI        4                         
+        Subtract                               
         PushI        9                         
         Subtract                               
         PushD        $mmgr-dealloc-block       
@@ -670,4 +641,143 @@
         PushD        $mmgr-remove-return       
         LoadI                                  
         Return                                 
+        Label        -mem-manager-get-id       
+        Exchange                               
+        PushI        4                         
+        Subtract                               
+        LoadI                                  
+        Exchange                               
+        Return                                 
+        DLabel       -$mmgr-diag-jump-table    
+        DataD        -$mmgr-diag-test-0        
+        DataD        -$mmgr-diag-test-1        
+        DataD        -$mmgr-diag-test-2        
+        DataD        -$mmgr-diag-test-3        
+        DataD        -$mmgr-diag-test-4        
+        DLabel       $mmgr-diag-return         
+        DataZ        4                         
+        Label        -mem-manager-diagnostics  
+        PushD        $mmgr-diag-return         
+        Exchange                               
+        StoreI                                 
+        PushI        4                         
+        Multiply                               
+        PushD        -$mmgr-diag-jump-table    
+        Add                                    
+        LoadI                                  
+        JumpV                                  
+        Label        -$mmgr-diag-end           
+        PushD        $mmgr-diag-return         
+        LoadI                                  
+        Return                                 
+        Label        -$mmgr-diag-test-0        
+        Jump         -$mmgr-diag-end           
+        Label        -$mmgr-diag-test-1        
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        Jump         -$mmgr-diag-end           
+        Label        -$mmgr-diag-test-2        
+        Duplicate                              
+        PushI        -4                        
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        0                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        4                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        8                         
+        Add                                    
+        LoadC                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        9                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        Jump         -$mmgr-diag-end           
+        Label        -$mmgr-diag-test-3        
+        Duplicate                              
+        PushI        -4                        
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        0                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        4                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        8                         
+        Add                                    
+        LoadC                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        9                         
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-separator   
+        Printf                                 
+        Duplicate                              
+        PushI        13                        
+        Add                                    
+        LoadI                                  
+        PushD        $print-format-integer     
+        Printf                                 
+        PushD        $print-format-newline     
+        Printf                                 
+        Pop                                    
+        Jump         -$mmgr-diag-end           
+        Label        -$mmgr-diag-test-4        
+        Pop                                    
+        Pop                                    
+        Pop                                    
+        Jump         -$mmgr-diag-end           
+        DLabel       mmgr-stringPrintFormat    
+        DataC        37                        %% "%s"
+        DataC        115                       
+        DataC        0                         
         DLabel       $heap-memory              

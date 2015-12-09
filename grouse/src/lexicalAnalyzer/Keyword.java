@@ -24,6 +24,7 @@ public enum Keyword implements Lextant {
 	EVER("ever"),
 	COUNT("count"),
 	STATIC("static"),
+	DIAG("diag"),
 	// Type:
 	BOOL("bool"),
 	CHAR("char"),
